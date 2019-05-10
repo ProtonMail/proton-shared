@@ -58,6 +58,7 @@
     "webpack": "^4.30.0"
   },
   "peerDependencies": {
+    "design-system": "github:ProtonMail/design-system.git#semver:^1.5.6",
     "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:^6.0.0",
     "react": "^16.8.1",
     "react-router-dom": "^4.3.1",
