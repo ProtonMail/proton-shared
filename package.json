@@ -55,6 +55,7 @@
     "prettier": "^1.16.1",
     "proton-i18n": "github:ProtonMail/proton-i18n#semver:^1.0.0",
     "require-inject": "^1.4.4",
+    "ttag": "^1.7.0",
     "webpack": "^4.30.0"
   },
   "peerDependencies": {
