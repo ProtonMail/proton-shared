@@ -29,6 +29,7 @@
         "import/no-unresolved": ["error", {
             "ignore": ["^react$", "ttag"]
         }],
+        "no-unused-expressions": ["error", { "allowShortCircuit": true }],
         "import/prefer-default-export": "off",
         "import/no-extraneous-dependencies": "off",
         "max-len": ["error", {
