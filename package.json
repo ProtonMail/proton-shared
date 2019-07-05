@@ -6,6 +6,7 @@
   "module": "lib/module.js",
   "scripts": {
     "test": "NODE_ENV=test karma start test/karma.conf.js",
+    "testwatch": "npm test -- --auto-watch --no-single-run",
     "i18n:validateJS": "proton-i18n validate lint-functions lib",
     "i18n:validate": "proton-i18n extract shared && proton-i18n validate",
     "lint": "eslint lib test --ext .js --quiet --cache",
