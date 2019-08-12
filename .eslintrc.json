@@ -1,9 +1,10 @@
 {
-    "extends": "airbnb-base",
     "parserOptions": {
         "ecmaVersion": 2020,
         "sourceType": "module"
     },
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
     "env": {
         "browser": true,
         "node": true,
@@ -14,7 +15,10 @@
         "window": "readonly",
         "expectAsync": "readonly"
     },
+    "extends": ["airbnb-base", "plugin:@typescript-eslint/recommended"],
     "rules": {
+        "@typescript-eslint/explicit-function-return-type": "off",
+        "@typescript-eslint/no-explicit-any": "off",
         "arrow-parens": ["error", "always"],
         "indent": "off",
         "comma-dangle": ["error", "never"],
@@ -32,7 +36,6 @@
         "no-return-assign": "warn",
         "no-shadow": "off",
         "no-unused-expressions": ["error", { "allowShortCircuit": true }],
-        "operator-linebreak": "off",
         "implicit-arrow-linebreak": "off",
         "import/no-unresolved": ["error", { "ignore": [".svg", ".scss"] }],
         "import/named": "error",
@@ -41,12 +44,15 @@
         "import/export": "error",
         "import/prefer-default-export": "off",
         "import/no-extraneous-dependencies": "off",
-        "max-len": ["error", {
-            "ignoreComments": true,
-            "code": 120,
-            "ignoreStrings": true,
-            "ignoreTemplateLiterals": true,
-            "ignoreRegExpLiterals": true
-        }]
+        "max-len": [
+            "error",
+            {
+                "ignoreComments": true,
+                "code": 120,
+                "ignoreStrings": true,
+                "ignoreTemplateLiterals": true,
+                "ignoreRegExpLiterals": true
+            }
+        ]
     }
 }

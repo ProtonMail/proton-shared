@@ -2,7 +2,7 @@
   "name": "proton-shared",
   "version": "1.0.0",
   "description": "Proton shared",
-  "main": "lib/index.js",
+  "main": "lib/index.ts",
   "module": "lib/module.js",
   "sideEffects": false,
   "scripts": {
@@ -47,6 +47,8 @@
     "ua-parser-js": "^0.7.20"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^6.3.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
