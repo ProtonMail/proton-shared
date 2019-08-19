@@ -40,6 +40,7 @@
     "get-random-values": "github:ProtonMail/get-random-values#semver:^1.0.0",
     "hi-base32": "^0.5.0",
     "lodash": "^4.17.11",
+    "push.js": "^1.0.12",
     "sieve.js": "github:ProtonMail/sieve.js#master",
     "ua-parser-js": "^0.7.20"
   },
