@@ -35,6 +35,7 @@
   },
   "homepage": "https://github.com/ProtonMail/proton-shared#readme",
   "dependencies": {
+    "@sentry/browser": "^5.6.2",
     "dayjs": "^1.8.8",
     "file-saver": "^2.0.2",
     "get-random-values": "github:ProtonMail/get-random-values#semver:^1.0.0",
