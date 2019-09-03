@@ -4,7 +4,7 @@
   "description": "Proton shared",
   "main": "lib/index.js",
   "module": "lib/module.js",
-  "side-effects": false,
+  "sideEffects": false,
   "scripts": {
     "test": "NODE_ENV=test karma start test/karma.conf.js",
     "testwatch": "npm test -- --auto-watch --no-single-run",
