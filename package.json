@@ -69,6 +69,7 @@
   "peerDependencies": {
     "pm-srp": "github:ProtonMail/pm-srp.git#semver:^1.0.0",
     "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:^6.0.0",
+    "design-system": "github:ProtonMail/design-system.git#semver:^1.7.4",
     "react": "^16.8.1",
     "react-router-dom": "^4.3.1",
     "ttag": "^1.7.0"
