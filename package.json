@@ -10,8 +10,8 @@
     "testwatch": "npm test -- --auto-watch --no-single-run",
     "i18n:validateJS": "proton-i18n validate lint-functions lib",
     "i18n:validate": "proton-i18n extract shared && proton-i18n validate",
-    "lint": "eslint lib test --ext .js --quiet --cache",
-    "pretty": "prettier --write $(find lib -type f -name '*.js')"
+    "lint": "eslint lib test --ext .js,.ts,tsx --quiet --cache",
+    "pretty": "prettier --write $(find lib -type f -name '*.js' -o -name '*.ts' -o -name '*.tsx')"
   },
   "husky": {
     "hooks": {
@@ -19,7 +19,7 @@
     }
   },
   "lint-staged": {
-    "*.js": [
+    "(*.ts|*.tsx|*.js)": [
       "prettier --write",
       "eslint",
       "git add"
