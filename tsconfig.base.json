@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "esnext",
         "lib": ["dom", "dom.iterable", "esnext"],
         "esModuleInterop": true,
         "strict": true,
@@ -13,8 +13,7 @@
         "noUnusedLocals": true,
         "noEmit": true,
         "jsx": "preserve",
-        "allowJs": true,
-        "typeRoots": ["./node_modules/@types", "./typings", "./typings/index.d.ts"]
+        "allowJs": true
     },
     "exclude": ["node_modules", "dist"]
 }
