@@ -11,11 +11,12 @@
     "i18n:validateJS": "proton-i18n validate lint-functions lib",
     "i18n:validate": "proton-i18n extract shared && proton-i18n validate",
     "lint": "eslint lib test --ext .js,.ts,tsx --quiet --cache",
-    "pretty": "prettier --write $(find lib -type f -name '*.js' -o -name '*.ts' -o -name '*.tsx')"
+    "pretty": "prettier --write $(find lib -type f -name '*.js' -o -name '*.ts' -o -name '*.tsx')",
+    "check-types": "tsc"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "npm run check-types && lint-staged"
     }
   },
   "lint-staged": {
