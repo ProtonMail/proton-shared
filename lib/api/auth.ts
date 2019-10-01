@@ -6,6 +6,15 @@ export const auth = (data: any) => ({
     data
 });
 
+export const auth2FA = ({ totp, u2f }: any) => ({
+    method: 'post',
+    url: 'auth/2fa',
+    data: {
+        TwoFactorCode: totp,
+        U2F: u2f
+    }
+});
+
 export const revoke = () => ({
     method: 'delete',
     url: 'auth'

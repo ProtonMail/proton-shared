@@ -3,6 +3,13 @@
         "ecmaVersion": 2020,
         "sourceType": "module"
     },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [".js", ".ts", ".tsx"]
+            }
+        }
+    },
     "parser": "@typescript-eslint/parser",
     "plugins": ["@typescript-eslint"],
     "env": {
@@ -19,6 +26,7 @@
     "rules": {
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/indent": "off",
         "arrow-parens": ["error", "always"],
         "indent": "off",
         "comma-dangle": ["error", "never"],
@@ -36,6 +44,7 @@
         "no-return-assign": "warn",
         "no-shadow": "off",
         "no-unused-expressions": ["error", { "allowShortCircuit": true }],
+        "operator-linebreak": "off",
         "implicit-arrow-linebreak": "off",
         "import/no-unresolved": ["error", { "ignore": [".svg", ".scss"] }],
         "import/named": "error",

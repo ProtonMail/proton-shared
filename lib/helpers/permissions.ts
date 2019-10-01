@@ -1,8 +1,9 @@
-// TODO: permissions enum
+import { PERMISSIONS } from '../constants';
+
 export const hasPermission = (
-    userPermissions: string[],
-    pagePermissions: string[] = [],
-    sectionPermissions: string[] = []
+    userPermissions: PERMISSIONS[],
+    pagePermissions: PERMISSIONS[] = [],
+    sectionPermissions: PERMISSIONS[] = []
 ) => {
     const requirements = pagePermissions.concat(sectionPermissions);
 

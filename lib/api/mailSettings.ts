@@ -1,9 +1,10 @@
+import { AutoResponder } from '../interfaces/AutoResponder';
+
 export const getMailSettings = () => ({
     url: 'settings/mail',
     method: 'get'
 });
 
-// TODO: enums
 export const updateShowMoved = (ShowMoved: number) => ({
     url: 'settings/mail/moved',
     method: 'put',
@@ -124,8 +125,7 @@ export const updateHotkeys = (Hotkeys: number) => ({
     data: { Hotkeys }
 });
 
-// TODO: autoresponder object
-export const updateAutoresponder = (AutoResponder: any) => ({
+export const updateAutoresponder = (AutoResponder: AutoResponder) => ({
     url: 'settings/mail/autoresponder',
     method: 'put',
     data: { AutoResponder }
