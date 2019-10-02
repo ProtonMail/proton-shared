@@ -67,6 +67,7 @@
     "prettier": "^1.18.2",
     "proton-i18n": "github:ProtonMail/proton-i18n#semver:^1.0.0",
     "require-inject": "^1.4.4",
+    "ts-loader": "^6.2.0",
     "ttag": "^1.7.17",
     "typescript": "^3.6.3",
     "webpack": "^4.33.0"
