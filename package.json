@@ -2,7 +2,7 @@
   "name": "proton-shared",
   "version": "1.0.0",
   "description": "Proton shared",
-  "main": "lib/index.js",
+  "main": "lib/index.ts",
   "module": "lib/module.js",
   "sideEffects": false,
   "scripts": {
@@ -10,16 +10,17 @@
     "testwatch": "npm test -- --auto-watch --no-single-run",
     "i18n:validateJS": "proton-i18n validate lint-functions lib",
     "i18n:validate": "proton-i18n extract shared && proton-i18n validate",
-    "lint": "eslint lib test --ext .js --quiet --cache",
-    "pretty": "prettier --write $(find lib -type f -name '*.js')"
+    "lint": "eslint lib test --ext .js,.ts,tsx --quiet --cache",
+    "pretty": "prettier --write $(find lib -type f -name '*.js' -o -name '*.ts' -o -name '*.tsx')",
+    "check-types": "tsc"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "npm run check-types && lint-staged"
     }
   },
   "lint-staged": {
-    "*.js": [
+    "(*.ts|*.tsx|*.js)": [
       "prettier --write",
       "eslint",
       "git add"
@@ -47,6 +48,9 @@
     "ua-parser-js": "^0.7.20"
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.6.2",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^6.3.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
@@ -63,7 +67,9 @@
     "prettier": "^1.18.2",
     "proton-i18n": "github:ProtonMail/proton-i18n#semver:^1.0.0",
     "require-inject": "^1.4.4",
+    "ts-loader": "^6.2.0",
     "ttag": "^1.7.17",
+    "typescript": "^3.6.3",
     "webpack": "^4.33.0"
   },
   "peerDependencies": {
