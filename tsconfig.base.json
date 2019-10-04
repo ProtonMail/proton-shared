@@ -9,11 +9,11 @@
         "module": "esnext",
         "moduleResolution": "node",
         "resolveJsonModule": true,
-        "isolatedModules": true,
         "noUnusedLocals": true,
         "noEmit": true,
         "jsx": "preserve",
-        "allowJs": true
+        "allowJs": true,
+        "maxNodeModuleJsDepth": 2
     },
     "exclude": ["node_modules", "dist"]
 }
