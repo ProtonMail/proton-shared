@@ -2,8 +2,6 @@
   "name": "proton-shared",
   "version": "1.0.0",
   "description": "Proton shared",
-  "main": "lib/index.ts",
-  "module": "lib/module.js",
   "sideEffects": false,
   "scripts": {
     "test": "NODE_ENV=test karma start test/karma.conf.js",
