@@ -45,7 +45,7 @@ TRIGGER:-PT15H
 END:VALARM
 END:VEVENT`;
 
-const valarmRrule = `BEGIN:VEVENT
+const veventRrule = `BEGIN:VEVENT
 UID:7E018059-2165-4170-B32F-6936E88E61E5
 DTSTART:20190719T120000Z
 DTEND:20190719T130000Z
@@ -138,7 +138,7 @@ describe('calendar', () => {
     });
 
     it('should parse rrule in vevent', () => {
-        const component = parse(valarmRrule);
+        const component = parse(veventRrule);
 
         expect(component).toEqual({
             component: 'vevent',
@@ -222,8 +222,8 @@ describe('calendar', () => {
     });
 
     it('should round trip rrule in vevent', () => {
-        const result = serialize(parse(valarmRrule));
-        expect(trimAll(result)).toEqual(trimAll(valarmRrule));
+        const result = serialize(parse(veventRrule));
+        expect(trimAll(result)).toEqual(trimAll(veventRrule));
     });
 
     it('should round trip vevent', () => {
