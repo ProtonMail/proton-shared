@@ -1,4 +1,4 @@
-import { parse, serialize } from '../../lib/calendar/vcal';
+import { parse, parseTriggerString, serialize } from '../../lib/calendar/vcal';
 
 const vevent = `BEGIN:VEVENT
 DTSTAMP:20190719T130854Z
@@ -239,5 +239,16 @@ describe('calendar', () => {
     it('should round trip all day vevent', () => {
         const result = serialize(parse(allDayVevent));
         expect(trimAll(result)).toEqual(trimAll(allDayVevent));
+    });
+
+    it('should parse trigger string', () => {
+        expect(parseTriggerString('-PT30M')).toEqual({
+            weeks: 0,
+            days: 0,
+            hours: 0,
+            minutes: 30,
+            seconds: 0,
+            isNegative: true
+        });
     });
 });
