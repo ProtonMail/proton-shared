@@ -125,8 +125,8 @@ describe('calendar encryption', () => {
         });
 
         const [sharedSessionKey, calendarSessionKey] = await readSessionKeys(data, primaryCalendarKey);
-        const otherVeventComponent = await readCalendarEvent(
-            {
+        const otherVeventComponent = await readCalendarEvent({
+            event: {
                 ...data,
                 // Not the same name for some reason
                 SharedEvents: data.SharedEventContent,
@@ -134,8 +134,9 @@ describe('calendar encryption', () => {
                 AttendeesEvent: data.AttendeesEventContent
             },
             publicKey,
-            { sharedSessionKey, calendarSessionKey }
-        );
+            sharedSessionKey,
+            calendarSessionKey
+        });
 
         expect(otherVeventComponent).toEqual(veventComponent);
     });
