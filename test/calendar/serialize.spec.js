@@ -63,12 +63,12 @@ const veventComponent = {
 describe('calendar encryption', () => {
     it('should encrypt and sign calendar events', async () => {
         const primaryCalendarKey = await decryptPrivateKey(DecryptableKey.PrivateKey, '123');
-        const data = await createCalendarEvent(
-            veventComponent,
-            primaryCalendarKey,
-            primaryCalendarKey.toPublic(),
-            primaryCalendarKey
-        );
+        const data = await createCalendarEvent({
+            eventComponent: veventComponent,
+            privateKey: primaryCalendarKey,
+            publicKey: primaryCalendarKey.toPublic(),
+            signingKey: primaryCalendarKey // Should be an address key
+        });
         expect(data).toEqual({
             SharedKeyPacket:
                 'wV4DatuD4HBmK9ESAQdAh5aMHBZCvQYA9q2Gm4j5LJYj0N/ETwHe/+Icmt09yl8w81ByP+wHwvShTNdKZNv7ziSuGkYloQ9Y2hReRQR0Vdacz4LtBa2T3H17aBbI/rBs',
@@ -117,7 +117,12 @@ describe('calendar encryption', () => {
         const primaryCalendarKey = await decryptPrivateKey(DecryptableKey.PrivateKey, '123');
         const publicKey = primaryCalendarKey.toPublic();
 
-        const data = await createCalendarEvent(veventComponent, primaryCalendarKey, publicKey, primaryCalendarKey);
+        const data = await createCalendarEvent({
+            eventComponent: veventComponent,
+            privateKey: primaryCalendarKey,
+            publicKey,
+            signingKey: primaryCalendarKey // Should be an address key
+        });
 
         const [sharedSessionKey, calendarSessionKey] = await readSessionKeys(data, primaryCalendarKey);
         const otherVeventComponent = await readCalendarEvent(
