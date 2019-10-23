@@ -1,7 +1,7 @@
 import { decryptPrivateKey } from 'pmcrypto';
 import { createCalendarEvent } from '../../lib/calendar/serialize';
-import { readCalendarEvent, readSessionKeys } from '../../lib/calendar/deserialize';
-import { DecryptableKey } from '../keys/keys.data';
+import { readCalendarEvent, readPersonalPart, readSessionKeys } from '../../lib/calendar/deserialize';
+import { DecryptableKey, DecryptableKey2 } from '../keys/keys.data';
 import { unwrap, wrap } from '../../lib/calendar/helper';
 
 const veventComponent = {
@@ -114,31 +114,33 @@ describe('calendar encryption', () => {
     });
 
     it('should roundtrip', async () => {
+        const addressKey = await decryptPrivateKey(DecryptableKey2, '123');
         const primaryCalendarKey = await decryptPrivateKey(DecryptableKey.PrivateKey, '123');
         const publicKey = primaryCalendarKey.toPublic();
+        const publicAddressKey = addressKey.toPublic();
 
         const data = await createCalendarEvent({
             eventComponent: veventComponent,
             privateKey: primaryCalendarKey,
             publicKey,
-            signingKey: primaryCalendarKey // Should be an address key
+            signingKey: addressKey
         });
 
         const [sharedSessionKey, calendarSessionKey] = await readSessionKeys(data, primaryCalendarKey);
         const otherVeventComponent = await readCalendarEvent({
             event: {
-                ...data,
-                // Not the same name for some reason
                 SharedEvents: data.SharedEventContent,
                 CalendarEvents: data.CalendarEventContent,
-                AttendeesEvent: data.AttendeesEventContent
+                AttendeesEvent: data.AttendeesEventContent,
+                Attendees: data.Attendees
             },
-            publicKey,
+            publicKeys: publicAddressKey,
             sharedSessionKey,
             calendarSessionKey
         });
+        const { components } = await readPersonalPart(data.PersonalEventContent, publicAddressKey);
 
-        expect(otherVeventComponent).toEqual(veventComponent);
+        expect({ ...otherVeventComponent, components }).toEqual(veventComponent);
     });
 });
 
