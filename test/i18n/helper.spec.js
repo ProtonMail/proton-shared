@@ -60,7 +60,7 @@ describe('Load date locales', () => {
         expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('01/01/2000, 00:00');
     });
 
-    fit('should override time format and date format with 12 hour format and year format', async () => {
+    it('should override time format and date format with 12 hour format and year format', async () => {
         const dateFnLocale = await loadDateFnLocale({
             locale: 'en_US',
             longLocale: 'fr',
@@ -71,7 +71,7 @@ describe('Load date locales', () => {
         expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('2000-01-01, 12:00 AM');
     });
 
-    fit('should override time format and date format with 24 hour format and year format', async () => {
+    it('should override time format and date format with 24 hour format and year format', async () => {
         const dateFnLocale = await loadDateFnLocale({
             locale: 'en_US',
             longLocale: 'en_US',
