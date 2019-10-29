@@ -18,6 +18,13 @@ describe('convert utc', () => {
         expect(convertZonedDateTimeToUTC(obj(2019, 10, 27, 1), 'Europe/Zurich')).toEqual(obj(2019, 10, 26, 23));
     });
 
+    fit('should convert a zoned time to utc', () => {
+        expect(convertZonedDateTimeToUTC(obj(2017, 3, 26, 1), 'Europe/Zurich'))
+            .toEqual(obj(2017, 3, 26, 0));
+        expect(convertZonedDateTimeToUTC(obj(2017, 3, 26, 2), 'Europe/Zurich'))
+            .toEqual(obj(2017, 3, 26, 1));
+    });
+
     it('should convert to a zone in utc', () => {
         expect(convertZonedDateTimeToUTC(obj(2019, 10, 27, 2), 'Europe/Zurich')).toEqual(obj(2019, 10, 27, 0));
     });
