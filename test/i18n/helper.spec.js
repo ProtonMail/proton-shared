@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 
 import dateFnLocales from '../../lib/i18n/dateFnLocales';
 import { getClosestMatch } from '../../lib/i18n/helper';
-import { DATE_FORMAT_LOCALES, loadDateFnLocale, TIME_FORMAT_LOCALES } from '../../lib/i18n/dateFnLocale';
+import { loadDateFnLocale } from '../../lib/i18n/dateFnLocale';
 import { loadTtagLocale } from '../../lib/i18n/ttagLocale';
 
 describe('helper', () => {
@@ -58,28 +58,5 @@ describe('Load date locales', () => {
             locales: dateFnLocales
         });
         expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('01/01/2000, 00:00');
-    });
-
-    it('should override time format and date format with 12 hour format and year format', async () => {
-        const dateFnLocale = await loadDateFnLocale({
-            locale: 'en_US',
-            longLocale: 'fr',
-            locales: dateFnLocales,
-            timeFormatLocale: TIME_FORMAT_LOCALES.H12,
-            dateFormatLocale: DATE_FORMAT_LOCALES.YYYYMMDD
-        });
-        expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('2000-01-01, 12:00 AM');
-    });
-
-    it('should override time format and date format with 24 hour format and year format', async () => {
-        const dateFnLocale = await loadDateFnLocale({
-            locale: 'en_US',
-            longLocale: 'en_US',
-            locales: dateFnLocales,
-            timeFormatLocale: TIME_FORMAT_LOCALES.H24,
-            dateFormatLocale: DATE_FORMAT_LOCALES.DDMMYYYY
-        });
-        const date = new Date(2019, 9, 7, 12, 5);
-        expect(format(date, 'Pp', { locale: dateFnLocale })).toBe('07/10/2019, 12:05');
     });
 });
