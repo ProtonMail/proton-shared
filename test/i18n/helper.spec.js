@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { c } from 'ttag';
 import { format } from 'date-fns';
+import cnLocale from 'date-fns/locale/zh-CN';
 
 import dateFnLocales from '../../lib/i18n/dateFnLocales';
 import { getClosestMatch } from '../../lib/i18n/helper';
-import { loadDateFnLocale } from '../../lib/i18n/dateFnLocale';
+import { loadDateFnLocale, loadDateFnTimeFormat } from '../../lib/i18n/dateFnLocale';
 import { loadTtagLocale } from '../../lib/i18n/ttagLocale';
 
 describe('helper', () => {
@@ -58,5 +59,48 @@ describe('Load date locales', () => {
             locales: dateFnLocales
         });
         expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('01/01/2000, 00:00');
+    });
+
+    it('should override time format and date format with 12 hour format', async () => {
+        const dateFnLocale = await loadDateFnLocale({
+            locale: 'en_US',
+            longLocale: 'fr',
+            locales: dateFnLocales
+        });
+        expect(
+            format(zero, 'p', {
+                locale: loadDateFnTimeFormat({
+                    dateLocale: dateFnLocale,
+                    displayAMPM: true
+                })
+            })
+        ).toBe('12:00 AM');
+
+        expect(
+            format(zero, 'p', {
+                locale: loadDateFnTimeFormat({
+                    dateLocale: dateFnLocale,
+                    displayAMPM: false
+                })
+            })
+        ).toBe('00:00');
+
+        expect(
+            format(zero, 'p', {
+                locale: loadDateFnTimeFormat({
+                    dateLocale: cnLocale,
+                    displayAMPM: false
+                })
+            })
+        ).toBe('00:00');
+
+        expect(
+            format(zero, 'p', {
+                locale: loadDateFnTimeFormat({
+                    dateLocale: cnLocale,
+                    displayAMPM: true
+                })
+            })
+        ).toBe('上午 12:00');
     });
 });
