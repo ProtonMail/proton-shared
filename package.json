@@ -45,7 +45,7 @@
     "lodash": "^4.17.11",
     "push.js": "^1.0.12",
     "sieve.js": "github:ProtonMail/sieve.js#master",
-    "timezone-support": "^2.0.2",
+    "timezone-support": "github:ProtonMail/timezone-support#master",
     "ua-parser-js": "^0.7.20"
   },
   "devDependencies": {
