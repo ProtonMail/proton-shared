@@ -38,6 +38,7 @@
     "@sentry/browser": "^5.6.2",
     "@types/node": "^12.7.11",
     "date-fns": "^2.2.1",
+    "dompurify": "^2.0.7",
     "file-saver": "^2.0.2",
     "get-random-values": "github:ProtonMail/get-random-values#semver:^1.0.0",
     "hi-base32": "^0.5.0",
