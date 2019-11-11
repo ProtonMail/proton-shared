@@ -488,7 +488,8 @@ export enum PAYMENT_METHOD_TYPES {
 
 export enum INVITE_TYPES {
     MAIL = 1,
-    VPN = 2
+    VPN = 2,
+    DRIVE = 3
 }
 
 export enum CLIENT_IDS {
@@ -503,7 +504,8 @@ export enum CLIENT_IDS {
 
 export enum CLIENT_TYPES {
     MAIL = 1,
-    VPN = 2
+    VPN = 2,
+    DRIVE = 3
 }
 
 export enum TOKEN_TYPES {
