@@ -48,7 +48,7 @@ export const generateDriveKey = async (rawPassphrase: string) => {
     return { privateKey, privateKeyArmored };
 };
 
-export const generateInitialDriveKeys = async (addressPrivateKey: key.Key) => {
+export const generateDriveBootstrap = async (addressPrivateKey: key.Key) => {
     const rawSharePassphrase = generatePassphrase();
     const rawFolderPassphrase = generatePassphrase();
 
