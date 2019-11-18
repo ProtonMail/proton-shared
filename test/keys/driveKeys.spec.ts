@@ -9,7 +9,7 @@ const passphrase =
 const folderName = '-----BEGIN PGP MESSAGE-----\nVersion: ProtonMail\n\nwV4D7bIbvfUVIgMSAQdAo0jDKpBeHzQDAjGPYPgMjLUFa3Rfs2U1c/XJxD69\njRow+Hz5SU5CAkSJmSHHYsctlaCcsRCfmkl62A5JIXfV/wHRDk0Usi6NIstq\n3aD+ywyr0j8BNY0gX2w08fWEyMDGAcYeqJay0zmsPRg9l59XYySAOAShlVvN\nQa/vQWCAxl/Bk1iYctxCPCDVslSMYRJeG2A=\n=Lj9p\n-----END PGP MESSAGE-----\n'.trim();
 
 describe('drive keys', () => {
-    fit('should prepare drive keys', async () => {
+    it('should prepare drive keys', async () => {
         const decryptedPrivateKey = await decryptPrivateKey(addressKey, 'oXueLX2EKIM.mwS7qmU2wvfNXb3KI3i');
         const decryptedPassphrase = await decryptUnsigned({
             armoredMessage: passphrase,
