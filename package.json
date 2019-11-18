@@ -67,7 +67,7 @@
     "karma-webpack": "^4.0.2",
     "lint-staged": "^8.2.0",
     "pm-srp": "github:ProtonMail/pm-srp.git#semver:^1.0.0",
-    "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:^6.1.0",
+    "pmcrypto": "github:ProtonMail/pmcrypto#semver:^6.1.1",
     "prettier": "^1.18.2",
     "proton-i18n": "github:ProtonMail/proton-i18n#semver:^1.0.0",
     "require-inject": "^1.4.4",
@@ -78,7 +78,7 @@
   },
   "peerDependencies": {
     "pm-srp": "github:ProtonMail/pm-srp.git#semver:^1.0.0",
-    "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:^6.0.0",
+    "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:^6.1.1",
     "design-system": "github:ProtonMail/design-system.git#semver:^1.7.4",
     "react": "^16.8.1",
     "react-router-dom": "^4.3.1",
