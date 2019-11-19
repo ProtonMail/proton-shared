@@ -37,6 +37,7 @@
   "dependencies": {
     "@sentry/browser": "^5.6.2",
     "@types/node": "^12.7.11",
+    "@types/openpgp": "^4.4.7",
     "date-fns": "^2.2.1",
     "dompurify": "^2.0.7",
     "file-saver": "^2.0.2",
@@ -54,7 +55,6 @@
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@types/jasmine": "^3.4.6",
-    "@types/openpgp": "^4.4.7",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^6.7.2",
