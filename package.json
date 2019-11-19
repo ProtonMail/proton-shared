@@ -53,6 +53,8 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.6.2",
+    "@types/jasmine": "^3.4.6",
+    "@types/openpgp": "^4.4.7",
     "@typescript-eslint/eslint-plugin": "^1.13.0",
     "@typescript-eslint/parser": "^1.13.0",
     "eslint": "^6.3.0",
