@@ -256,8 +256,20 @@ export enum CYCLE {
 
 export const BLACK_FRIDAY = {
     COUPON_CODE: 'BF2019',
-    START: 'November 26, 2019 06:00:00',
-    END: '2019-12-09'
+    START: {
+        // Nov 26, 2019 06:00:00 UTC
+        YEAR: 2019,
+        MONTH: 10, // An integer between 0 (January) and 11 (December) representing the month
+        DAY: 26,
+        HOUR: 6
+    },
+    END: {
+        // Dec 9th 2019, 07:00:00 UTC
+        YEAR: 2019,
+        MONTH: 11, // An integer between 0 (January) and 11 (December) representing the month
+        DAY: 9,
+        HOUR: 7
+    }
 };
 
 export const MIN_PAYPAL_AMOUNT = 500;
