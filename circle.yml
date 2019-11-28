@@ -5,7 +5,7 @@ jobs:
         ignore:
           - /deploy-.*/
      docker:
-       - image: circleci/node:lts
+       - image: circleci/node:lts-browsers
      steps:
        - checkout
        - run: npm i
