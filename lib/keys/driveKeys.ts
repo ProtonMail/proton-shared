@@ -18,7 +18,7 @@ export const encryptUnsigned = async ({ message, privateKey }: UnsignedEncryptio
 };
 
 interface UnsignedDecryptionPayload {
-    armoredMessage: string;
+    armoredMessage: string | Uint8Array;
     privateKey: key.Key;
 }
 
