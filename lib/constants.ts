@@ -268,7 +268,7 @@ export const BLACK_FRIDAY = {
         YEAR: 2019,
         MONTH: 11, // An integer between 0 (January) and 11 (December) representing the month
         DAY: 9,
-        HOUR: 7
+        HOUR: 8
     }
 };
 
