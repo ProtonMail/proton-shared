@@ -1,7 +1,12 @@
-import { decryptMessage, getMessage, encryptMessage, generateKey } from 'pmcrypto/lib/pmcrypto';
 import { key } from 'openpgp';
+import { decryptMessage, getMessage, encryptMessage, generateKey } from 'pmcrypto/lib/pmcrypto';
+import { openpgp } from 'pmcrypto/lib/openpgp';
+import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
+import { createReadableStreamWrapper } from '@mattiasbuelens/web-streams-adapter';
 import { ENCRYPTION_CONFIGS, ENCRYPTION_TYPES } from '../constants';
 import { generatePassphrase } from './calendarKeys';
+
+const toPolyfillReadable = createReadableStreamWrapper(PolyfillReadableStream);
 
 interface UnsignedEncryptionPayload {
     message: string;
@@ -15,6 +20,10 @@ export const encryptUnsigned = async ({ message, privateKey }: UnsignedEncryptio
         publicKeys: privateKey.toPublic()
     });
     return encryptedToken as string;
+};
+
+export const getStreamMessage = (stream: ReadableStream<Uint8Array>) => {
+    return openpgp.message.read(toPolyfillReadable(stream));
 };
 
 interface UnsignedDecryptionPayload {
