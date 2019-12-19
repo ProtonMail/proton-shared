@@ -1,3 +1,3 @@
-import baseConfig from './configs/babel.config';
+import baseConfig from './configs/babel.config.base';
 
 module.exports = baseConfig;
