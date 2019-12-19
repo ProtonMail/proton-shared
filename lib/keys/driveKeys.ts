@@ -86,8 +86,12 @@ export const generateLookupHash = async (name: string, hashKey: string) => {
         ['sign', 'verify']
     );
 
-    const data = binaryStringToArray(name).buffer;
-    return arrayToHexString(new Uint8Array(await crypto.subtle.sign('HMAC', key, data)));
+    const signature = await crypto.subtle.sign(
+        { name: 'HMAC', hash: { name: 'SHA-256' } },
+        key,
+        binaryStringToArray(name)
+    );
+    return arrayToHexString(new Uint8Array(signature));
 };
 
 export const generateNodeHashKey = async (privateKey: key.Key) => {
