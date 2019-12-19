@@ -1,0 +1,156 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=utf-8\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: lib/helpers/humanSize.js:13
+msgctxt "file size format"
+msgid "KB"
+msgstr ""
+
+#: lib/helpers/humanSize.js:14
+msgctxt "file size format"
+msgid "MB"
+msgstr ""
+
+#: lib/helpers/humanSize.js:15
+msgctxt "file size format"
+msgid "GB"
+msgstr ""
+
+#: lib/filters/factory.js:11
+msgctxt "Filter modal type"
+msgid "Select ..."
+msgstr ""
+
+#: lib/filters/factory.js:12
+msgctxt "Filter modal type"
+msgid "If the subject"
+msgstr ""
+
+#: lib/filters/factory.js:13
+msgctxt "Filter modal type"
+msgid "If the sender"
+msgstr ""
+
+#: lib/filters/factory.js:14
+msgctxt "Filter modal type"
+msgid "If the recipient"
+msgstr ""
+
+#: lib/filters/factory.js:15
+msgctxt "Filter modal type"
+msgid "If the attachments"
+msgstr ""
+
+#: lib/filters/factory.js:18
+msgctxt "Condition for custom filter"
+msgid "contains"
+msgstr ""
+
+#: lib/filters/factory.js:19
+msgctxt "Condition for custom filter"
+msgid "is exactly"
+msgstr ""
+
+#: lib/filters/factory.js:20
+msgctxt "Condition for custom filter"
+msgid "begins with"
+msgstr ""
+
+#: lib/filters/factory.js:21
+msgctxt "Condition for custom filter"
+msgid "ends with"
+msgstr ""
+
+#: lib/filters/factory.js:22
+msgctxt "Condition for custom filter"
+msgid "matches"
+msgstr ""
+
+#: lib/filters/factory.js:24
+msgctxt "Condition for custom filter"
+msgid "does not contain"
+msgstr ""
+
+#: lib/filters/factory.js:27
+msgctxt "Condition for custom filter"
+msgid "is not"
+msgstr ""
+
+#: lib/filters/factory.js:29
+msgctxt "Condition for custom filter"
+msgid "does not begin with"
+msgstr ""
+
+#: lib/filters/factory.js:33
+msgctxt "Condition for custom filter"
+msgid "does not end with"
+msgstr ""
+
+#: lib/filters/factory.js:37
+msgctxt "Condition for custom filter"
+msgid "does not match"
+msgstr ""
+
+#: lib/filters/factory.js:42
+msgctxt "Filter modal operators"
+msgid "All conditions must be fulfilled (AND)"
+msgstr ""
+
+#: lib/filters/factory.js:43
+msgctxt "Filter modal operators"
+msgid "One condition must be fulfilled (OR)"
+msgstr ""
+
+#: lib/keys/calendarKeys.js:98
+#: lib/keys/keys.js:102
+msgctxt "Error"
+msgid "Signature verification failed"
+msgstr ""
+
+#: lib/keys/keys.js:122
+msgctxt "Error"
+msgid "Incorrect decryption password"
+msgstr ""
+
+#: lib/keys/calendarKeys.js:230
+#, javascript-format
+msgctxt "Error"
+msgid "Could not find address ${ email }."
+msgstr ""
+
+#: lib/calendar/integration/createOrUpdateEvent.js:14
+msgctxt "Error"
+msgid "Primary address key not found"
+msgstr ""
+
+#: lib/calendar/integration/createOrUpdateEvent.js:21
+msgctxt "Error"
+msgid "Primary calendar key is not decrypted"
+msgstr ""
+
+#: lib/themes/themes.js:13
+msgctxt "Theme"
+msgid "Default theme"
+msgstr ""
+
+#: lib/themes/themes.js:23
+msgctxt "Theme"
+msgid "Custom theme"
+msgstr ""
+
+#: lib/themes/themes.js:33
+msgctxt "Theme"
+msgid "Light"
+msgstr ""
+
+#: lib/themes/themes.js:42
+msgctxt "Theme"
+msgid "Blue"
+msgstr ""
+
+#: lib/themes/themes.js:51
+msgctxt "Theme"
+msgid "Dark theme"
+msgstr ""
