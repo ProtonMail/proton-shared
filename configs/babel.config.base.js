@@ -3,6 +3,6 @@ module.exports = {
     plugins: [
         '@babel/plugin-proposal-object-rest-spread',
         '@babel/plugin-transform-runtime',
-        'transform-require-context'
+        'transform-require-context' // this plugin is here only to make Jest tests run
     ]
 };
