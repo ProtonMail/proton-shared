@@ -1,4 +1,4 @@
-module.exports = {
-    presets: ['@babel/preset-env'],
-    plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/plugin-transform-runtime']
-};
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const baseConfig = require('./configs/babel.config.base');
+
+module.exports = baseConfig;
