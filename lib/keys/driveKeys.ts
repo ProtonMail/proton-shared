@@ -1,5 +1,5 @@
 import { key } from 'openpgp';
-import { decryptMessage, getMessage, encryptMessage, generateKey } from 'pmcrypto/lib/pmcrypto';
+import { decryptMessage, getMessage, encryptMessage, generateKey } from 'pmcrypto';
 import { openpgp } from 'pmcrypto/lib/openpgp';
 import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
 import { createReadableStreamWrapper } from '@mattiasbuelens/web-streams-adapter';
