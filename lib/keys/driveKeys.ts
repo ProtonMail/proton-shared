@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import {
     decryptMessage,
     getMessage,
@@ -9,6 +10,10 @@ import {
     OpenPGPKey,
     SHA256
 } from 'pmcrypto';
+=======
+import { key } from 'openpgp';
+import { decryptMessage, getMessage, encryptMessage, generateKey } from 'pmcrypto';
+>>>>>>> pmcrypto typing stub
 import { openpgp } from 'pmcrypto/lib/openpgp';
 import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
 import { createReadableStreamWrapper } from '@mattiasbuelens/web-streams-adapter';
