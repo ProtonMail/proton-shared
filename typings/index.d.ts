@@ -9,5 +9,17 @@ declare module 'pmcrypto' {
     const encryptMessage: any;
     const generateKey: any;
     const decryptPrivateKey: any;
-    export { decryptMessage, getMessage, encryptMessage, generateKey, decryptPrivateKey };
+    const binaryStringToArray: any;
+    const signMessage: any;
+    const arrayToHexString: any;
+    export {
+        decryptMessage,
+        getMessage,
+        encryptMessage,
+        generateKey,
+        decryptPrivateKey,
+        binaryStringToArray,
+        signMessage,
+        arrayToHexString
+    };
 }
