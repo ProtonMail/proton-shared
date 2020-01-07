@@ -256,7 +256,7 @@ describe('calendar', () => {
     it('should convert trigger strings into milliseconds', () => {
         expect(getMillisecondsFromTriggerString('-PT30M')).toEqual(-30 * MINUTE);
         expect(getMillisecondsFromTriggerString('PT1H')).toEqual(HOUR);
-        expect(getMillisecondsFromTriggerString('P1D')).toEqual(DAY);
+        expect(getMillisecondsFromTriggerString('-P1D')).toEqual(-DAY);
         expect(getMillisecondsFromTriggerString('-PT2H34M12S')).toEqual(-2 * HOUR - 34 * MINUTE - 12 * SECOND);
         expect(getMillisecondsFromTriggerString('P2W1DT1S')).toEqual(2 * WEEK + DAY + SECOND);
     });
