@@ -1,4 +1,4 @@
-export interface Keys {
+export interface Key {
     ID: string;
     Primary: number;
     Flags: number;

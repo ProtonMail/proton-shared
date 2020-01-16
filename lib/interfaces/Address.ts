@@ -1,5 +1,5 @@
 import { ADDRESS_TYPE } from '../constants';
-import { Keys } from './Keys';
+import { Key } from './Key';
 
 export interface Address {
     DisplayName: string;
@@ -7,7 +7,7 @@ export interface Address {
     Email: string;
     HasKeys: number;
     ID: string;
-    Keys: Keys[];
+    Keys: Key[];
     Order: number;
     Priority: number;
     Receive: number;
