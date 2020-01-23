@@ -1,4 +1,6 @@
-export const getPublicKeys = ({ Email, Fingerprint }) => ({
+import { SignedKeyList } from '../interfaces';
+
+export const getPublicKeys = ({ Email, Fingerprint }: { Email: string; Fingerprint: string }) => ({
     url: 'keys',
     method: 'get',
     params: { Email, Fingerprint }
@@ -17,7 +19,17 @@ export const getKeySalts = () => ({
  * @param {Object} SignedKeyList
  * @return {Object}
  */
-export const createAddressKeyRoute = ({ AddressID, Primary, PrivateKey, SignedKeyList }) => ({
+export const createAddressKeyRoute = ({
+    AddressID,
+    Primary,
+    PrivateKey,
+    SignedKeyList
+}: {
+    AddressID: string;
+    Primary: number;
+    PrivateKey: string;
+    SignedKeyList: SignedKeyList;
+}) => ({
     url: 'keys',
     method: 'post',
     data: {
@@ -35,7 +47,15 @@ export const createAddressKeyRoute = ({ AddressID, Primary, PrivateKey, SignedKe
  * @param {Object} [SignedKeyList] - If activating an address key
  * @return {Object}
  */
-export const reactivateKeyRoute = ({ ID, PrivateKey, SignedKeyList }) => ({
+export const reactivateKeyRoute = ({
+    ID,
+    PrivateKey,
+    SignedKeyList
+}: {
+    ID: string;
+    PrivateKey: string;
+    SignedKeyList: SignedKeyList | undefined;
+}) => ({
     url: `keys/${ID}`,
     method: 'put',
     data: {
@@ -50,7 +70,7 @@ export const reactivateKeyRoute = ({ ID, PrivateKey, SignedKeyList }) => ({
  * @param {Object} SignedKeyList
  * @return {Object}
  */
-export const setKeyPrimaryRoute = ({ ID, SignedKeyList }) => ({
+export const setKeyPrimaryRoute = ({ ID, SignedKeyList }: { ID: string; SignedKeyList: SignedKeyList }) => ({
     url: `keys/${ID}/primary`,
     method: 'put',
     data: {
@@ -65,7 +85,15 @@ export const setKeyPrimaryRoute = ({ ID, SignedKeyList }) => ({
  * @param {Object} SignedKeyList
  * @return {Object}
  */
-export const setKeyFlagsRoute = ({ ID, Flags, SignedKeyList }) => ({
+export const setKeyFlagsRoute = ({
+    ID,
+    Flags,
+    SignedKeyList
+}: {
+    ID: string;
+    Flags: number;
+    SignedKeyList: SignedKeyList;
+}) => ({
     url: `keys/${ID}/flags`,
     method: 'put',
     data: {
@@ -80,7 +108,7 @@ export const setKeyFlagsRoute = ({ ID, Flags, SignedKeyList }) => ({
  * @param {Object} SignedKeyList
  * @return {Object}
  */
-export const removeKeyRoute = ({ ID, SignedKeyList }) => ({
+export const removeKeyRoute = ({ ID, SignedKeyList }: { ID: string; SignedKeyList: SignedKeyList }) => ({
     url: `keys/${ID}/delete`,
     method: 'put',
     data: {
@@ -88,7 +116,15 @@ export const removeKeyRoute = ({ ID, SignedKeyList }) => ({
     }
 });
 
-export const updatePrivateKeyRoute = ({ KeySalt, Keys, OrganizationKey }) => ({
+export const updatePrivateKeyRoute = ({
+    KeySalt,
+    Keys,
+    OrganizationKey
+}: {
+    KeySalt: string;
+    Keys: any[];
+    OrganizationKey: string;
+}) => ({
     url: 'keys/private',
     method: 'put',
     data: {
@@ -98,7 +134,19 @@ export const updatePrivateKeyRoute = ({ KeySalt, Keys, OrganizationKey }) => ({
     }
 });
 
-export const resetKeysRoute = ({ Username, PrimaryKey, Token, KeySalt, AddressKeys }) => ({
+export const resetKeysRoute = ({
+    Username,
+    PrimaryKey,
+    Token,
+    KeySalt,
+    AddressKeys
+}: {
+    Username: string;
+    PrimaryKey: string;
+    Token: string;
+    KeySalt: string;
+    AddressKeys: any[];
+}) => ({
     url: 'keys/reset',
     method: 'post',
     data: {
