@@ -22,8 +22,9 @@ const transformKeysOutput = (keys: KeyAction[]) => {
 };
 
 /**
- * @param keys the list of keys
- * @param signingKey the primary key of the list
+ * Generate the signed key list data
+ * @param keys - The list of keys
+ * @param signingKey - The primary key of the list
  */
 const getSignedKeyList = async (keys: KeyAction[], signingKey: OpenPGPKey): Promise<SignedKeyList> => {
     const data = JSON.stringify(transformKeysOutput(keys));

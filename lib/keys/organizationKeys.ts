@@ -6,10 +6,6 @@ import { generateAddressKey } from './keys';
 import { decryptMemberToken, encryptMemberToken, generateMemberToken } from './memberToken';
 import { Member, EncryptionConfig, Address } from '../interfaces';
 
-/**
- * @param backupPassword
- * @param organizationKey
- */
 export const getBackupKeyData = async ({
     backupPassword,
     organizationKey
@@ -27,11 +23,6 @@ export const getBackupKeyData = async ({
     };
 };
 
-/**
- * @param keyPassword
- * @param backupPassword
- * @param encryptionConfig
- */
 interface GenerateOrganizationKeysArguments {
     keyPassword: string;
     backupPassword: string;
@@ -57,12 +48,6 @@ export const generateOrganizationKeys = async ({
     };
 };
 
-/**
- * @param nonPrivateMembers
- * @param nonPrivateMembersAddresses
- * @param oldOrganizationKey
- * @param newOrganizationKey
- */
 interface ReEncryptOrganizationTokens {
     nonPrivateMembers: Member[];
     nonPrivateMembersAddresses: Address[][];
