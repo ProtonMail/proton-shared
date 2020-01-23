@@ -150,7 +150,7 @@ export const splitKeys = (keys: CachedKey[] = []) => {
 interface GetAddressKeyTokenArguments {
     Token: string;
     Signature: string;
-    organizationKey: OpenPGPKey;
+    organizationKey?: OpenPGPKey | void;
     privateKeys: OpenPGPKey | OpenPGPKey[];
     publicKeys: OpenPGPKey | OpenPGPKey[];
 }
@@ -170,6 +170,9 @@ export const getAddressKeyToken = ({
             // Verify against the organization key in case an admin is signed in to a non-private member.
             publicKeys: organizationKey ? [organizationKey.toPublic()] : publicKeys
         });
+    }
+    if (!organizationKey) {
+        throw new Error('Missing organization key');
     }
     // Old address key format for an admin signed into a non-private user
     return decryptMemberToken(Token, organizationKey);
