@@ -27,7 +27,8 @@ export const addKeyAction = ({ keys, ID: newKeyID, fingerprint, flags }: AddKeyA
     const newKey = {
         ID: newKeyID,
         primary: isNewPrimary,
-        flags
+        flags,
+        fingerprint
     };
 
     if (isNewPrimary) {
