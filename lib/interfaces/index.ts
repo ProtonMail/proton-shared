@@ -1,5 +1,6 @@
 export * from './Api';
 export * from './Address';
+export * from './User';
 export * from './Member';
 export * from './CachedKey';
 export * from './Key';
