@@ -27,9 +27,6 @@ const getResetKeys = (Keys: Key[], { canReceive, fingerprint }: { canReceive: bo
 
 /**
  * Generates a new key for each address, encrypted with the new passphrase.
- * @param addresses
- * @param passphrase
- * @param encryptionConfig
  */
 export const getResetAddressesKeys = async ({
     addresses = [],

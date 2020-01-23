@@ -39,12 +39,6 @@ export const getPrimaryKeyWithSalt = (Keys: Key[] = [], KeySalts: KeySalt[] = []
     };
 };
 
-/**
- * @param email
- * @param [name=email]
- * @param passphrase
- * @param encryptionConfig
- */
 interface GenerateAddressKeyArguments {
     email: string;
     name?: string;
@@ -67,13 +61,6 @@ export const generateAddressKey = async ({
 
     return { privateKey, privateKeyArmored };
 };
-
-/**
- * @param email
- * @param [name=email]
- * @param passphrase
- * @param originalKey
- */
 
 interface ReformatAddressKeyArguments {
     email: string;
@@ -100,10 +87,6 @@ export const reformatAddressKey = async ({
 
 /**
  * Decrypt an address key token and verify the detached signature.
- * @param Token
- * @param Signature
- * @param privateKeys
- * @param publicKeys
  */
 interface DecryptAddressKeyTokenArguments {
     Token: string;

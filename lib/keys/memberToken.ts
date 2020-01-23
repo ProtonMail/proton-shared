@@ -5,8 +5,6 @@ import { serializeUint8Array } from '../helpers/serialization';
 
 /**
  * Decrypts a member token with the organization private key
- * @param token
- * @param privateKey decrypted private key
  */
 export const decryptMemberToken = async (token: string, privateKey: OpenPGPKey) => {
     const { data: decryptedToken, verified } = await decryptMessage({
