@@ -9,11 +9,11 @@ import {
     VERIFICATION_STATUS
 } from 'pmcrypto';
 import { c } from 'ttag';
-// @ts-ignore
+// @ts-ignore - pm-srp does not have typings, todo
 import { computeKeyPassword, generateKeySalt } from 'pm-srp';
 
 import { decryptMemberToken } from './memberToken';
-import { CachedKey, EncryptionConfig, Key, KeySalt } from '../interfaces';
+import { CachedKey, EncryptionConfig, Key, KeySalt as tsKeySalt } from '../interfaces';
 
 export const generateKeySaltAndPassphrase = async (password: string) => {
     const salt = generateKeySalt();
@@ -28,7 +28,7 @@ export const generateKeySaltAndPassphrase = async (password: string) => {
  * @param Keys - Keys as received from the API
  * @param KeySalts - KeySalts as received from the API
  */
-export const getPrimaryKeyWithSalt = (Keys: Key[] = [], KeySalts: KeySalt[] = []) => {
+export const getPrimaryKeyWithSalt = (Keys: Key[] = [], KeySalts: tsKeySalt[] = []) => {
     const { PrivateKey, ID } = Keys.find(({ Primary }) => Primary === 1) || {};
     const { KeySalt } = KeySalts.find(({ ID: keySaltID }) => ID === keySaltID) || {};
 
