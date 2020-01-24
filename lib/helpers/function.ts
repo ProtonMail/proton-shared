@@ -5,12 +5,10 @@ export const debounce = <A extends any[]>(func: (...args: A[]) => void, wait: nu
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     return function executedFunction(this: any, ...args: A) {
-        const context = this;
-
         const later = () => {
             timeoutId = undefined;
             if (!isImmediate) {
-                func.apply(context, args);
+                func.apply(this, args);
             }
         };
 
@@ -23,7 +21,7 @@ export const debounce = <A extends any[]>(func: (...args: A[]) => void, wait: nu
         timeoutId = setTimeout(later, wait);
 
         if (shouldCallNow) {
-            func.apply(context, args);
+            func.apply(this, args);
         }
     };
 };
