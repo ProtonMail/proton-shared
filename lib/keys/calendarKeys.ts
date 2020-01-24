@@ -107,10 +107,10 @@ export const decryptPassphrase = async ({
         throw error;
     }
 
-    return decryptedPassphrase;
+    return decryptedPassphrase as string;
 };
 
-export const getAddressesMembersMap = (Members: Member[] = [], Addresses = []) => {
+export const getAddressesMembersMap = (Members: Member[], Addresses: Address[] = []) => {
     return Members.reduce<{ [key: string]: Address }>((acc, Member) => {
         const Address = Addresses.find(({ Email }) => Email === Member.Email);
         if (!Address) {
@@ -126,11 +126,14 @@ export const getAddressesMembersMap = (Members: Member[] = [], Addresses = []) =
  * @param Keys - the calendar keys as coming from the API
  * @param passphrasesMap - The decrypted passphrases map
  */
-export const decryptCalendarKeys = async (Keys: tsKey[], passphrasesMap: { [key: string]: string } = {}) => {
+export const decryptCalendarKeys = async (
+    Keys: tsKey[],
+    passphrasesMap: { [key: string]: string | undefined } = {}
+) => {
     const process = async (Key: tsKey) => {
         try {
             const { PrivateKey, PassphraseID } = Key;
-            const passphrase = passphrasesMap[PassphraseID];
+            const passphrase = passphrasesMap[PassphraseID] || '';
             const privateKey = await decryptPrivateKey(PrivateKey, passphrase);
             return {
                 Key,
