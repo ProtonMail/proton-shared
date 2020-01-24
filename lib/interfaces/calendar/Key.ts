@@ -3,5 +3,5 @@ export interface Key {
     CalendarID: string;
     PrivateKey: string;
     PassphraseID: string;
-    Flags: 1;
+    Flags: number;
 }
