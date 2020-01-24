@@ -1,5 +1,5 @@
 export interface MemberPassphrase {
-    CalendarMemberID: string;
+    MemberID: string;
     Passphrase: string;
     Signature: string;
 }
