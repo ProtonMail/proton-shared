@@ -1,7 +1,7 @@
 export const noop = () => {};
 export const identity = (value: any) => value;
 
-export const debounce = <A extends any[]>(func: (...args: A[]) => void, wait: number, isImmediate?: boolean) => {
+export const debounce = <A extends any[]>(func: (...args: A) => void, wait: number, isImmediate?: boolean) => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     return function executedFunction(this: any, ...args: A) {
