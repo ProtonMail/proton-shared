@@ -110,7 +110,7 @@ export const decryptPassphrase = async ({
     return decryptedPassphrase as string;
 };
 
-export const getAddressesMembersMap = (Members: Member[], Addresses: Address[] = []) => {
+export const getAddressesMembersMap = (Members: Member[], Addresses: Address[]) => {
     return Members.reduce<{ [key: string]: Address }>((acc, Member) => {
         const Address = Addresses.find(({ Email }) => Email === Member.Email);
         if (!Address) {
