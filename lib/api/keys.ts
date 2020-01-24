@@ -1,9 +1,9 @@
 import { AddressKey, SignedKeyList } from '../interfaces';
 
-export const getPublicKeys = ({ Email, Fingerprint }: { Email: string; Fingerprint: string }) => ({
+export const getPublicKeys = (params: { Email: string; Fingerprint?: string }) => ({
     url: 'keys',
     method: 'get',
-    params: { Email, Fingerprint }
+    params
 });
 
 export const getKeySalts = () => ({
