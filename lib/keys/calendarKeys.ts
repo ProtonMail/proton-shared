@@ -20,10 +20,10 @@ import { hasBit } from '../helpers/bitset';
 import { Address, EncryptionConfig } from '../interfaces';
 import { Key as tsKey, Member } from '../interfaces/calendar';
 
-export const KEY_FLAGS = {
-    PRIMARY: 0b1,
-    ACTIVE: 0b01
-};
+export enum KEY_FLAGS {
+    PRIMARY = 0b1,
+    ACTIVE = 0b01
+}
 
 export const generatePassphrase = () => {
     const value = getRandomValues(new Uint8Array(32));
