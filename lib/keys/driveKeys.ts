@@ -1,4 +1,3 @@
-import { key } from 'openpgp';
 import {
     decryptMessage,
     getMessage,
@@ -6,7 +5,9 @@ import {
     generateKey,
     binaryStringToArray,
     signMessage,
-    arrayToHexString
+    arrayToHexString,
+    OpenPGPKey,
+    SHA256
 } from 'pmcrypto';
 import { openpgp } from 'pmcrypto/lib/openpgp';
 import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
@@ -20,17 +21,17 @@ const toPolyfillReadable = createReadableStreamWrapper(PolyfillReadableStream);
 
 interface UnsignedEncryptionPayload {
     message: string;
-    privateKey: key.Key;
+    privateKey: OpenPGPKey;
 }
 
-export const sign = async (data: string, privateKeys: key.Key | key.Key[]) => {
+export const sign = async (data: string, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
     const { signature } = await signMessage({
         data,
         privateKeys,
         armor: true,
         detached: true
     });
-    return signature;
+    return signature as string;
 };
 
 export const encryptUnsigned = async ({ message, privateKey }: UnsignedEncryptionPayload) => {
@@ -42,13 +43,14 @@ export const encryptUnsigned = async ({ message, privateKey }: UnsignedEncryptio
     return encryptedToken as string;
 };
 
+// TODO: move this to pmcrypto
 export const getStreamMessage = (stream: ReadableStream<Uint8Array>) => {
     return openpgp.message.read(toPolyfillReadable(stream));
 };
 
 interface UnsignedDecryptionPayload {
     armoredMessage: string | Uint8Array;
-    privateKey: key.Key;
+    privateKey: OpenPGPKey;
 }
 
 /**
@@ -94,7 +96,7 @@ export const generateLookupHash = async (name: string, hashKey: string) => {
     return arrayToHexString(new Uint8Array(signature));
 };
 
-export const generateNodeHashKey = async (privateKey: key.Key) => {
+export const generateNodeHashKey = async (privateKey: OpenPGPKey) => {
     const message = generatePassphrase();
 
     const NodeHashKey = await encryptUnsigned({
@@ -105,7 +107,7 @@ export const generateNodeHashKey = async (privateKey: key.Key) => {
     return { NodeHashKey };
 };
 
-export const generateNodeKeys = async (parentKey: key.Key) => {
+export const generateNodeKeys = async (parentKey: OpenPGPKey) => {
     const rawPassphrase = generatePassphrase();
     const { privateKey, privateKeyArmored: NodeKey } = await generateDriveKey(rawPassphrase);
 
@@ -118,11 +120,11 @@ export const generateNodeKeys = async (parentKey: key.Key) => {
 };
 
 export const generateContentHash = async (content: Uint8Array) => {
-    const data = await openpgp.crypto.hash.sha256(content);
+    const data = await SHA256(content);
     return { HashType: 'sha256', BlockHash: arrayToHexString(data) as string };
 };
 
-export const generateContentKeys = async (nodeKey: key.Key) => {
+export const generateContentKeys = async (nodeKey: OpenPGPKey) => {
     const publicKey = nodeKey.toPublic();
     const sessionKey = await createSessionKey(publicKey);
     const contentKeys = await getEncryptedSessionKey(sessionKey, publicKey);
@@ -130,7 +132,7 @@ export const generateContentKeys = async (nodeKey: key.Key) => {
     return { sessionKey, ContentKeyPacket };
 };
 
-export const generateDriveBootstrap = async (addressPrivateKey: key.Key) => {
+export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
     const { NodeKey: ShareKey, NodePassphrase: SharePassphrase, privateKey: sharePrivateKey } = await generateNodeKeys(
         addressPrivateKey
     );
