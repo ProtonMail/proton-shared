@@ -1,10 +1,10 @@
 export const noop = () => {};
 export const identity = (value: any) => value;
 
-export const debounce = (func: Function, wait: number, isImmediate?: boolean) => {
+export const debounce = <A extends any[]>(func: (...args: A[]) => void, wait: number, isImmediate?: boolean) => {
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    return function executedFunction(this: any, ...args: any[]) {
+    return function executedFunction(this: any, ...args: A) {
         const context = this;
 
         const later = () => {
@@ -28,10 +28,10 @@ export const debounce = (func: Function, wait: number, isImmediate?: boolean) =>
     };
 };
 
-export const throttle = (func: Function, ms = 50, context = window) => {
+export const throttle = <A extends any[]>(func: (...args: A) => void, ms = 50, context = window) => {
     let wait = false;
 
-    return (...args: any[]) => {
+    return (...args: A) => {
         const later = () => {
             func.apply(context, args);
         };
