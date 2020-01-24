@@ -1,4 +1,4 @@
-import { SignedKeyList } from '../interfaces';
+import { AddressKey, SignedKeyList } from '../interfaces';
 
 export const getPublicKeys = ({ Email, Fingerprint }: { Email: string; Fingerprint: string }) => ({
     url: 'keys',
@@ -145,7 +145,7 @@ export const resetKeysRoute = ({
     PrimaryKey: string;
     Token: string;
     KeySalt: string;
-    AddressKeys: any[];
+    AddressKeys: AddressKey[];
 }) => ({
     url: 'keys/reset',
     method: 'post',

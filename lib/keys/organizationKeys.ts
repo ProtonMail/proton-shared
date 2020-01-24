@@ -1,5 +1,5 @@
 import { encryptMessage, encryptPrivateKey, generateKey, OpenPGPKey } from 'pmcrypto';
-// @ts-ignore
+// @ts-ignore - pm-srp does not have typings, todo
 import { computeKeyPassword, generateKeySalt } from 'pm-srp';
 
 import { generateAddressKey } from './keys';
