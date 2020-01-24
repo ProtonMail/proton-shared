@@ -76,7 +76,7 @@ export const setPrimaryKeyAction = ({ keys, ID }: { keys: KeyAction[]; ID: strin
                 primary: key.ID === ID ? 1 : 0
             };
         })
-        .sort(({ primary: primaryA }, { primary: primaryB }) => primaryB - primaryA);
+        .sort((a, b) => b.primary - a.primary);
 };
 
 export const setFlagsKeyAction = ({ keys, ID, flags }: { keys: KeyAction[]; ID: string; flags: number }) => {

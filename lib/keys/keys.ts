@@ -133,7 +133,7 @@ export const splitKeys = (keys: CachedKey[] = []) => {
 interface GetAddressKeyTokenArguments {
     Token: string;
     Signature: string;
-    organizationKey?: OpenPGPKey | void;
+    organizationKey?: OpenPGPKey;
     privateKeys: OpenPGPKey | OpenPGPKey[];
     publicKeys: OpenPGPKey | OpenPGPKey[];
 }
