@@ -16,13 +16,13 @@ import { c } from 'ttag';
 import { ENCRYPTION_TYPES, ENCRYPTION_CONFIGS } from '../constants';
 import { normalize } from '../helpers/string';
 import { serializeUint8Array } from '../helpers/serialization';
-import { hasBit } from '../helpers/bitset';
 import { Address, EncryptionConfig } from '../interfaces';
 import { Key as tsKey, Member } from '../interfaces/calendar';
 
-export enum KEY_FLAGS {
-    PRIMARY = 0b1,
-    ACTIVE = 0b01
+export enum KeyFlags {
+    INACTIVE = 0,
+    ACTIVE = 1,
+    PRIMARY = 2
 }
 
 export const generatePassphrase = () => {
@@ -145,10 +145,6 @@ export const decryptCalendarKeys = async (Keys: tsKey[], passphrasesMap: { [key:
         }
     };
     return Promise.all(Keys.map(process));
-};
-
-export const getPrimaryKey = (Keys: tsKey[] = []) => {
-    return Keys.find(({ Flags }) => hasBit(Flags, KEY_FLAGS.PRIMARY));
 };
 
 /**
