@@ -6,4 +6,5 @@ export interface CachedKey {
     // Can be undefined if the key was not parsed, not decrypted or invalid
     privateKey?: OpenPGPKey;
     publicKey?: OpenPGPKey;
+    error?: Error;
 }
