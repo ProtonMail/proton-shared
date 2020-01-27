@@ -55,9 +55,9 @@ END:VEVENT`;
 
 const veventRruleWeekly2 = `BEGIN:VEVENT
 UID:7E018059-2165-4170-B32F-6936E88E61E5
-DTSTART:20190719T120000Z
-DTEND:20190719T130000Z
-RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20200130T230000Z
+DTSTART;VALUE=DATE:20190719
+DTEND;VALUE=DATE:20190719
+RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20200130T160000
 END:VEVENT`;
 
 const veventRruleMonthly1 = `BEGIN:VEVENT
@@ -203,16 +203,18 @@ describe('calendar', () => {
                     value: '7E018059-2165-4170-B32F-6936E88E61E5'
                 },
                 dtstart: {
-                    value: { year: 2019, month: 7, day: 19, hours: 12, minutes: 0, seconds: 0, isUTC: true }
+                    value: { year: 2019, month: 7, day: 19 },
+                    parameters: { type: 'date' }
                 },
                 dtend: {
-                    value: { year: 2019, month: 7, day: 19, hours: 13, minutes: 0, seconds: 0, isUTC: true }
+                    value: { year: 2019, month: 7, day: 19 },
+                    parameters: { type: 'date' }
                 },
                 rrule: {
                     value: {
                         freq: 'WEEKLY',
                         byday: 'MO',
-                        until: { year: 2020, month: 1, day: 30, hours: 23, minutes: 0, seconds: 0, isUTC: true }
+                        until: { year: 2020, month: 1, day: 30, hours: 16, minutes: 0, seconds: 0, isUTC: false }
                     }
                 }
             },
