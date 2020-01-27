@@ -67,12 +67,11 @@ export const reEncryptOrganizationTokens = ({
             return acc.concat(AddressKeys);
         }, Keys);
 
-        return memberKeys.map(async ({ ID, Token, Activation }) => {
-            if (!Token || !Activation) {
-                throw new Error('Missing Token or Activation');
+        return memberKeys.map(async ({ ID, Token }) => {
+            if (!Token) {
+                throw new Error('Missing Token');
             }
-            // TODO: Check if Token || Activation is really neccessary.
-            const decryptedToken = await decryptMemberToken(Token || Activation, oldOrganizationKey);
+            const decryptedToken = await decryptMemberToken(Token, oldOrganizationKey);
             const { data } = await encryptMessage({
                 data: decryptedToken,
                 privateKeys: newOrganizationKey,
