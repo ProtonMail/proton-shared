@@ -29,14 +29,33 @@ describe('recurring', () => {
         expect(result).toEqual([]);
     });
 
+    it('should get initial occurrences between a range', () => {
+        const result = getOccurencesBetween(component, Date.UTC(2018, 1, 1), Date.UTC(2019, 1, 3));
+
+        expect(
+            result.map(
+                ([start, end, occurrenceNumber]) =>
+                    `${new Date(start).toISOString()} - ${new Date(end).toISOString()} | ${occurrenceNumber}`
+            )
+        ).toEqual([
+            '2019-01-30T01:30:00.000Z - 2019-01-30T02:30:00.000Z | 1',
+            '2019-01-31T01:30:00.000Z - 2019-01-31T02:30:00.000Z | 2',
+            '2019-02-01T01:30:00.000Z - 2019-02-01T02:30:00.000Z | 3',
+            '2019-02-02T01:30:00.000Z - 2019-02-02T02:30:00.000Z | 4'
+        ]);
+    });
+
     it('should get occurrences between a range', () => {
         const result = getOccurrencesBetween(component, Date.UTC(2019, 2, 1), Date.UTC(2019, 2, 3));
 
         expect(
-            result.map(([start, end]) => `${new Date(start).toISOString()} - ${new Date(end).toISOString()}`)
+            result.map(
+                ([start, end, occurrenceNumber]) =>
+                    `${new Date(start).toISOString()} - ${new Date(end).toISOString()} | ${occurrenceNumber}`
+            )
         ).toEqual([
-            '2019-03-01T01:30:00.000Z - 2019-03-01T02:30:00.000Z',
-            '2019-03-02T01:30:00.000Z - 2019-03-02T02:30:00.000Z'
+            '2019-03-01T01:30:00.000Z - 2019-03-01T02:30:00.000Z | 31',
+            '2019-03-02T01:30:00.000Z - 2019-03-02T02:30:00.000Z | 32'
         ]);
     });
 
@@ -64,10 +83,13 @@ describe('recurring', () => {
         const result1 = getOccurrencesBetween(component, Date.UTC(2019, 2, 1), Date.UTC(2019, 2, 3), cache);
         const result2 = getOccurrencesBetween(component, Date.UTC(2031, 2, 1), Date.UTC(2031, 2, 3), cache);
         expect(
-            result2.map(([start, end]) => `${new Date(start).toISOString()} - ${new Date(end).toISOString()}`)
+            result2.map(
+                ([start, end, occurrenceNumber]) =>
+                    `${new Date(start).toISOString()} - ${new Date(end).toISOString()} | ${occurrenceNumber}`
+            )
         ).toEqual([
-            '2031-03-01T01:30:00.000Z - 2031-03-01T02:30:00.000Z',
-            '2031-03-02T01:30:00.000Z - 2031-03-02T02:30:00.000Z'
+            '2031-03-01T01:30:00.000Z - 2031-03-01T02:30:00.000Z | 4414',
+            '2031-03-02T01:30:00.000Z - 2031-03-02T02:30:00.000Z | 4415'
         ]);
     });
 
