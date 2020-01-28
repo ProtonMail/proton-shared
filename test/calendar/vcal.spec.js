@@ -228,7 +228,7 @@ describe('calendar', () => {
                     value: {
                         freq: 'WEEKLY',
                         byday: 'MO',
-                        until: { year: 2020, month: 1, day: 30, hours: 0, minutes: 0, seconds: 0, isUTC: false }
+                        until: { year: 2020, month: 1, day: 30 }
                     }
                 }
             },
