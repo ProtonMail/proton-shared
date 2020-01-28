@@ -57,8 +57,24 @@ const veventRruleWeekly2 = `BEGIN:VEVENT
 UID:7E018059-2165-4170-B32F-6936E88E61E5
 DTSTART;VALUE=DATE:20190719
 DTEND;VALUE=DATE:20190719
-RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20200130T160000
+RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20200130
 END:VEVENT`;
+
+const veventRruleWeekly3 = `BEGIN:VEVENT
+UID:7E018059-2165-4170-B32F-6936E88E61E5
+DTSTART:20190719T120000Z
+DTEND:20190719T130000Z
+RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20200130T225959Z
+END:VEVENT`;
+
+const veventRruleWeekly4 = `BEGIN:VEVENT
+UID:7E018059-2165-4170-B32F-6936E88E61E5
+DTSTART;TZID=America/New_York:20190719T120000
+DTEND:20190719T130000Z
+RRULE:FREQ=WEEKLY;BYDAY=MO;UNTIL=20200130T225959Z
+END:VEVENT`;
+
+const veventsRruleWeekly = [veventRruleWeekly1, veventRruleWeekly2, veventRruleWeekly3, veventRruleWeekly4];
 
 const veventRruleMonthly1 = `BEGIN:VEVENT
 UID:7E018059-2165-4170-B32F-6936E88E61E5
@@ -74,12 +90,16 @@ DTEND:20190719T130000Z
 RRULE:FREQ=MONTHLY;COUNT=4;BYSETPOS=2;BYDAY=TU
 END:VEVENT`;
 
+const veventsRruleMonthly = [veventRruleMonthly1, veventRruleMonthly2];
+
 const veventRruleYearly = `BEGIN:VEVENT
 UID:7E018059-2165-4170-B32F-6936E88E61E5
 DTSTART:20190719T120000Z
 DTEND:20190719T130000Z
 RRULE:FREQ=YEARLY;BYMONTH=7;BYMONTHDAY=25
 END:VEVENT`;
+
+const veventsRruleYearly = [veventRruleYearly];
 
 describe('calendar', () => {
     it('should parse vevent', () => {
@@ -167,13 +187,7 @@ describe('calendar', () => {
     });
 
     it('should parse rrule in vevent', () => {
-        const components = [
-            veventRruleWeekly1,
-            veventRruleWeekly2,
-            veventRruleMonthly1,
-            veventRruleMonthly2,
-            veventRruleYearly
-        ].map(parse);
+        const components = [...veventsRruleWeekly, ...veventsRruleMonthly, ...veventsRruleYearly].map(parse);
 
         expect(components).toEqual([
             {
@@ -214,7 +228,46 @@ describe('calendar', () => {
                     value: {
                         freq: 'WEEKLY',
                         byday: 'MO',
-                        until: { year: 2020, month: 1, day: 30, hours: 16, minutes: 0, seconds: 0, isUTC: false }
+                        until: { year: 2020, month: 1, day: 30, hours: 0, minutes: 0, seconds: 0, isUTC: false }
+                    }
+                }
+            },
+            {
+                component: 'vevent',
+                uid: {
+                    value: '7E018059-2165-4170-B32F-6936E88E61E5'
+                },
+                dtstart: {
+                    value: { year: 2019, month: 7, day: 19, hours: 12, minutes: 0, seconds: 0, isUTC: true }
+                },
+                dtend: {
+                    value: { year: 2019, month: 7, day: 19, hours: 13, minutes: 0, seconds: 0, isUTC: true }
+                },
+                rrule: {
+                    value: {
+                        freq: 'WEEKLY',
+                        byday: 'MO',
+                        until: { year: 2020, month: 1, day: 30, hours: 22, minutes: 59, seconds: 59, isUTC: true }
+                    }
+                }
+            },
+            {
+                component: 'vevent',
+                uid: {
+                    value: '7E018059-2165-4170-B32F-6936E88E61E5'
+                },
+                dtstart: {
+                    value: { year: 2019, month: 7, day: 19, hours: 12, minutes: 0, seconds: 0, isUTC: false },
+                    parameters: { tzid: 'America/New_York' }
+                },
+                dtend: {
+                    value: { year: 2019, month: 7, day: 19, hours: 13, minutes: 0, seconds: 0, isUTC: true }
+                },
+                rrule: {
+                    value: {
+                        freq: 'WEEKLY',
+                        byday: 'MO',
+                        until: { year: 2020, month: 1, day: 30, hours: 22, minutes: 59, seconds: 59, isUTC: true }
                     }
                 }
             },
@@ -343,13 +396,7 @@ describe('calendar', () => {
     });
 
     it('should round trip rrule in vevent', () => {
-        const vevents = [
-            veventRruleWeekly1,
-            veventRruleWeekly2,
-            veventRruleMonthly1,
-            veventRruleMonthly2,
-            veventRruleYearly
-        ];
+        const vevents = [...veventsRruleWeekly, ...veventsRruleMonthly, ...veventsRruleYearly];
         const results = vevents.map((vevent) => serialize(parse(vevent)));
         expect(results.map(trimAll)).toEqual(vevents.map(trimAll));
     });
