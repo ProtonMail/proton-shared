@@ -421,7 +421,7 @@ describe('calendar', () => {
         expect(trimAll(result)).toEqual(trimAll(allDayVevent));
     });
 
-    fit('should parse vevent with UTC timezone without appending tzid UTC', () => {
+    it('should parse vevent with UTC timezone without appending tzid UTC', () => {
         const result = parse(veventUTC);
 
         expect(result).toEqual({
