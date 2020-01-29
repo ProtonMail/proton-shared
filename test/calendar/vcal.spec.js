@@ -101,6 +101,11 @@ END:VEVENT`;
 
 const veventsRruleYearly = [veventRruleYearly];
 
+const veventUTC = `BEGIN:VEVENT
+DTSTART;TZID=Etc/UTC:20190101T000000
+DTEND;TZID=UTC:20190101T020000
+END:VEVENT`;
+
 describe('calendar', () => {
     it('should parse vevent', () => {
         const result = parse(vevent);
@@ -414,6 +419,20 @@ describe('calendar', () => {
     it('should round trip all day vevent', () => {
         const result = serialize(parse(allDayVevent));
         expect(trimAll(result)).toEqual(trimAll(allDayVevent));
+    });
+
+    fit('should parse vevent with UTC timezone without appending tzid UTC', () => {
+        const result = parse(veventUTC);
+
+        expect(result).toEqual({
+            component: 'vevent',
+            dtstart: {
+                value: { year: 2019, month: 1, day: 1, hours: 0, minutes: 0, seconds: 0, isUTC: true }
+            },
+            dtend: {
+                value: { year: 2019, month: 1, day: 1, hours: 2, minutes: 0, seconds: 0, isUTC: true }
+            }
+        });
     });
 
     it('should parse trigger string', () => {
