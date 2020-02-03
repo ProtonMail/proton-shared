@@ -107,16 +107,18 @@ export const generateNodeHashKey = async (privateKey: OpenPGPKey) => {
     return { NodeHashKey };
 };
 
-export const generateNodeKeys = async (parentKey: OpenPGPKey) => {
+export const generateNodeKeys = async (parentKey: OpenPGPKey, addressKey: OpenPGPKey = parentKey) => {
     const rawPassphrase = generatePassphrase();
     const { privateKey, privateKeyArmored: NodeKey } = await generateDriveKey(rawPassphrase);
 
-    const NodePassphrase = await encryptUnsigned({
-        message: rawPassphrase,
-        privateKey: parentKey
+    const { data: NodePassphrase, signature } = await encryptMessage({
+        data: rawPassphrase,
+        privateKeys: addressKey,
+        publicKeys: parentKey.toPublic(),
+        detached: true
     });
 
-    return { privateKey, NodeKey, NodePassphrase, rawPassphrase };
+    return { privateKey, NodeKey, NodePassphrase, rawPassphrase, signature };
 };
 
 export const generateContentHash = async (content: Uint8Array) => {
@@ -133,15 +135,19 @@ export const generateContentKeys = async (nodeKey: OpenPGPKey) => {
 };
 
 export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
-    const { NodeKey: ShareKey, NodePassphrase: SharePassphrase, privateKey: sharePrivateKey } = await generateNodeKeys(
-        addressPrivateKey
-    );
+    const {
+        NodeKey: ShareKey,
+        NodePassphrase: SharePassphrase,
+        privateKey: sharePrivateKey,
+        signature: SharePassphraseSignature
+    } = await generateNodeKeys(addressPrivateKey);
 
     const {
         NodeKey: FolderKey,
         NodePassphrase: FolderPassphrase,
-        privateKey: folderPrivateKey
-    } = await generateNodeKeys(sharePrivateKey);
+        privateKey: folderPrivateKey,
+        signature: FolderPassphraseSignature
+    } = await generateNodeKeys(sharePrivateKey, addressPrivateKey);
 
     const FolderName = await encryptUnsigned({
         message: 'root',
@@ -151,7 +157,9 @@ export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
     return {
         bootstrap: {
             SharePassphrase,
+            SharePassphraseSignature,
             FolderPassphrase,
+            FolderPassphraseSignature,
             ShareKey,
             FolderKey,
             FolderName
