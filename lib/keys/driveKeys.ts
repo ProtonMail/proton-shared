@@ -6,7 +6,9 @@ import {
     generateKey,
     binaryStringToArray,
     signMessage,
-    arrayToHexString
+    arrayToHexString,
+    SHA256,
+    OpenPGPKey
 } from 'pmcrypto';
 import { openpgp } from 'pmcrypto/lib/openpgp';
 import { ReadableStream as PolyfillReadableStream } from 'web-streams-polyfill';
@@ -20,10 +22,10 @@ const toPolyfillReadable = createReadableStreamWrapper(PolyfillReadableStream);
 
 interface UnsignedEncryptionPayload {
     message: string;
-    privateKey: key.Key;
+    privateKey: OpenPGPKey;
 }
 
-export const sign = async (data: string, privateKeys: key.Key | key.Key[]) => {
+export const sign = async (data: string, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
     const { signature } = await signMessage({
         data,
         privateKeys,
@@ -48,7 +50,7 @@ export const getStreamMessage = (stream: ReadableStream<Uint8Array>) => {
 
 interface UnsignedDecryptionPayload {
     armoredMessage: string | Uint8Array;
-    privateKey: key.Key;
+    privateKey: OpenPGPKey;
 }
 
 /**
@@ -94,7 +96,7 @@ export const generateLookupHash = async (name: string, hashKey: string) => {
     return arrayToHexString(new Uint8Array(signature));
 };
 
-export const generateNodeHashKey = async (privateKey: key.Key) => {
+export const generateNodeHashKey = async (privateKey: OpenPGPKey) => {
     const message = generatePassphrase();
 
     const NodeHashKey = await encryptUnsigned({
@@ -105,24 +107,26 @@ export const generateNodeHashKey = async (privateKey: key.Key) => {
     return { NodeHashKey };
 };
 
-export const generateNodeKeys = async (parentKey: key.Key) => {
+export const generateNodeKeys = async (parentKey: OpenPGPKey, addressKey: OpenPGPKey = parentKey) => {
     const rawPassphrase = generatePassphrase();
     const { privateKey, privateKeyArmored: NodeKey } = await generateDriveKey(rawPassphrase);
 
-    const NodePassphrase = await encryptUnsigned({
-        message: rawPassphrase,
-        privateKey: parentKey
+    const { data: NodePassphrase, signature } = await encryptMessage({
+        data: rawPassphrase,
+        privateKeys: addressKey,
+        publicKeys: parentKey.toPublic(),
+        detached: true
     });
 
-    return { privateKey, NodeKey, NodePassphrase, rawPassphrase };
+    return { privateKey, NodeKey, NodePassphrase, rawPassphrase, signature };
 };
 
 export const generateContentHash = async (content: Uint8Array) => {
-    const data = await openpgp.crypto.hash.sha256(content);
-    return { HashType: 'sha256', BlockHash: arrayToHexString(data) as string };
+    const data = await SHA256(content);
+    return { HashType: 'sha256', BlockHash: arrayToHexString(data) };
 };
 
-export const generateContentKeys = async (nodeKey: key.Key) => {
+export const generateContentKeys = async (nodeKey: OpenPGPKey) => {
     const publicKey = nodeKey.toPublic();
     const sessionKey = await createSessionKey(publicKey);
     const contentKeys = await getEncryptedSessionKey(sessionKey, publicKey);
@@ -130,16 +134,20 @@ export const generateContentKeys = async (nodeKey: key.Key) => {
     return { sessionKey, ContentKeyPacket };
 };
 
-export const generateDriveBootstrap = async (addressPrivateKey: key.Key) => {
-    const { NodeKey: ShareKey, NodePassphrase: SharePassphrase, privateKey: sharePrivateKey } = await generateNodeKeys(
-        addressPrivateKey
-    );
+export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
+    const {
+        NodeKey: ShareKey,
+        NodePassphrase: SharePassphrase,
+        privateKey: sharePrivateKey,
+        signature: SharePassphraseSignature
+    } = await generateNodeKeys(addressPrivateKey);
 
     const {
         NodeKey: FolderKey,
         NodePassphrase: FolderPassphrase,
-        privateKey: folderPrivateKey
-    } = await generateNodeKeys(sharePrivateKey);
+        privateKey: folderPrivateKey,
+        signature: FolderPassphraseSignature
+    } = await generateNodeKeys(sharePrivateKey, addressPrivateKey);
 
     const FolderName = await encryptUnsigned({
         message: 'root',
@@ -149,7 +157,9 @@ export const generateDriveBootstrap = async (addressPrivateKey: key.Key) => {
     return {
         bootstrap: {
             SharePassphrase,
+            SharePassphraseSignature,
             FolderPassphrase,
+            FolderPassphraseSignature,
             ShareKey,
             FolderKey,
             FolderName
