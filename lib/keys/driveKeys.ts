@@ -1,4 +1,3 @@
-import { key } from 'openpgp';
 import {
     decryptMessage,
     getMessage,
