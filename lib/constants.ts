@@ -578,3 +578,4 @@ export enum DENSITY {
     COMFORTABLE = 0,
     COMPACT = 1
 }
+export const ROOT_FOLDER = 0;
