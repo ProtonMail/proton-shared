@@ -175,4 +175,64 @@ END:VEVENT
             '2020-02-08T00:00:00.000Z - 2020-02-08T00:00:00.000Z'
         ]);
     });
+
+    fit('should fill occurrences for an event with an exdate', () => {
+        const component = parse(`
+BEGIN:VEVENT
+RRULE:FREQ=DAILY;COUNT=6
+DTSTART;TZID=Europe/Zurich:20200309T043000
+DTEND;TZID=Europe/Zurich:20200309T063000
+EXDATE;TZID=Europe/Zurich:20200311T043000
+EXDATE;TZID=Europe/Zurich:20200313T043000
+END:VEVENT
+`);
+        const cache = {};
+        const result = getOccurrencesBetween(component, Date.UTC(2020, 0, 1), Date.UTC(2021, 4, 1), cache);
+        expect(stringifyResultSimple(result)).toEqual([
+            '2020-03-09T03:30:00.000Z - 2020-03-09T05:30:00.000Z',
+            '2020-03-10T03:30:00.000Z - 2020-03-10T05:30:00.000Z',
+            '2020-03-12T03:30:00.000Z - 2020-03-12T05:30:00.000Z',
+            '2020-03-14T03:30:00.000Z - 2020-03-14T05:30:00.000Z'
+        ]);
+    });
+
+    fit('should fill occurrences for an all day event with an exdate', () => {
+        const component = parse(`
+BEGIN:VEVENT
+RRULE:FREQ=DAILY;COUNT=6
+DTSTART;VALUE=DATE:20200201
+DTEND;VALUE=DATE:20200202
+EXDATE;VALUE=DATE:20200201
+EXDATE;VALUE=DATE:20200202
+EXDATE;VALUE=DATE:20200203
+END:VEVENT
+`);
+        const cache = {};
+        const result = getOccurrencesBetween(component, Date.UTC(2020, 0, 1), Date.UTC(2021, 4, 1), cache);
+        expect(stringifyResultSimple(result)).toEqual([
+            '2020-02-04T00:00:00.000Z - 2020-02-04T00:00:00.000Z',
+            '2020-02-05T00:00:00.000Z - 2020-02-05T00:00:00.000Z',
+            '2020-02-06T00:00:00.000Z - 2020-02-06T00:00:00.000Z'
+        ]);
+    });
+
+    fit('should fill occurrences for a UTC date with an exdate', () => {
+        const component = parse(`
+BEGIN:VEVENT
+RRULE:FREQ=DAILY;COUNT=6
+DTSTART:20200201T030000Z
+DTEND:20200201T040000Z
+EXDATE:20200202T030000Z
+EXDATE:20200203T030000Z
+EXDATE:20200204T030000Z
+END:VEVENT
+`);
+        const cache = {};
+        const result = getOccurrencesBetween(component, Date.UTC(2020, 0, 1), Date.UTC(2021, 4, 1), cache);
+        expect(stringifyResultSimple(result)).toEqual([
+            '2020-02-01T03:00:00.000Z - 2020-02-01T04:00:00.000Z',
+            '2020-02-05T03:00:00.000Z - 2020-02-05T04:00:00.000Z',
+            '2020-02-06T03:00:00.000Z - 2020-02-06T04:00:00.000Z'
+        ]);
+    });
 });
