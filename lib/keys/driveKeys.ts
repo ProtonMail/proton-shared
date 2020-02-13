@@ -144,6 +144,7 @@ export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
     const {
         NodeKey: FolderKey,
         NodePassphrase: FolderPassphrase,
+        privateKey: folderPrivateKey,
         signature: FolderPassphraseSignature
     } = await generateNodeKeys(sharePrivateKey, addressPrivateKey);
 
@@ -162,6 +163,7 @@ export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
             FolderKey,
             FolderName
         },
-        sharePrivateKey
+        sharePrivateKey,
+        folderPrivateKey
     };
 };
