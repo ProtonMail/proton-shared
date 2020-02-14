@@ -176,7 +176,7 @@ END:VEVENT
         ]);
     });
 
-    fit('should fill occurrences for an event with an exdate', () => {
+    it('should fill occurrences for an event with an exdate', () => {
         const component = parse(`
 BEGIN:VEVENT
 RRULE:FREQ=DAILY;COUNT=6
@@ -196,7 +196,7 @@ END:VEVENT
         ]);
     });
 
-    fit('should fill occurrences for an all day event with an exdate', () => {
+    it('should fill occurrences for an all day event with an exdate', () => {
         const component = parse(`
 BEGIN:VEVENT
 RRULE:FREQ=DAILY;COUNT=6
@@ -216,7 +216,7 @@ END:VEVENT
         ]);
     });
 
-    fit('should fill occurrences for a UTC date with an exdate', () => {
+    it('should fill occurrences for a UTC date with an exdate', () => {
         const component = parse(`
 BEGIN:VEVENT
 RRULE:FREQ=DAILY;COUNT=6
