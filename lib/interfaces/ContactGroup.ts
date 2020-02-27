@@ -4,4 +4,5 @@ export interface ContactGroup {
     Order: number;
     Type: number;
     Color: string;
+    Path: string;
 }
