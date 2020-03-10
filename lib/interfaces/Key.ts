@@ -1,13 +1,77 @@
+import { OpenPGPKey } from 'pmcrypto';
+import { MIME_TYPES, RECIPIENT_TYPES } from '../constants';
+import { MailSettings } from './MailSettings';
+
 export interface Key {
     ID: string;
     Primary: number;
     Flags: number;
     Fingerprint: string;
     Fingerprints: string[];
-    PublicKey: string;
+    PublicKey: string; // armored key
     Version: number;
     Activation?: string;
-    PrivateKey: string;
+    PrivateKey: string; // armored key
     Token?: string;
     Signature: string;
+}
+
+export interface KeyPair {
+    privateKey: OpenPGPKey;
+    publicKey: OpenPGPKey;
+}
+
+export interface KeyPairs {
+    privateKeys: OpenPGPKey[];
+    publicKeys: OpenPGPKey[];
+}
+
+export type PmMimeType = MIME_TYPES | '' | null | undefined;
+
+export interface PublicKeyData {
+    Code?: number;
+    RecipientType?: RECIPIENT_TYPES;
+    MIMEType?: PmMimeType;
+    Keys: Key[];
+    SignedKeyList?: any[];
+    Warnings?: string[];
+}
+
+export interface ApiKeysConfig extends PublicKeyData {
+    publicKeys: OpenPGPKey[];
+    isVerificationOnly: { [key: string]: boolean };
+}
+
+export interface PinnedKeysConfig {
+    pinnedKeys: OpenPGPKey[];
+    encrypt: boolean;
+    sign: boolean;
+    mimeType: PmMimeType;
+    scheme: string;
+    error?: Error;
+}
+
+export interface PublicKeyConfigs {
+    email: string;
+    apiKeysConfig: ApiKeysConfig;
+    pinnedKeysConfig: PinnedKeysConfig;
+    mailSettings: MailSettings;
+}
+
+export interface PublicKeyModel {
+    email: string;
+    publicKeys: { api: OpenPGPKey[]; pinned: OpenPGPKey[] };
+    encrypt: boolean;
+    sign: boolean;
+    mimeType: PmMimeType;
+    scheme: string;
+    trustedFingerprints: Set<string>;
+    expiredFingerprints: Set<string>;
+    revokedFingerprints: Set<string>;
+    verifyOnlyFingerprints: Set<string>;
+    isPGPExternal: boolean;
+    isPGPInternal: boolean;
+    isPGPExternalWithWKDKeys: boolean;
+    isPGPExternalWithoutWKDKeys: boolean;
+    pgpAddressDisabled: boolean;
 }

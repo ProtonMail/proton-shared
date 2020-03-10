@@ -56,6 +56,7 @@ export enum INVOICE_OWNER {
     ORGANIZATION = 1
 }
 export const PM_SIGNATURE = 'Sent with <a href="https://protonmail.com" target="_blank">ProtonMail</a> Secure Email.';
+export const PGP_SIGN = 1;
 export const DEFAULT_CURRENCY = 'EUR';
 export const CURRENCIES = ['EUR', 'USD', 'CHF'];
 export const MIN_DONATION_AMOUNT = 100;
@@ -193,7 +194,7 @@ export enum MIME_TYPES {
     DEFAULT = 'text/html'
 }
 
-export enum RECIPIENT_TYPE {
+export enum RECIPIENT_TYPES {
     TYPE_INTERNAL = 1,
     TYPE_EXTERNAL = 2,
     TYPE_NO_RECEIVE = 3
