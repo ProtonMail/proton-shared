@@ -1,5 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { PublicKeyModel, PmMimeType } from '../interfaces';
+import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
+import { PublicKeyModel } from '../interfaces';
 
 enum EncryptionPreferencesError {
     INTERNAL_USER_NO_API_KEY = 1,
@@ -13,8 +14,8 @@ enum EncryptionPreferencesError {
 export interface EncryptionPreferences {
     encrypt: boolean;
     sign: boolean;
-    mimeType: PmMimeType;
-    scheme: string;
+    mimeType: DRAFT_MIME_TYPES;
+    scheme: PGP_SCHEMES;
     publicKey: OpenPGPKey;
     isPublicKeyPinned: boolean;
     isInternal: boolean;

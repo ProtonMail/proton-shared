@@ -1,6 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { MIME_TYPES, RECIPIENT_TYPES } from '../constants';
-import { MailSettings } from './MailSettings';
+import { DRAFT_MIME_TYPES, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
+import { ApiMailSettings } from './MailSettings';
 
 export interface Key {
     ID: string;
@@ -26,12 +26,12 @@ export interface KeyPairs {
     publicKeys: OpenPGPKey[];
 }
 
-export type PmMimeType = MIME_TYPES | '' | null | undefined;
+export type MimeTypeVcard = DRAFT_MIME_TYPES.PLAINTEXT;
 
 export interface PublicKeyData {
     Code?: number;
     RecipientType?: RECIPIENT_TYPES;
-    MIMEType?: PmMimeType;
+    MIMEType?: MimeTypeVcard;
     Keys: Key[];
     SignedKeyList?: any[];
     Warnings?: string[];
@@ -44,10 +44,10 @@ export interface ApiKeysConfig extends PublicKeyData {
 
 export interface PinnedKeysConfig {
     pinnedKeys: OpenPGPKey[];
-    encrypt: boolean;
-    sign: boolean;
-    mimeType: PmMimeType;
-    scheme: string;
+    encrypt?: boolean;
+    sign?: boolean;
+    mimeType?: MimeTypeVcard;
+    scheme?: PGP_SCHEMES;
     error?: Error;
 }
 
@@ -55,7 +55,7 @@ export interface PublicKeyConfigs {
     email: string;
     apiKeysConfig: ApiKeysConfig;
     pinnedKeysConfig: PinnedKeysConfig;
-    mailSettings: MailSettings;
+    mailSettings: ApiMailSettings;
 }
 
 export interface PublicKeyModel {
@@ -63,8 +63,8 @@ export interface PublicKeyModel {
     publicKeys: { api: OpenPGPKey[]; pinned: OpenPGPKey[] };
     encrypt: boolean;
     sign: boolean;
-    mimeType: PmMimeType;
-    scheme: string;
+    mimeType: DRAFT_MIME_TYPES;
+    scheme: PGP_SCHEMES;
     trustedFingerprints: Set<string>;
     expiredFingerprints: Set<string>;
     revokedFingerprints: Set<string>;

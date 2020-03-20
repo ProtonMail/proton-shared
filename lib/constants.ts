@@ -188,6 +188,16 @@ export enum PACKAGE_TYPE {
     SEND_PGP_MIME = 16
 }
 
+export enum PGP_SCHEMES {
+    PGP_INLINE = 'pgp-inline',
+    PGP_MIME = 'pgp-mime'
+}
+
+export enum DRAFT_MIME_TYPES {
+    PLAINTEXT = 'text/plain',
+    DEFAULT = 'text/html'
+}
+
 export enum MIME_TYPES {
     MIME = 'multipart/mixed',
     PLAINTEXT = 'text/plain',

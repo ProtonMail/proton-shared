@@ -50,7 +50,7 @@ export const getPublicKeysEmailHelper = async (api: Api, Email: string): Promise
 };
 
 export const getPublicKeysVcardHelper = async (api: Api, Email: string): Promise<PinnedKeysConfig> => {
-    const defaultConfig: PinnedKeysConfig = { pinnedKeys: [], mimeType: '', encrypt: false, sign: false, scheme: '' };
+    const defaultConfig: PinnedKeysConfig = { pinnedKeys: [] };
     try {
         const contacts = (await api(queryContactEmails({ Email } as any))) as ContactEmail[];
         if (!contacts.length) {
@@ -67,6 +67,6 @@ export const getPublicKeysVcardHelper = async (api: Api, Email: string): Promise
         }
         return getKeyInfoFromProperties(properties, emailProperty.group);
     } catch (error) {
-        return { pinnedKeys: [], mimeType: '', encrypt: false, sign: false, scheme: '', error };
+        return { pinnedKeys: [], error };
     }
 };

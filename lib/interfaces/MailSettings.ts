@@ -1,4 +1,6 @@
-interface ApiMailSettings {
+import { DRAFT_MIME_TYPES } from '../constants';
+
+export interface ApiMailSettings {
     DisplayName: string;
     Signature: string;
     Theme: string;
@@ -34,7 +36,7 @@ interface ApiMailSettings {
     PromptPin: number;
     Autocrypt: number;
     NumMessagePerPage: number;
-    DraftMIMEType: string;
+    DraftMIMEType: DRAFT_MIME_TYPES;
     ReceiveMIMEType: string;
     ShowMIMEType: string;
     StickyLabels: number;

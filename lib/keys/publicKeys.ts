@@ -1,7 +1,8 @@
 import { OpenPGPKey, serverTime } from 'pmcrypto';
+import { extractDraftMIMEType, extractScheme, extractSign } from '../api/helpers/mailSettings';
+import { DRAFT_MIME_TYPES, KEY_FLAGS, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
 import { toBitMap } from '../helpers/object';
 import { ApiKeysConfig, PublicKeyConfigs, PublicKeyModel } from '../interfaces/Key';
-import { RECIPIENT_TYPES, KEY_FLAGS, PGP_SIGN } from '../constants';
 
 const { TYPE_INTERNAL } = RECIPIENT_TYPES;
 const { ENABLE_ENCRYPTION } = KEY_FLAGS;
@@ -105,10 +106,16 @@ export const getPublicKeyModel = async ({
     email,
     apiKeysConfig,
     pinnedKeysConfig,
-    mailSettings = {}
+    mailSettings
 }: PublicKeyConfigs): Promise<PublicKeyModel> => {
     // prepare keys retrieved from the vCard
-    const { pinnedKeys = [], mimeType, encrypt, scheme, sign: vcardSign } = pinnedKeysConfig;
+    const {
+        pinnedKeys = [],
+        mimeType: vcardMimeType,
+        encrypt: vcardEncrypt,
+        scheme: vcardScheme,
+        sign: vcardSign
+    } = pinnedKeysConfig;
     const trustedFingerprints = new Set() as Set<string>;
     const expiredFingerprints = new Set() as Set<string>;
     const revokedFingerprints = new Set() as Set<string>;
@@ -136,11 +143,19 @@ export const getPublicKeyModel = async ({
     });
     const orderedApiKeys = sortApiKeys(apiKeys, trustedFingerprints, verifyOnlyFingerprints);
 
+    // Take mail settings into account
+    const encrypt = !!vcardEncrypt;
+    const sign = vcardSign !== undefined ? vcardSign : extractSign(mailSettings);
+    const scheme = vcardScheme !== undefined ? vcardScheme : extractScheme(mailSettings);
+    const mimeType = vcardMimeType !== undefined ? vcardMimeType : extractDraftMIMEType(mailSettings);
+    // remember that when signing messages for external PGP users with the PGP_INLINE scheme, the email format must be plain text
+    const isExternalPGPInline = sign && externalUser && !apiKeys.length && scheme === PGP_SCHEMES.PGP_INLINE;
+
     return {
-        mimeType,
         encrypt,
+        sign: encrypt || sign,
         scheme,
-        sign: vcardSign || mailSettings.Sign === PGP_SIGN,
+        mimeType: isExternalPGPInline ? DRAFT_MIME_TYPES.PLAINTEXT : mimeType,
         email,
         publicKeys: { api: orderedApiKeys, pinned: orderedPinnedKeys },
         trustedFingerprints,

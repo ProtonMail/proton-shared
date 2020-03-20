@@ -1,9 +1,9 @@
-import { getKeys, arrayToBinaryString, binaryStringToArray, decodeBase64, encodeBase64, OpenPGPKey } from 'pmcrypto';
-import { MIME_TYPES } from '../constants';
-import { VCARD_KEY_FIELDS } from './constants';
+import { arrayToBinaryString, binaryStringToArray, decodeBase64, encodeBase64, getKeys, OpenPGPKey } from 'pmcrypto';
+import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
 import { noop } from '../helpers/function';
-import { PinnedKeysConfig, PmMimeType } from '../interfaces';
+import { MimeTypeVcard, PinnedKeysConfig } from '../interfaces';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts/Contact';
+import { VCARD_KEY_FIELDS } from './constants';
 import { sortByPref } from './properties';
 
 /**
@@ -87,11 +87,27 @@ export const formatAdr = (adr: string[] = []): string => {
         .join(', ');
 };
 
-const getMimeType = (mimeType: string): PmMimeType => {
-    if ([...Object.keys(MIME_TYPES), ''].includes(mimeType)) {
-        return mimeType as MIME_TYPES | '';
+/**
+ * The only values allowed for a PGP scheme stored in a vCard are
+ * '' for default PGP scheme (meaning we should use the PGPScheme from mailSettings when composing email)
+ * 'pgp-mime' for PGP-Inline scheme
+ * 'pgp-mime' for PGP-MIME scheme
+ */
+const getPGPSchemeVcard = (scheme: string): PGP_SCHEMES | undefined => {
+    // ugly code; typescript to be blamed
+    if (Object.values(PGP_SCHEMES).includes(scheme as PGP_SCHEMES)) {
+        return scheme as PGP_SCHEMES;
     }
     return undefined;
+};
+
+/**
+ * The only values allowed for a MIME type stored in a vCard are
+ * '' for automatic format (meaning we should use DraftMIMEType from mailSettings when composing email)
+ * 'text/plain' for plain text format
+ */
+const getMimeTypeVcard = (mimeType: string): MimeTypeVcard | undefined => {
+    return mimeType === DRAFT_MIME_TYPES.PLAINTEXT ? mimeType : undefined;
 };
 
 /**
@@ -127,23 +143,30 @@ export const getKeyInfoFromProperties = async (
                     return acc;
                 }
                 if (field === 'x-pm-scheme' && value) {
-                    acc.scheme = value as string;
+                    acc.scheme = getPGPSchemeVcard(value as string);
                     return acc;
                 }
                 if (field === 'x-pm-mimetype' && value) {
-                    acc.mimeType = getMimeType(value as string);
+                    acc.mimeType = getMimeTypeVcard(value as string);
                     return acc;
                 }
                 return acc;
             },
-            { pinnedKeyPromises: [] as any[], mimeType: '' as PmMimeType, encrypt: false, sign: false, scheme: '' } // Default values
+            {
+                // Default values
+                pinnedKeyPromises: [] as any[],
+                encrypt: undefined as any,
+                sign: undefined as any,
+                scheme: undefined as any,
+                mimeType: undefined as any
+            }
         );
     const pinnedKeys = (await Promise.all(pinnedKeyPromises))
         .filter(Boolean)
         .sort(sortByPref)
         .map(({ publicKey }) => publicKey);
 
-    return { pinnedKeys, mimeType, encrypt, scheme, sign };
+    return { pinnedKeys, encrypt, scheme, mimeType, sign };
 };
 
 interface VcardPublicKey {
