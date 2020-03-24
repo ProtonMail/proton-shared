@@ -1,6 +1,6 @@
 import { DRAFT_MIME_TYPES } from '../constants';
 
-export interface ApiMailSettings {
+export interface MailSettings {
     DisplayName: string;
     Signature: string;
     Theme: string;
@@ -42,5 +42,3 @@ export interface ApiMailSettings {
     StickyLabels: number;
     ConfirmLink: number;
 }
-
-export type MailSettings = Partial<ApiMailSettings> | undefined;

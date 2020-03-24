@@ -16,18 +16,19 @@ export interface EncryptionPreferences {
     sign: boolean;
     mimeType: DRAFT_MIME_TYPES;
     scheme: PGP_SCHEMES;
-    publicKey: OpenPGPKey;
-    isPublicKeyPinned: boolean;
+    publicKey?: OpenPGPKey;
+    isPublicKeyPinned?: boolean;
     isInternal: boolean;
     hasApiKeys: boolean;
     hasPinnedKeys: boolean;
     warnings?: any[];
-    error: EncryptionPreferencesError;
+    error?: EncryptionPreferencesError;
 }
 
-const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): Partial<EncryptionPreferences> => {
+const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     const {
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
+        scheme,
         mimeType,
         trustedFingerprints,
         revokedFingerprints,
@@ -36,7 +37,7 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): P
     } = publicKeyModel;
     const hasApiKeys = !!apiKeys.length;
     const hasPinnedKeys = !!pinnedKeys.length;
-    const result = { encrypt: true, sign: true, mimeType, isInternal: true, hasApiKeys, hasPinnedKeys };
+    const result = { encrypt: true, sign: true, scheme, mimeType, isInternal: true, hasApiKeys, hasPinnedKeys };
     if (!hasApiKeys) {
         return {
             ...result,
@@ -70,11 +71,10 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): P
     return { ...result, publicKey, isPublicKeyPinned: true };
 };
 
-const extractEncryptionPreferencesExternalWithWKDKeys = (
-    publicKeyModel: PublicKeyModel
-): Partial<EncryptionPreferences> => {
+const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     const {
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
+        scheme,
         mimeType,
         trustedFingerprints,
         revokedFingerprints,
@@ -83,7 +83,7 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (
     } = publicKeyModel;
     const hasApiKeys = true;
     const hasPinnedKeys = !!pinnedKeys.length;
-    const result = { encrypt: true, sign: true, mimeType, isInternal: false, hasApiKeys, hasPinnedKeys };
+    const result = { encrypt: true, sign: true, scheme, mimeType, isInternal: false, hasApiKeys, hasPinnedKeys };
     // WKD keys are ordered in terms of preference. Make sure the primary is valid
     const primaryKeyFingerprint = apiKeys[0].getFingerprint();
     const isPrimaryValid =
@@ -111,15 +111,13 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (
     return { ...result, publicKey, isPublicKeyPinned: true };
 };
 
-const extractEncryptionPreferencesExternalWithoutWKDKeys = (
-    publicKeyModel: PublicKeyModel
-): Partial<EncryptionPreferences> => {
+const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     const {
-        publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
+        publicKeys: { pinned: pinnedKeys } = { pinned: [] },
         encrypt,
         sign,
-        mimeType,
         scheme,
+        mimeType,
         revokedFingerprints,
         expiredFingerprints
     } = publicKeyModel;
@@ -133,8 +131,11 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (
         hasApiKeys: false,
         hasPinnedKeys
     };
+    if (!hasPinnedKeys) {
+        return result;
+    }
     // Pinned keys are ordered in terms of preference. Make sure the first is valid
-    const preferredKeyFingerprint = apiKeys[0].getFingerprint();
+    const preferredKeyFingerprint = pinnedKeys[0].getFingerprint();
     const isPreferredValid =
         !revokedFingerprints.has(preferredKeyFingerprint) && !expiredFingerprints.has(preferredKeyFingerprint);
     if (!isPreferredValid) {
@@ -150,7 +151,7 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (
     };
 };
 
-const extractEncryptionPreferences = (publicKeyModel: PublicKeyModel): Partial<EncryptionPreferences> => {
+const extractEncryptionPreferences = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     // case of internal user
     if (publicKeyModel.isPGPInternal) {
         return extractEncryptionPreferencesInternal(publicKeyModel);

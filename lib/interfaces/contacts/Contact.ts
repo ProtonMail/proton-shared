@@ -3,6 +3,7 @@ import { CONTACT_CARD_TYPE } from '../../constants';
 export interface ContactEmail {
     ID: string;
     Email: string;
+    Name: string;
     Type: string[];
     Defaults: number;
     Order: number;

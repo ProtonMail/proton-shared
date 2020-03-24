@@ -49,18 +49,23 @@ export const getPublicKeysEmailHelper = async (api: Api, Email: string): Promise
     }
 };
 
+/**
+ * Get the public keys stored in the vcard of a contact associated to a certain email address
+ */
 export const getPublicKeysVcardHelper = async (api: Api, Email: string): Promise<PinnedKeysConfig> => {
     const defaultConfig: PinnedKeysConfig = { pinnedKeys: [] };
     try {
-        const contacts = (await api(queryContactEmails({ Email } as any))) as ContactEmail[];
-        if (!contacts.length) {
+        const { ContactEmails = [] } = (await api(queryContactEmails({ Email } as any))) as {
+            ContactEmails: ContactEmail[];
+        };
+        if (!ContactEmails.length) {
             return defaultConfig;
         }
         // pick the first contact with the desired email. The API returns them ordered by decreasing priority already
-        const { Contact } = await api(getContact(contacts[0].ContactID));
+        const { Contact } = await api(getContact(ContactEmails[0].ContactID));
         // all the info we need is in the signed part
         const signedCard = Contact.Cards.find(({ Type }: { Type: number }) => Type === CONTACT_CARD_TYPE.SIGNED);
-        const properties = parse(signedCard);
+        const properties = parse(signedCard.Data);
         const emailProperty = properties.find(({ field, value }) => field === 'email' && value === Email);
         if (!emailProperty || !emailProperty.group) {
             throw new Error(c('Error').t`Invalid vcard`);

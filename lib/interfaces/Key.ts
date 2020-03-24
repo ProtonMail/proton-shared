@@ -1,6 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
-import { ApiMailSettings } from './MailSettings';
+import { MailSettings } from './MailSettings';
 
 export interface Key {
     ID: string;
@@ -55,7 +55,7 @@ export interface PublicKeyConfigs {
     email: string;
     apiKeysConfig: ApiKeysConfig;
     pinnedKeysConfig: PinnedKeysConfig;
-    mailSettings: ApiMailSettings;
+    mailSettings: MailSettings;
 }
 
 export interface PublicKeyModel {
