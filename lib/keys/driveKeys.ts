@@ -43,7 +43,7 @@ export const encryptUnsigned = async ({ message, publicKey }: UnsignedEncryption
 };
 
 export const getStreamMessage = (stream: ReadableStream<Uint8Array> | PolyfillReadableStream<Uint8Array>) => {
-    return openpgp.message.read(toPolyfillReadable(stream));
+    return openpgp.message.read(toPolyfillReadable(stream) as ReadableStream<Uint8Array>);
 };
 
 interface UnsignedDecryptionPayload {
