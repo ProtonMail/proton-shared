@@ -21,7 +21,7 @@ const toPolyfillReadable = createReadableStreamWrapper(PolyfillReadableStream);
 
 interface UnsignedEncryptionPayload {
     message: string;
-    privateKey: OpenPGPKey;
+    publicKey: OpenPGPKey;
 }
 
 export const sign = async (data: string, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
@@ -34,11 +34,10 @@ export const sign = async (data: string, privateKeys: OpenPGPKey | OpenPGPKey[])
     return signature;
 };
 
-export const encryptUnsigned = async ({ message, privateKey }: UnsignedEncryptionPayload) => {
+export const encryptUnsigned = async ({ message, publicKey }: UnsignedEncryptionPayload) => {
     const { data: encryptedToken } = await encryptMessage({
         data: message,
-        privateKeys: privateKey,
-        publicKeys: privateKey.toPublic()
+        publicKeys: publicKey
     });
     return encryptedToken as string;
 };
@@ -58,8 +57,7 @@ interface UnsignedDecryptionPayload {
 export const decryptUnsigned = async ({ armoredMessage, privateKey }: UnsignedDecryptionPayload) => {
     const { data: decryptedMessage } = await decryptMessage({
         message: await getMessage(armoredMessage),
-        privateKeys: privateKey,
-        publicKeys: privateKey.toPublic()
+        privateKeys: privateKey
     });
 
     return decryptedMessage as string;
@@ -95,12 +93,12 @@ export const generateLookupHash = async (name: string, hashKey: string) => {
     return arrayToHexString(new Uint8Array(signature));
 };
 
-export const generateNodeHashKey = async (privateKey: OpenPGPKey) => {
+export const generateNodeHashKey = async (publicKey: OpenPGPKey) => {
     const message = generatePassphrase();
 
     const NodeHashKey = await encryptUnsigned({
         message,
-        privateKey
+        publicKey
     });
 
     return { NodeHashKey };
@@ -150,7 +148,7 @@ export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
 
     const FolderName = await encryptUnsigned({
         message: 'root',
-        privateKey: sharePrivateKey
+        publicKey: sharePrivateKey.toPublic()
     });
 
     return {
