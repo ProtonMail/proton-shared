@@ -1,34 +1,22 @@
 export const range = (start = 0, end = 1, step = 1) => {
     const result = [];
-
     for (let index = start; index < end; index += step) {
         result.push(index);
     }
-
     return result;
 };
 
-export const chunk = (list = [], size = 1) => {
+export const chunk = <T>(list: T[] = [], size = 1) => {
     return list.reduce((res, item, index) => {
         if (index % size === 0) {
             res.push([]);
         }
         res[res.length - 1].push(item);
         return res;
-    }, []);
+    }, [] as T[][]);
 };
 
-export const compare = (a, b) => {
-    if (a > b) {
-        return 1;
-    }
-    if (a < b) {
-        return -1;
-    }
-    return 0;
-};
-
-export const uniqueBy = (array, comparator) => {
+export const uniqueBy = <T>(array: T[], comparator: (t: T) => any) => {
     const seen = new Set();
     return array.filter((value) => {
         const computed = comparator(value);
@@ -40,16 +28,16 @@ export const uniqueBy = (array, comparator) => {
     });
 };
 
-export const unique = (array) => uniqueBy(array, (x) => x);
+export const unique = <T>(array: T[]) => uniqueBy(array, (x) => x);
 
 /**
  * Returns a new array with the item moved to the new position.
- * @param {Array} array List of items
- * @param {number} from Index of item to move. If negative, it will begin that many elements from the end.
- * @param {number} to Index of where to move the item. If negative, it will begin that many elements from the end.
- * @return {Array} New array with the item moved to the new position
+ * @param list List of items
+ * @param from Index of item to move. If negative, it will begin that many elements from the end.
+ * @param to Index of where to move the item. If negative, it will begin that many elements from the end.
+ * @return New array with the item moved to the new position
  */
-export const move = (list = [], from, to) => {
+export const move = <T>(list: T[] = [], from: number, to: number) => {
     const copy = list.slice();
     copy.splice(to < 0 ? copy.length + to : to, 0, copy.splice(from, 1)[0]);
     return copy;
@@ -57,11 +45,11 @@ export const move = (list = [], from, to) => {
 
 /**
  * Remove the first occurrence of an item from an array.
- * @param {Array} arr
- * @param {Any} item    The item to remove
- * @returns {Array}     copy of the updated array.
+ * @param arr
+ * @param item    The item to remove
+ * @returns copy of the updated array.
  */
-export const remove = (arr, item) => {
+export const remove = <T>(arr: T[], item: T) => {
     const i = arr.indexOf(item);
     if (i === -1) {
         return arr;
@@ -73,12 +61,12 @@ export const remove = (arr, item) => {
 
 /**
  * Replace the first occurrence of an item from an array by another item.
- * @param {Array} arr
- * @param {Any} item            The item to be replaced
- * @param {Any} replacement     The replacement item
- * @returns {Array}     copy of the updated array.
+ * @param arr
+ * @param item            The item to be replaced
+ * @param replacement     The replacement item
+ * @returns copy of the updated array.
  */
-export const replace = (arr, item, replacement) => {
+export const replace = <T>(arr: T[], item: T, replacement: T) => {
     const i = arr.indexOf(item);
     if (i === -1) {
         return arr;
@@ -94,25 +82,29 @@ export const replace = (arr, item, replacement) => {
  * @param {Array} arr2
  * @returns {Array} diff
  */
-export const diff = (arr1, arr2) => arr1.filter((a) => !arr2.includes(a));
+export const diff = <T>(arr1: T[], arr2: T[]) => arr1.filter((a) => !arr2.includes(a));
 
 /**
  * Groups elements in an array by a provided comparison function. E.g. `[1, 1, 2, 3, 3] => [[1, 1], [2], [3, 3]]`
- * @param {(a, b) => boolean} compare fn whose result tells if elements belong to the same group
- * @param {Array} arr
+ * @param compare fn whose result tells if elements belong to the same group
+ * @param arr
  */
-export const groupWith = (compare, arr = []) => {
+export const groupWith = <T>(compare: (a: T, b: T) => boolean, arr: T[] = []) => {
     const { groups } = arr.reduce(
-        ({ groups, remaining }, a) => {
+        (acc, a) => {
+            const { groups, remaining } = acc;
             const group = remaining.filter((b) => compare(a, b));
-            return group.length
-                ? {
-                      groups: [...groups, group],
-                      remaining: remaining.filter((b) => !compare(a, b))
-                  }
-                : { groups, remaining };
+
+            if (group.length) {
+                acc.groups = [...groups, group];
+                acc.remaining = remaining.filter((b) => !compare(a, b));
+                return acc;
+            }
+
+            return acc;
         },
-        { groups: [], remaining: arr }
+        // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
+        { groups: [], remaining: arr } as { groups: T[][]; remaining: T[] }
     );
 
     return groups;
@@ -120,35 +112,37 @@ export const groupWith = (compare, arr = []) => {
 
 /**
  * Returns the item that has minimum value as determined by fn property selector function. E.g.: `minBy(({ a }) => a, [{a: 4}, {a: 2}, {a: 5}])` returns `{a: 2}`
- * @param {(a) => number} fn object property selector
- * @param {Array} arr array to search in
+ * @param fn object property selector
+ * @param arr array to search in
  */
-export const minBy = (fn, arr = []) => arr.reduce((min, item) => (fn(item) < fn(min) ? item : min), arr[0]);
+export const minBy = <T>(fn: (a: T) => any, arr: T[] = []) => {
+    return arr.reduce((min, item) => {
+        return fn(item) < fn(min) ? item : min;
+    }, arr[0]);
+};
 
 /**
  * Order collection of object by a specific key
- * @param {Array<Object>} collection
- * @param {String} key
- * @returns {Array} new collection
+ * @param collection
+ * @param key
+ * @returns new collection
  */
-export const orderBy = (collection = [], key = '') => {
+export const orderBy = <T, K extends keyof T>(collection: T[] = [], key: K) => {
     if (!key) {
         throw new Error('"key" needs to be defined when using "orderBy"');
     }
-    const mapped = collection.map((item, index) => ({ index, item }));
-    mapped.sort((a, b) => {
-        if (a.item[key] > b.item[key]) {
+    return collection.slice().sort((a, b) => {
+        if (a[key] > b[key]) {
             return 1;
         }
-        if (a.item[key] < b.item[key]) {
+        if (a[key] < b[key]) {
             return -1;
         }
         return 0;
     });
-    return mapped.map(({ index }) => collection[index]);
 };
 
-export const shallowEqual = (a, b) => {
+export const shallowEqual = <T>(a: T[], b: T[]) => {
     if (a.length !== b.length) {
         return false;
     }
