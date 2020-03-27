@@ -128,9 +128,6 @@ export const minBy = <T>(fn: (a: T) => any, arr: T[] = []) => {
  * @returns new collection
  */
 export const orderBy = <T, K extends keyof T>(collection: T[] = [], key: K) => {
-    if (!key) {
-        throw new Error('"key" needs to be defined when using "orderBy"');
-    }
     return collection.slice().sort((a, b) => {
         if (a[key] > b[key]) {
             return 1;
