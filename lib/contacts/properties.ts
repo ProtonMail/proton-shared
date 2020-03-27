@@ -1,4 +1,5 @@
 // Vcard fields for which we keep track of PREF parameter
+import { PublicKeyWithPref } from '../interfaces';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts/Contact';
 
 const FIELDS_WITH_PREF = ['fn', 'email', 'tel', 'adr', 'key'];
@@ -33,9 +34,9 @@ export const sanitizeProperties = (properties: ContactProperties = []): ContactP
     */
     return properties
         .filter(({ value }) => value)
-        .map((property) =>
-            Array.isArray(property.value) ? property : { ...property, value: property.value.toString() }
-        )
+        .map((property) => {
+            return Array.isArray(property.value) ? property : { ...property, value: property.value.toString() };
+        })
         .map((property) => {
             const { field, value } = property;
             if (field !== 'adr' || Array.isArray(value)) {
@@ -73,7 +74,10 @@ export const addPref = (properties: ContactProperties = []): ContactProperties =
 /**
  * Function that sorts properties by preference
  */
-export const sortByPref = (firstEl: ContactProperty, secondEl: ContactProperty): number => {
+export const sortByPref = (
+    firstEl: ContactProperty | PublicKeyWithPref,
+    secondEl: ContactProperty | PublicKeyWithPref
+): number => {
     if (firstEl.pref && secondEl.pref) {
         return firstEl.pref - secondEl.pref;
     }
@@ -84,7 +88,10 @@ export const sortByPref = (firstEl: ContactProperty, secondEl: ContactProperty):
  * Given a list of properties with preference, reorder them according to the preference
  */
 export const reOrderByPref = (properties: ContactProperties): ContactProperties => {
-    const { withPref, withoutPref } = properties.reduce(
+    const { withPref, withoutPref } = properties.reduce<{
+        withPref: ContactProperties;
+        withoutPref: ContactProperties;
+    }>(
         (acc, property) => {
             if (FIELDS_WITH_PREF.includes(property.field)) {
                 acc.withPref.push(property);
@@ -93,7 +100,7 @@ export const reOrderByPref = (properties: ContactProperties): ContactProperties 
             }
             return acc;
         },
-        { withPref: [] as ContactProperty[], withoutPref: [] as ContactProperty[] }
+        { withPref: [], withoutPref: [] }
     );
 
     return withPref.sort(sortByPref).concat(withoutPref);

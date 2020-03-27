@@ -22,7 +22,7 @@ export const isDisabledUser = (config: ApiKeysConfig): boolean =>
  * Check if there is a mismatch between the current email and the email defined in key data
  */
 export const emailMismatch = ({ users = [] }: OpenPGPKey, currentEmail: string): boolean | string[] => {
-    const keyEmails = users.reduce((acc, { userId = {} } = {}) => {
+    const keyEmails = users.reduce<string[]>((acc, { userId = {} } = {}) => {
         if (!userId || !userId.userid) {
             // userId can be set to null
             return acc;
@@ -31,7 +31,7 @@ export const emailMismatch = ({ users = [] }: OpenPGPKey, currentEmail: string):
         const [, email = userId.userid] = /<([^>]*)>/.exec(userId.userid) || [];
         acc.push(email);
         return acc;
-    }, [] as any[]);
+    }, []);
 
     if (keyEmails.includes(currentEmail)) {
         return false;
@@ -50,16 +50,19 @@ export const sortApiKeys = (
     verifyOnlyFingerprints: Set<string>
 ): OpenPGPKey[] =>
     keys
-        .reduce((acc, key) => {
-            const fingerprint = key.getFingerprint();
-            // calculate order through a bitmap
-            const index = toBitMap({
-                isVerificationOnly: verifyOnlyFingerprints.has(fingerprint),
-                isNotTrusted: !trustedFingerprints.has(fingerprint)
-            });
-            acc[index].push(key);
-            return acc;
-        }, Array.from({ length: 4 }).map(() => []) as any[])
+        .reduce<OpenPGPKey[][]>(
+            (acc, key) => {
+                const fingerprint = key.getFingerprint();
+                // calculate order through a bitmap
+                const index = toBitMap({
+                    isVerificationOnly: verifyOnlyFingerprints.has(fingerprint),
+                    isNotTrusted: !trustedFingerprints.has(fingerprint)
+                });
+                acc[index].push(key);
+                return acc;
+            },
+            Array.from({ length: 4 }).map(() => [])
+        )
         .flat();
 
 /**
@@ -71,19 +74,22 @@ export const sortPinnedKeys = (
     revokedFingerprints: Set<string>
 ): OpenPGPKey[] =>
     keys
-        .reduce((acc, key) => {
-            const fingerprint = key.getFingerprint();
-            // calculate order through a bitmap
-            const index = toBitMap({
-                cannotSend: expiredFingerprints.has(fingerprint) || revokedFingerprints.has(fingerprint)
-            });
-            acc[index].push(key);
-            return acc;
-        }, Array.from({ length: 2 }).map(() => []) as any[])
+        .reduce<OpenPGPKey[][]>(
+            (acc, key) => {
+                const fingerprint = key.getFingerprint();
+                // calculate order through a bitmap
+                const index = toBitMap({
+                    cannotSend: expiredFingerprints.has(fingerprint) || revokedFingerprints.has(fingerprint)
+                });
+                acc[index].push(key);
+                return acc;
+            },
+            Array.from({ length: 2 }).map(() => [])
+        )
         .flat();
 
 /**
- * Given a key, return its expiration and revoke status
+ * Given a public key, return its expiration and revoke status
  */
 export const getKeyEncryptStatus = async (
     publicKey: OpenPGPKey,
@@ -102,6 +108,24 @@ export const getKeyEncryptStatus = async (
     return { isExpired, isRevoked };
 };
 
+/**
+ * Given a public key retrieved from the API, return true if it has been marked by the API as
+ * verification-only. Return false if it's marked valid for encryption. Return undefined otherwise
+ */
+export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiKeysConfig): boolean | undefined => {
+    const fingerprint = publicKey.getFingerprint();
+    const index = config.publicKeys.findIndex((publicKey) => publicKey.getFingerprint() === fingerprint);
+    if (index === -1) {
+        return undefined;
+    }
+    return !(config.Keys[index].Flags & KEY_FLAGS.ENABLE_ENCRYPTION);
+};
+
+/**
+ * For a given email address and its corresponding public keys (retrieved from the API and/or the corresponding vCard),
+ * construct the public key model taking into account the user preferences in mailSettings.
+ * The public key model contains the information about public keys that one can use for sending email to an email address
+ */
 export const getPublicKeyModel = async ({
     email,
     apiKeysConfig,
@@ -136,9 +160,8 @@ export const getPublicKeyModel = async ({
     const verifyOnlyFingerprints = new Set() as Set<string>;
     const apiKeys = [...apiKeysConfig.publicKeys];
     apiKeys.forEach((publicKey) => {
-        const fingerprint = publicKey.getFingerprint();
-        if (apiKeysConfig.isVerificationOnly[fingerprint]) {
-            verifyOnlyFingerprints.add(fingerprint);
+        if (getKeyVerificationOnlyStatus(publicKey, apiKeysConfig)) {
+            verifyOnlyFingerprints.add(publicKey.getFingerprint());
         }
     });
     const orderedApiKeys = sortApiKeys(apiKeys, trustedFingerprints, verifyOnlyFingerprints);

@@ -1,7 +1,7 @@
 import { arrayToBinaryString, binaryStringToArray, decodeBase64, encodeBase64, getKeys, OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
 import { noop } from '../helpers/function';
-import { MimeTypeVcard, PinnedKeysConfig } from '../interfaces';
+import { MimeTypeVcard, PinnedKeysConfig, PublicKeyWithPref } from '../interfaces';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts/Contact';
 import { VCARD_KEY_FIELDS } from './constants';
 import { sortByPref } from './properties';
@@ -119,7 +119,13 @@ export const getKeyInfoFromProperties = async (
 ): Promise<PinnedKeysConfig> => {
     const { pinnedKeyPromises, mimeType, encrypt, scheme, sign } = properties
         .filter(({ field, group }) => VCARD_KEY_FIELDS.includes(field) && group === emailGroup)
-        .reduce(
+        .reduce<{
+            pinnedKeyPromises: Promise<PublicKeyWithPref | undefined>[];
+            encrypt?: boolean;
+            sign?: boolean;
+            scheme?: PGP_SCHEMES;
+            mimeType?: MimeTypeVcard;
+        }>(
             (acc, { field, value, pref }) => {
                 if (field === 'key' && value) {
                     const [, base64 = ''] = (value as string).split(',');
@@ -154,17 +160,15 @@ export const getKeyInfoFromProperties = async (
             },
             {
                 // Default values
-                pinnedKeyPromises: [] as any[],
-                encrypt: undefined as any,
-                sign: undefined as any,
-                scheme: undefined as any,
-                mimeType: undefined as any
+                pinnedKeyPromises: [],
+                encrypt: undefined,
+                sign: undefined,
+                scheme: undefined,
+                mimeType: undefined
             }
         );
-    const pinnedKeys = (await Promise.all(pinnedKeyPromises))
-        .filter(Boolean)
-        .sort(sortByPref)
-        .map(({ publicKey }) => publicKey);
+    const rawPinnedKeys = (await Promise.all(pinnedKeyPromises)).filter(Boolean) as PublicKeyWithPref[];
+    const pinnedKeys = rawPinnedKeys.sort(sortByPref).map(({ publicKey }) => publicKey);
 
     return { pinnedKeys, encrypt, scheme, mimeType, sign };
 };

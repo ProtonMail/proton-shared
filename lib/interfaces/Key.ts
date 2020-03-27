@@ -37,17 +37,21 @@ export interface PublicKeyData {
     Warnings?: string[];
 }
 
+export interface PublicKeyWithPref {
+    publicKey: OpenPGPKey;
+    pref?: number;
+}
+
 export interface ApiKeysConfig extends PublicKeyData {
     publicKeys: OpenPGPKey[];
-    isVerificationOnly: { [key: string]: boolean };
 }
 
 export interface PinnedKeysConfig {
     pinnedKeys: OpenPGPKey[];
     encrypt?: boolean;
     sign?: boolean;
-    mimeType?: MimeTypeVcard;
     scheme?: PGP_SCHEMES;
+    mimeType?: MimeTypeVcard;
     error?: Error;
 }
 

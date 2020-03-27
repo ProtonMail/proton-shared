@@ -1,4 +1,5 @@
-import { getPublicKeysEmailHelper, getPublicKeysVcardHelper } from '../api/helpers/publicKeys';
+import getPublicKeysVcardHelper from '../api/helpers/getPublicKeysVcardHelper';
+import getPublicKeysEmailHelper from '../api/helpers/getPublicKeysEmailHelper';
 import { getPublicKeyModel } from '../keys/publicKeys';
 import extractEncryptionPreferences, { EncryptionPreferences } from './encryptionPreferences';
 import { Api, MailSettings } from '../interfaces';

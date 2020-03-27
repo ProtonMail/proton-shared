@@ -52,39 +52,36 @@ export const isCustomField = (field = '') => field.startsWith('x-');
  */
 export const parse = (vcard: string = ''): ContactProperties => {
     const comp = new ICAL.Component(ICAL.parse(vcard));
-    const properties = comp.getAllProperties();
+    const properties = comp.getAllProperties() as any[];
 
-    return (
-        properties
-            // @ts-ignore
-            .reduce((acc, property) => {
-                const splitProperty = property.name.split('.');
-                const field = splitProperty[1] ? splitProperty[1] : splitProperty[0];
-                const type = property.getParameter('type');
-                const prefValue = property.getParameter('pref');
-                const pref = typeof prefValue === 'string' && hasPref(field) ? +prefValue : undefined;
+    return properties
+        .reduce<ContactProperty[]>((acc, property) => {
+            const splitProperty = property.name.split('.');
+            const field = splitProperty[1] ? splitProperty[1] : splitProperty[0];
+            const type = property.getParameter('type');
+            const prefValue = property.getParameter('pref');
+            const pref = typeof prefValue === 'string' && hasPref(field) ? +prefValue : undefined;
 
-                // Ignore invalid field
-                if (!field) {
-                    return acc;
-                }
-
-                const isCustom = isCustomField(field);
-
-                // Ignore invalid property
-                if (!isCustom && !Object.keys(PROPERTIES).includes(field)) {
-                    return acc;
-                }
-
-                const group = splitProperty[1] ? splitProperty[0] : undefined;
-                const prop = { pref, field, group, type, value: getValue(property) };
-
-                acc.push(prop);
-
+            // Ignore invalid field
+            if (!field) {
                 return acc;
-            }, [] as ContactProperty[])
-            .sort(sortByPref)
-    );
+            }
+
+            const isCustom = isCustomField(field);
+
+            // Ignore invalid property
+            if (!isCustom && !Object.keys(PROPERTIES).includes(field)) {
+                return acc;
+            }
+
+            const group = splitProperty[1] ? splitProperty[0] : undefined;
+            const prop = { pref, field, group, type, value: getValue(property) };
+
+            acc.push(prop);
+
+            return acc;
+        }, [])
+        .sort(sortByPref);
 };
 
 /**

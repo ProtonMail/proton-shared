@@ -6,13 +6,16 @@ import {
     createCleartextMessage,
     DecryptResultPmcrypto
 } from 'pmcrypto';
+import { c } from 'ttag';
 import { KeyPairs } from '../interfaces';
 import { Contact, ContactProperties } from '../interfaces/contacts/Contact';
 import { merge, parse } from './vcard';
 import { sanitizeProperties } from './properties';
 
 import { CONTACT_CARD_TYPE } from '../constants';
-import { SIGNATURE_NOT_VERIFIED, FAIL_TO_READ, FAIL_TO_LOAD, FAIL_TO_DECRYPT } from './constants';
+import { CRYPTO_PROCESSING_TYPES } from './constants';
+
+const { SUCCESS, SIGNATURE_NOT_VERIFIED, FAIL_TO_READ, FAIL_TO_LOAD, FAIL_TO_DECRYPT } = CRYPTO_PROCESSING_TYPES;
 
 const { CLEAR_TEXT, ENCRYPTED_AND_SIGNED, ENCRYPTED, SIGNED } = CONTACT_CARD_TYPE;
 
@@ -21,9 +24,15 @@ interface ContactCryptoData {
     Signature?: string;
 }
 
+export interface CryptoProcessingError {
+    type: Exclude<CRYPTO_PROCESSING_TYPES, CRYPTO_PROCESSING_TYPES.SUCCESS>;
+    error: Error;
+}
+
 interface ContactClearTextData {
+    type: CRYPTO_PROCESSING_TYPES;
     data?: Partial<DecryptResultPmcrypto>;
-    error?: number;
+    error?: Error;
 }
 
 const decrypt = async (
@@ -34,21 +43,21 @@ const decrypt = async (
     try {
         message = await getMessage(Data);
     } catch (error) {
-        return { error: FAIL_TO_READ };
+        return { type: FAIL_TO_READ, error };
     }
 
     try {
         const data = await decryptMessage({ message, privateKeys });
-        return { data };
+        return { type: SUCCESS, data };
     } catch (error) {
-        return { error: FAIL_TO_DECRYPT };
+        return { type: FAIL_TO_DECRYPT, error };
     }
 };
 
 const signed = async ({ Data, Signature = '' }: ContactCryptoData, { publicKeys }: Pick<KeyPairs, 'publicKeys'>) => {
     try {
         if (!Signature) {
-            return { error: FAIL_TO_LOAD };
+            throw new Error(c('Error').t`Missing signature`);
         }
         const signature = await getSignature(Signature);
         const { verified } = await verifyMessage({
@@ -58,11 +67,11 @@ const signed = async ({ Data, Signature = '' }: ContactCryptoData, { publicKeys 
         });
 
         if (verified !== 1) {
-            return { data: Data, error: SIGNATURE_NOT_VERIFIED };
+            return { data: Data, type: SIGNATURE_NOT_VERIFIED, error: new Error(c('Error').t`Signature not verified`) };
         }
-        return { data: Data };
+        return { type: SUCCESS, data: Data };
     } catch (error) {
-        return { error: FAIL_TO_READ };
+        return { type: FAIL_TO_READ, error };
     }
 };
 
@@ -72,7 +81,7 @@ const decryptSigned = async (
 ): Promise<ContactClearTextData> => {
     try {
         if (!Signature) {
-            return { error: FAIL_TO_LOAD };
+            return { type: FAIL_TO_LOAD, error: new Error(c('Error').t`Missing signature`) };
         }
         const [message, signature] = await Promise.all([getMessage(Data), getSignature(Signature)]);
         const { data, verified } = await decryptMessage({
@@ -84,12 +93,12 @@ const decryptSigned = async (
         });
 
         if (verified !== 1) {
-            return { data, error: SIGNATURE_NOT_VERIFIED };
+            return { data, type: SIGNATURE_NOT_VERIFIED, error: new Error(c('Error').t`Signature not verified`) };
         }
 
-        return { data };
+        return { type: SUCCESS, data };
     } catch (error) {
-        return { error: FAIL_TO_READ };
+        return { type: FAIL_TO_READ, error };
     }
 };
 
@@ -105,7 +114,7 @@ const ACTIONS: { [index: number]: any } = {
 export const prepareContact = async (
     contact: Contact,
     { publicKeys, privateKeys }: KeyPairs
-): Promise<{ properties: ContactProperties; errors: number }> => {
+): Promise<{ properties: ContactProperties; errors: CryptoProcessingError[] }> => {
     const { Cards } = contact;
 
     const decryptedCards = await Promise.all(
@@ -125,12 +134,12 @@ export const prepareContact = async (
     });
 
     const { vcards, errors } = sanitizedCards.reduce(
-        (acc, { data, error }) => {
-            if (error) {
-                acc.errors.push(error);
-            }
-            if (data) {
+        (acc, { type, data, error }) => {
+            if (type === SUCCESS) {
                 acc.vcards.push(data);
+            }
+            if (error) {
+                acc.errors.push({ type, error });
             }
             return acc;
         },

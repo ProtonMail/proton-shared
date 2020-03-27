@@ -1,7 +1,7 @@
 import { OpenPGPKey, encryptMessage, signMessage } from 'pmcrypto';
 import { c } from 'ttag';
 
-import { generateUID } from './contact';
+import { generateProtonWebUID } from '../helpers/uid';
 import { toICAL } from './vcard';
 import { hasCategories, sanitizeProperties, addPref, addGroup } from './properties';
 import { KeyPair } from '../interfaces';
@@ -11,14 +11,20 @@ import { CLEAR_FIELDS, SIGNED_FIELDS } from './constants';
 
 const { CLEAR_TEXT, ENCRYPTED_AND_SIGNED, SIGNED } = CONTACT_CARD_TYPE;
 
+interface SplitProperties {
+    toEncryptAndSign: ContactProperties;
+    toSign: ContactProperties;
+    toClearText: ContactProperties;
+}
+
 /**
  * Split properties for contact cards
  */
-const splitProperties = (properties: ContactProperties): { [key: string]: ContactProperties } => {
+const splitProperties = (properties: ContactProperties): SplitProperties => {
     // we should only create a clear text part if categories are present
     const splitClearText = hasCategories(properties);
 
-    return properties.reduce(
+    return properties.reduce<SplitProperties>(
         (acc, property) => {
             const { field } = property;
 
@@ -41,9 +47,9 @@ const splitProperties = (properties: ContactProperties): { [key: string]: Contac
             return acc;
         },
         {
-            toEncryptAndSign: [] as ContactProperties,
-            toSign: [] as ContactProperties,
-            toClearText: [] as ContactProperties
+            toEncryptAndSign: [],
+            toSign: [],
+            toClearText: []
         }
     );
 };
@@ -81,7 +87,7 @@ export const prepareCards = (
         const hasFN = toSign.some((property) => property.field === 'fn');
 
         if (!hasUID) {
-            const defaultUID = generateUID();
+            const defaultUID = generateProtonWebUID();
             toSign.push({ field: 'uid', value: defaultUID });
         }
 
@@ -144,10 +150,10 @@ export const prepareContacts = async (
     contacts: ContactProperties[] = [],
     { privateKey, publicKey }: KeyPair
 ): Promise<Pick<Contact, 'Cards'>[]> => {
-    const promises = contacts.reduce((acc, properties) => {
+    const promises = contacts.reduce<Promise<Pick<Contact, 'Cards'>>[]>((acc, properties) => {
         acc.push(prepareContact(properties, { privateKey, publicKey }));
         return acc;
-    }, [] as Promise<Pick<Contact, 'Cards'>>[]);
+    }, []);
 
     return Promise.all(promises);
 };
