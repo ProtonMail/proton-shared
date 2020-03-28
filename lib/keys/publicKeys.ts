@@ -124,7 +124,7 @@ export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiK
 /**
  * For a given email address and its corresponding public keys (retrieved from the API and/or the corresponding vCard),
  * construct the public key model taking into account the user preferences in mailSettings.
- * The public key model contains the information about public keys that one can use for sending email to an email address
+ * The public key model contains information about public keys that one can use for sending email to an email address
  */
 export const getPublicKeyModel = async ({
     email,

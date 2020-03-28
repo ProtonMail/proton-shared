@@ -2,12 +2,13 @@ import getPublicKeysVcardHelper from '../api/helpers/getPublicKeysVcardHelper';
 import getPublicKeysEmailHelper from '../api/helpers/getPublicKeysEmailHelper';
 import { getPublicKeyModel } from '../keys/publicKeys';
 import extractEncryptionPreferences, { EncryptionPreferences } from './encryptionPreferences';
-import { Api, MailSettings } from '../interfaces';
+import { Address, Api, MailSettings } from '../interfaces';
 
 interface ContactSendInfo {
     emailAddress: string;
     mailSettings: MailSettings;
     api: Api;
+    addresses: Address[];
 }
 
 // Implement the logic in the document 'Encryption preferences for outgoing email'
@@ -19,13 +20,16 @@ interface ContactSendInfo {
 const getEncryptionPreferences = async ({
     emailAddress,
     mailSettings,
-    api
+    api,
+    addresses
 }: ContactSendInfo): Promise<EncryptionPreferences> => {
     const apiKeysConfig = await getPublicKeysEmailHelper(api, emailAddress);
-    const pinnedKeysConfig = await getPublicKeysVcardHelper(api, emailAddress);
+    const pinnedKeysConfig = addresses.some(({ Email }) => Email === emailAddress)
+        ? { pinnedKeys: [] } // do not fetch vCard key data for own addresses
+        : await getPublicKeysVcardHelper(api, emailAddress);
     const keyModel = await getPublicKeyModel({ email: emailAddress, apiKeysConfig, pinnedKeysConfig, mailSettings });
 
-    return extractEncryptionPreferences(keyModel);
+    return extractEncryptionPreferences(keyModel, addresses);
 };
 
 export default getEncryptionPreferences;
