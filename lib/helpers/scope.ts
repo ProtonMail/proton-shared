@@ -1,6 +1,6 @@
 import JSBI from 'jsbi';
 
-export const hasScope = (scope: string, mask: number) => {
+export const hasScope = (scope: string, mask: number | string) => {
     const scopeInt = JSBI.BigInt(scope);
     const maskInt = JSBI.BigInt(mask);
 
