@@ -1,6 +1,6 @@
 import { c } from 'ttag';
 import { CONTACT_CARD_TYPE } from '../../constants';
-import { getKeyInfoFromProperties } from '../../contacts/property';
+import { getKeyInfoFromProperties } from '../../contacts/keyProperties';
 import { parse } from '../../contacts/vcard';
 import { Api, PinnedKeysConfig } from '../../interfaces';
 import { ContactEmail } from '../../interfaces/contacts';
@@ -12,9 +12,9 @@ import { getContact, queryContactEmails } from '../contacts';
 const getPublicKeysVcardHelper = async (api: Api, Email: string): Promise<PinnedKeysConfig> => {
     const defaultConfig: PinnedKeysConfig = { pinnedKeys: [] };
     try {
-        const { ContactEmails = [] } = (await api(queryContactEmails({ Email } as any))) as {
-            ContactEmails: ContactEmail[];
-        };
+        const { ContactEmails = [] } = await api<{ ContactEmails: ContactEmail[] }>(
+            queryContactEmails({ Email } as any)
+        );
         if (!ContactEmails.length) {
             return defaultConfig;
         }

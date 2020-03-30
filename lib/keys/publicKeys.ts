@@ -140,9 +140,9 @@ export const getPublicKeyModel = async ({
         scheme: vcardScheme,
         sign: vcardSign
     } = pinnedKeysConfig;
-    const trustedFingerprints = new Set() as Set<string>;
-    const expiredFingerprints = new Set() as Set<string>;
-    const revokedFingerprints = new Set() as Set<string>;
+    const trustedFingerprints = new Set<string>();
+    const expiredFingerprints = new Set<string>();
+    const revokedFingerprints = new Set<string>();
     await Promise.all(
         pinnedKeys.map(async (publicKey) => {
             const fingerprint = publicKey.getFingerprint();

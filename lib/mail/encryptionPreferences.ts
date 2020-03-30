@@ -81,7 +81,7 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
     if (!hasPinnedKeys) {
         return { ...result, publicKey: apiKeys[0], isPublicKeyPinned: false };
     }
-    // Make sure the primary api key is trusted
+    // Make sure the primary API key is trusted
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
         return {
             ...result,
@@ -121,7 +121,7 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
     if (!hasPinnedKeys) {
         return { ...result, publicKey: apiKeys[0], isPublicKeyPinned: false };
     }
-    // Make sure the primary api key is trusted
+    // Make sure the primary API key is trusted
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
         return {
             ...result,

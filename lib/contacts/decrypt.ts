@@ -71,7 +71,7 @@ const signed = async ({ Data, Signature = '' }: ContactCryptoData, { publicKeys 
         }
         return { type: SUCCESS, data: Data };
     } catch (error) {
-        return { type: FAIL_TO_READ, error };
+        return { type: SIGNATURE_NOT_VERIFIED, error };
     }
 };
 
@@ -137,8 +137,7 @@ export const prepareContact = async (
         (acc, { type, data, error }) => {
             if (type === SUCCESS) {
                 acc.vcards.push(data);
-            }
-            if (error) {
+            } else {
                 acc.errors.push({ type, error });
             }
             return acc;
