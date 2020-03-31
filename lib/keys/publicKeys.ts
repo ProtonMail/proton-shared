@@ -127,7 +127,7 @@ export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiK
  * The public key model contains information about public keys that one can use for sending email to an email address
  */
 export const getPublicKeyModel = async ({
-    email,
+    emailAddress,
     apiKeysConfig,
     pinnedKeysConfig,
     mailSettings
@@ -179,7 +179,7 @@ export const getPublicKeyModel = async ({
         sign: encrypt || sign,
         scheme,
         mimeType: isExternalPGPInline ? DRAFT_MIME_TYPES.PLAINTEXT : mimeType,
-        email,
+        emailAddress,
         publicKeys: { api: orderedApiKeys, pinned: orderedPinnedKeys },
         trustedFingerprints,
         expiredFingerprints,

@@ -1,5 +1,7 @@
 import { OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
+import { Address } from './Address';
+import { CachedKey } from './CachedKey';
 import { MailSettings } from './MailSettings';
 
 export interface Key {
@@ -42,6 +44,11 @@ export interface PublicKeyWithPref {
     pref?: number;
 }
 
+export interface SelfSend {
+    address: Address;
+    key: CachedKey;
+}
+
 export interface ApiKeysConfig extends PublicKeyData {
     publicKeys: OpenPGPKey[];
 }
@@ -56,14 +63,14 @@ export interface PinnedKeysConfig {
 }
 
 export interface PublicKeyConfigs {
-    email: string;
+    emailAddress: string;
     apiKeysConfig: ApiKeysConfig;
     pinnedKeysConfig: PinnedKeysConfig;
     mailSettings: MailSettings;
 }
 
 export interface PublicKeyModel {
-    email: string;
+    emailAddress: string;
     publicKeys: { api: OpenPGPKey[]; pinned: OpenPGPKey[] };
     encrypt: boolean;
     sign: boolean;

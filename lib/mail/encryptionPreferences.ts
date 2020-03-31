@@ -1,8 +1,9 @@
+import { c } from 'ttag';
 import { OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
-import { Address, PublicKeyModel } from '../interfaces';
+import { PublicKeyModel, SelfSend } from '../interfaces';
 
-enum EncryptionPreferencesError {
+enum EncryptionPreferencesFailureTypes {
     INTERNAL_USER_DISABLED = 0,
     INTERNAL_USER_NO_API_KEY = 1,
     INTERNAL_USER_NO_VALID_API_KEY = 2,
@@ -10,6 +11,11 @@ enum EncryptionPreferencesError {
     WKD_USER_NO_VALID_WKD_KEY = 4,
     WKD_USER_PRIMARY_NOT_PINNED = 5,
     EXTERNAL_USER_NO_VALID_PINNED_KEY = 6
+}
+
+interface EncryptionPreferencesFailure {
+    type: EncryptionPreferencesFailureTypes;
+    error: Error;
 }
 
 export interface EncryptionPreferences {
@@ -23,28 +29,46 @@ export interface EncryptionPreferences {
     hasApiKeys: boolean;
     hasPinnedKeys: boolean;
     warnings?: any[];
-    error?: EncryptionPreferencesError;
+    failure?: EncryptionPreferencesFailure;
 }
 
 const extractEncryptionPreferencesOwnAddress = (
-    ownAddress: Address,
-    publicKeyModel: PublicKeyModel
+    publicKeyModel: PublicKeyModel,
+    selfSend: SelfSend
 ): EncryptionPreferences => {
-    const { publicKeys: { api: apiKeys } = { api: [] }, scheme, mimeType, pgpAddressDisabled } = publicKeyModel;
-    const hasApiKeys = !!apiKeys.length;
+    const { scheme, mimeType, pgpAddressDisabled } = publicKeyModel;
+    const hasApiKeys = !!selfSend.address.HasKeys;
     const hasPinnedKeys = false;
-    const canAddressReceive = !!ownAddress.Receive && !pgpAddressDisabled;
+    const canAddressReceive = !!selfSend.address.Receive && !pgpAddressDisabled;
     const result = { encrypt: true, sign: true, scheme, mimeType, isInternal: true, hasApiKeys, hasPinnedKeys };
     if (!canAddressReceive) {
-        return { ...result, error: EncryptionPreferencesError.INTERNAL_USER_DISABLED };
+        return {
+            ...result,
+            failure: {
+                type: EncryptionPreferencesFailureTypes.INTERNAL_USER_DISABLED,
+                error: new Error(c('Error').t`Email address disabled`)
+            }
+        };
     }
     if (!hasApiKeys) {
         return {
             ...result,
-            error: EncryptionPreferencesError.INTERNAL_USER_NO_API_KEY
+            failure: {
+                type: EncryptionPreferencesFailureTypes.INTERNAL_USER_NO_API_KEY,
+                error: new Error(c('Error').t`No keys retrieved for internal user`)
+            }
         };
     }
-    return { ...result, publicKey: apiKeys[0], isPublicKeyPinned: false };
+    if (!selfSend.key.publicKey) {
+        return {
+            ...result,
+            failure: {
+                type: EncryptionPreferencesFailureTypes.INTERNAL_USER_NO_VALID_API_KEY,
+                error: new Error(c('Error').t`No valid keys retrieved for internal user`)
+            }
+        };
+    }
+    return { ...result, publicKey: selfSend.key.publicKey, isPublicKeyPinned: false };
 };
 
 const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
@@ -63,7 +87,10 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
     if (!hasApiKeys) {
         return {
             ...result,
-            error: EncryptionPreferencesError.INTERNAL_USER_NO_API_KEY
+            failure: {
+                type: EncryptionPreferencesFailureTypes.INTERNAL_USER_NO_API_KEY,
+                error: new Error(c('Error').t`No keys retrieved for internal user`)
+            }
         };
     }
     // API keys are ordered in terms of preference. Make sure the primary is valid
@@ -75,7 +102,10 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
     if (!isPrimaryValid) {
         return {
             ...result,
-            error: EncryptionPreferencesError.INTERNAL_USER_NO_VALID_API_KEY
+            failure: {
+                type: EncryptionPreferencesFailureTypes.INTERNAL_USER_NO_VALID_API_KEY,
+                error: new Error(c('Error').t`No valid keys retrieved for internal user`)
+            }
         };
     }
     if (!hasPinnedKeys) {
@@ -85,7 +115,10 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
         return {
             ...result,
-            error: EncryptionPreferencesError.INTERNAL_USER_PRIMARY_NOT_PINNED
+            failure: {
+                type: EncryptionPreferencesFailureTypes.INTERNAL_USER_PRIMARY_NOT_PINNED,
+                error: new Error(c('Error').t`The sending key is not trusted`)
+            }
         };
     }
     // return the pinned key, not the API one
@@ -115,7 +148,10 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
     if (!isPrimaryValid) {
         return {
             ...result,
-            error: EncryptionPreferencesError.WKD_USER_NO_VALID_WKD_KEY
+            failure: {
+                type: EncryptionPreferencesFailureTypes.WKD_USER_NO_VALID_WKD_KEY,
+                error: new Error(c('Error').t`No valid WKD keys retrieved for external user`)
+            }
         };
     }
     if (!hasPinnedKeys) {
@@ -125,7 +161,10 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
         return {
             ...result,
-            error: EncryptionPreferencesError.WKD_USER_PRIMARY_NOT_PINNED
+            failure: {
+                type: EncryptionPreferencesFailureTypes.WKD_USER_PRIMARY_NOT_PINNED,
+                error: new Error(c('Error').t`The sending key is not trusted`)
+            }
         };
     }
     // return the pinned key, not the API one
@@ -163,7 +202,10 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: Publ
     if (!isPreferredValid) {
         return {
             ...result,
-            error: EncryptionPreferencesError.EXTERNAL_USER_NO_VALID_PINNED_KEY
+            failure: {
+                type: EncryptionPreferencesFailureTypes.EXTERNAL_USER_NO_VALID_PINNED_KEY,
+                error: new Error(c('Error').t`The sending key is not valid`)
+            }
         };
     }
     return {
@@ -176,11 +218,10 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: Publ
 /**
  * Extract the encryption preferences from a public-key model corresponding to a certain email address
  */
-const extractEncryptionPreferences = (publicKeyModel: PublicKeyModel, addresses: Address[]): EncryptionPreferences => {
-    const ownAddress = addresses.find(({ Email }) => Email === publicKeyModel.email);
+const extractEncryptionPreferences = (publicKeyModel: PublicKeyModel, selfSend?: SelfSend): EncryptionPreferences => {
     // case of own address
-    if (ownAddress) {
-        return extractEncryptionPreferencesOwnAddress(ownAddress, publicKeyModel);
+    if (selfSend) {
+        return extractEncryptionPreferencesOwnAddress(publicKeyModel, selfSend);
     }
     // case of internal user
     if (publicKeyModel.isPGPInternal) {
