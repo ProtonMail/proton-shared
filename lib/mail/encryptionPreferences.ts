@@ -2,6 +2,7 @@ import { c } from 'ttag';
 import { OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
 import { PublicKeyModel, SelfSend } from '../interfaces';
+import { getEmailMismatchWarning } from '../keys/publicKeys';
 
 enum EncryptionPreferencesFailureTypes {
     INTERNAL_USER_DISABLED = 0,
@@ -28,7 +29,7 @@ export interface EncryptionPreferences {
     isInternal: boolean;
     hasApiKeys: boolean;
     hasPinnedKeys: boolean;
-    warnings?: any[];
+    warnings?: string[];
     failure?: EncryptionPreferencesFailure;
 }
 
@@ -36,7 +37,8 @@ const extractEncryptionPreferencesOwnAddress = (
     publicKeyModel: PublicKeyModel,
     selfSend: SelfSend
 ): EncryptionPreferences => {
-    const { scheme, mimeType, pgpAddressDisabled } = publicKeyModel;
+    const { emailAddress, scheme, mimeType, pgpAddressDisabled } = publicKeyModel;
+    const { publicKey } = selfSend.key;
     const hasApiKeys = !!selfSend.address.HasKeys;
     const hasPinnedKeys = false;
     const canAddressReceive = !!selfSend.address.Receive && !pgpAddressDisabled;
@@ -59,7 +61,7 @@ const extractEncryptionPreferencesOwnAddress = (
             }
         };
     }
-    if (!selfSend.key.publicKey) {
+    if (!publicKey) {
         return {
             ...result,
             failure: {
@@ -68,11 +70,13 @@ const extractEncryptionPreferencesOwnAddress = (
             }
         };
     }
-    return { ...result, publicKey: selfSend.key.publicKey, isPublicKeyPinned: false };
+    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
+    return { ...result, publicKey, isPublicKeyPinned: false, warnings };
 };
 
 const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     const {
+        emailAddress,
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
         scheme,
         mimeType,
@@ -109,7 +113,9 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
         };
     }
     if (!hasPinnedKeys) {
-        return { ...result, publicKey: apiKeys[0], isPublicKeyPinned: false };
+        const publicKey = apiKeys[0];
+        const warnings = getEmailMismatchWarning(publicKey, emailAddress);
+        return { ...result, publicKey, isPublicKeyPinned: false, warnings };
     }
     // Make sure the primary API key is trusted
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
@@ -122,12 +128,14 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
         };
     }
     // return the pinned key, not the API one
-    const publicKey = pinnedKeys.find((key) => key.getFingerprint() === primaryKeyFingerprint);
-    return { ...result, publicKey, isPublicKeyPinned: true };
+    const publicKey = pinnedKeys.find((key) => key.getFingerprint() === primaryKeyFingerprint) as OpenPGPKey;
+    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
+    return { ...result, publicKey, isPublicKeyPinned: true, warnings };
 };
 
 const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     const {
+        emailAddress,
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
         scheme,
         mimeType,
@@ -155,7 +163,9 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
         };
     }
     if (!hasPinnedKeys) {
-        return { ...result, publicKey: apiKeys[0], isPublicKeyPinned: false };
+        const publicKey = apiKeys[0];
+        const warnings = getEmailMismatchWarning(publicKey, emailAddress);
+        return { ...result, publicKey, isPublicKeyPinned: false, warnings };
     }
     // Make sure the primary API key is trusted
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
@@ -168,12 +178,14 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
         };
     }
     // return the pinned key, not the API one
-    const publicKey = pinnedKeys.find((key) => key.getFingerprint() === primaryKeyFingerprint);
-    return { ...result, publicKey, isPublicKeyPinned: true };
+    const publicKey = pinnedKeys.find((key) => key.getFingerprint() === primaryKeyFingerprint) as OpenPGPKey;
+    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
+    return { ...result, publicKey, isPublicKeyPinned: true, warnings };
 };
 
 const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
     const {
+        emailAddress,
         publicKeys: { pinned: pinnedKeys } = { pinned: [] },
         encrypt,
         sign,
@@ -208,11 +220,9 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: Publ
             }
         };
     }
-    return {
-        ...result,
-        publicKey: pinnedKeys[0],
-        isPublicKeyPinned: true
-    };
+    const publicKey = pinnedKeys[0];
+    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
+    return { ...result, publicKey, isPublicKeyPinned: true, warnings };
 };
 
 /**

@@ -1,7 +1,9 @@
+import { c } from 'ttag';
 import { OpenPGPKey, serverTime } from 'pmcrypto';
 import { extractDraftMIMEType, extractScheme, extractSign } from '../api/helpers/mailSettings';
 import { DRAFT_MIME_TYPES, KEY_FLAGS, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
 import { toBitMap } from '../helpers/object';
+import { normalize } from '../helpers/string';
 import { ApiKeysConfig, PublicKeyConfigs, PublicKeyModel } from '../interfaces/Key';
 
 const { TYPE_INTERNAL } = RECIPIENT_TYPES;
@@ -18,26 +20,23 @@ export const isInternalUser = ({ RecipientType }: ApiKeysConfig): boolean => Rec
 export const isDisabledUser = (config: ApiKeysConfig): boolean =>
     isInternalUser(config) && !config.Keys.some(({ Flags }) => Flags & ENABLE_ENCRYPTION);
 
-/**
- * Check if there is a mismatch between the current email and the email defined in key data
- */
-export const emailMismatch = ({ users = [] }: OpenPGPKey, currentEmail: string): boolean | string[] => {
+export const getEmailMismatchWarning = (publicKey: OpenPGPKey, emailAddress: string): string[] => {
+    const users = publicKey.users || [];
     const keyEmails = users.reduce<string[]>((acc, { userId = {} } = {}) => {
         if (!userId || !userId.userid) {
             // userId can be set to null
             return acc;
         }
-        // we don't normalize anything here because enigmail / pgp also doesn't normalize it.
         const [, email = userId.userid] = /<([^>]*)>/.exec(userId.userid) || [];
-        acc.push(email);
+        // normalize the email
+        acc.push(normalize(email));
         return acc;
     }, []);
-
-    if (keyEmails.includes(currentEmail)) {
-        return false;
+    if (!keyEmails.includes(emailAddress)) {
+        const keyUserIds = keyEmails.join(', ');
+        return [c('Warning').t`Email address not found among user ids defined in sending key (${keyUserIds})`];
     }
-
-    return keyEmails;
+    return [];
 };
 
 /**
