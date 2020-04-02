@@ -34,7 +34,7 @@ export const getEmailMismatchWarning = (publicKey: OpenPGPKey, emailAddress: str
     }, []);
     if (!keyEmails.includes(emailAddress)) {
         const keyUserIds = keyEmails.join(', ');
-        return [c('Warning').t`Email address not found among user ids defined in sending key (${keyUserIds})`];
+        return [c('PGP key warning').t`Email address not found among user ids defined in sending key (${keyUserIds})`];
     }
     return [];
 };
