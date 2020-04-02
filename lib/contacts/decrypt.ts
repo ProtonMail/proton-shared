@@ -1,11 +1,4 @@
-import {
-    getMessage,
-    decryptMessage,
-    getSignature,
-    verifyMessage,
-    createCleartextMessage,
-    DecryptResultPmcrypto
-} from 'pmcrypto';
+import { getMessage, decryptMessage, getSignature, verifyMessage, createCleartextMessage } from 'pmcrypto';
 import { c } from 'ttag';
 import { KeyPairs } from '../interfaces';
 import { Contact, ContactProperties } from '../interfaces/contacts/Contact';
@@ -31,7 +24,7 @@ export interface CryptoProcessingError {
 
 interface ContactClearTextData {
     type: CRYPTO_PROCESSING_TYPES;
-    data?: Partial<DecryptResultPmcrypto>;
+    data?: string;
     error?: Error;
 }
 
@@ -47,14 +40,17 @@ const decrypt = async (
     }
 
     try {
-        const data = await decryptMessage({ message, privateKeys });
+        const { data }: { data: string } = await decryptMessage({ message, privateKeys });
         return { type: SUCCESS, data };
     } catch (error) {
         return { type: FAIL_TO_DECRYPT, error };
     }
 };
 
-const signed = async ({ Data, Signature = '' }: ContactCryptoData, { publicKeys }: Pick<KeyPairs, 'publicKeys'>) => {
+const signed = async (
+    { Data, Signature = '' }: ContactCryptoData,
+    { publicKeys }: Pick<KeyPairs, 'publicKeys'>
+): Promise<ContactClearTextData> => {
     try {
         if (!Signature) {
             throw new Error(c('Error').t`Missing signature`);
@@ -102,7 +98,7 @@ const decryptSigned = async (
     }
 };
 
-const clearText = ({ Data }: ContactCryptoData): Pick<DecryptResultPmcrypto, 'data'> => ({ data: Data });
+const clearText = ({ Data }: ContactCryptoData): ContactClearTextData => ({ type: SUCCESS, data: Data });
 
 const ACTIONS: { [index: number]: any } = {
     [ENCRYPTED_AND_SIGNED]: decryptSigned,
