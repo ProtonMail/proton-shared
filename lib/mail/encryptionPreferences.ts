@@ -38,10 +38,10 @@ const extractEncryptionPreferencesOwnAddress = (
     selfSend: SelfSend
 ): EncryptionPreferences => {
     const { emailAddress, scheme, mimeType, pgpAddressDisabled } = publicKeyModel;
-    const { publicKey } = selfSend.key;
-    const hasApiKeys = !!selfSend.address.HasKeys;
+    const { address, publicKey } = selfSend;
+    const hasApiKeys = !!address.HasKeys;
     const hasPinnedKeys = false;
-    const canAddressReceive = !!selfSend.address.Receive && !pgpAddressDisabled;
+    const canAddressReceive = !!address.Receive && !pgpAddressDisabled;
     const result = { encrypt: true, sign: true, scheme, mimeType, isInternal: true, hasApiKeys, hasPinnedKeys };
     if (!canAddressReceive) {
         return {

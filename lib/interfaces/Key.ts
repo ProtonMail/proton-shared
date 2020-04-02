@@ -1,7 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
 import { Address } from './Address';
-import { CachedKey } from './CachedKey';
 import { MailSettings } from './MailSettings';
 
 export interface Key {
@@ -46,7 +45,7 @@ export interface PublicKeyWithPref {
 
 export interface SelfSend {
     address: Address;
-    key: CachedKey;
+    publicKey?: OpenPGPKey;
 }
 
 export interface ApiKeysConfig extends PublicKeyData {
