@@ -16,12 +16,12 @@ const getPublicKeysEmailHelper = async (api: Api, Email: string): Promise<ApiKey
     try {
         const { Keys = [], ...rest } = await api(getPublicKeys({ Email }));
         const publicKeys = (await Promise.all(
-            Keys.map(({ Flags, PublicKey }) => {
+            Keys.map(({ PublicKey }) => {
                 return getKeys(PublicKey)
                     .then(([publicKey]) => publicKey)
                     .catch(noop);
             })
-        )) as OpenPGPKey[];
+        )) as (OpenPGPKey | undefined)[];
         return {
             ...rest,
             Keys,

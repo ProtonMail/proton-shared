@@ -49,7 +49,7 @@ export interface SelfSend {
 }
 
 export interface ApiKeysConfig extends PublicKeyData {
-    publicKeys: OpenPGPKey[];
+    publicKeys: (OpenPGPKey | undefined)[];
 }
 
 export interface PinnedKeysConfig {

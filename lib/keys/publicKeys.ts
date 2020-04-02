@@ -12,18 +12,18 @@ const { ENABLE_ENCRYPTION } = KEY_FLAGS;
 /**
  * Check if some API key data belongs to an internal user
  */
-export const isInternalUser = ({ RecipientType }: ApiKeysConfig): boolean => RecipientType === TYPE_INTERNAL;
+export const getIsInternalUser = ({ RecipientType }: ApiKeysConfig): boolean => RecipientType === TYPE_INTERNAL;
 
 /**
  * Test if no key is enabled
  */
 export const isDisabledUser = (config: ApiKeysConfig): boolean =>
-    isInternalUser(config) && !config.Keys.some(({ Flags }) => Flags & ENABLE_ENCRYPTION);
+    getIsInternalUser(config) && !config.Keys.some(({ Flags }) => Flags & ENABLE_ENCRYPTION);
 
 export const getEmailMismatchWarning = (publicKey: OpenPGPKey, emailAddress: string): string[] => {
     const users = publicKey.users || [];
     const keyEmails = users.reduce<string[]>((acc, { userId = {} } = {}) => {
-        if (!userId || !userId.userid) {
+        if (!userId?.userid) {
             // userId can be set to null
             return acc;
         }
@@ -113,7 +113,7 @@ export const getKeyEncryptStatus = async (
  */
 export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiKeysConfig): boolean | undefined => {
     const fingerprint = publicKey.getFingerprint();
-    const index = config.publicKeys.findIndex((publicKey) => publicKey.getFingerprint() === fingerprint);
+    const index = config.publicKeys.findIndex((publicKey) => publicKey && publicKey.getFingerprint() === fingerprint);
     if (index === -1) {
         return undefined;
     }
@@ -154,10 +154,10 @@ export const getPublicKeyModel = async ({
     const orderedPinnedKeys = sortPinnedKeys(pinnedKeys, expiredFingerprints, revokedFingerprints);
 
     // prepare keys retrieved from the API
-    const internalUser = isInternalUser(apiKeysConfig);
-    const externalUser = !internalUser;
-    const verifyOnlyFingerprints = new Set() as Set<string>;
-    const apiKeys = [...apiKeysConfig.publicKeys];
+    const isInternalUser = getIsInternalUser(apiKeysConfig);
+    const isExternalUser = !isInternalUser;
+    const verifyOnlyFingerprints = new Set<string>();
+    const apiKeys = apiKeysConfig.publicKeys.filter(Boolean) as OpenPGPKey[];
     apiKeys.forEach((publicKey) => {
         if (getKeyVerificationOnlyStatus(publicKey, apiKeysConfig)) {
             verifyOnlyFingerprints.add(publicKey.getFingerprint());
@@ -171,7 +171,7 @@ export const getPublicKeyModel = async ({
     const scheme = vcardScheme !== undefined ? vcardScheme : extractScheme(mailSettings);
     const mimeType = vcardMimeType !== undefined ? vcardMimeType : extractDraftMIMEType(mailSettings);
     // remember that when signing messages for external PGP users with the PGP_INLINE scheme, the email format must be plain text
-    const isExternalPGPInline = sign && externalUser && !apiKeys.length && scheme === PGP_SCHEMES.PGP_INLINE;
+    const isExternalPGPInline = sign && isExternalUser && !apiKeys.length && scheme === PGP_SCHEMES.PGP_INLINE;
 
     return {
         encrypt,
@@ -184,10 +184,10 @@ export const getPublicKeyModel = async ({
         expiredFingerprints,
         revokedFingerprints,
         verifyOnlyFingerprints,
-        isPGPExternal: externalUser,
-        isPGPInternal: internalUser,
-        isPGPExternalWithWKDKeys: externalUser && !!apiKeys.length,
-        isPGPExternalWithoutWKDKeys: externalUser && !apiKeys.length,
+        isPGPExternal: isExternalUser,
+        isPGPInternal: isInternalUser,
+        isPGPExternalWithWKDKeys: isExternalUser && !!apiKeys.length,
+        isPGPExternalWithoutWKDKeys: isExternalUser && !apiKeys.length,
         pgpAddressDisabled: isDisabledUser(apiKeysConfig)
     };
 };
