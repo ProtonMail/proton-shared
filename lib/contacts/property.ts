@@ -1,3 +1,4 @@
+import isTruthy from '../helpers/isTruthy';
 import { ContactProperty } from '../interfaces/contacts/Contact';
 
 /**
@@ -76,7 +77,7 @@ export const getType = (types: string | string[] = []): string => {
  */
 export const formatAdr = (adr: string[] = []): string => {
     return adr
-        .filter(Boolean)
+        .filter(isTruthy)
         .map((value) => value.trim())
         .join(', ');
 };

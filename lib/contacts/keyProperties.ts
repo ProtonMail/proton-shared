@@ -1,6 +1,7 @@
 import { arrayToBinaryString, binaryStringToArray, decodeBase64, encodeBase64, getKeys, OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
 import { noop } from '../helpers/function';
+import isTruthy from '../helpers/isTruthy';
 import { MimeTypeVcard, PinnedKeysConfig, PublicKeyWithPref } from '../interfaces';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts';
 import { VCARD_KEY_FIELDS } from './constants';
@@ -84,7 +85,7 @@ export const getKeyInfoFromProperties = async (
                 mimeType: undefined
             }
         );
-    const rawPinnedKeys = (await Promise.all(pinnedKeyPromises)).filter(Boolean) as PublicKeyWithPref[];
+    const rawPinnedKeys = (await Promise.all(pinnedKeyPromises)).filter(isTruthy);
     const pinnedKeys = rawPinnedKeys.sort(sortByPref).map(({ publicKey }) => publicKey);
 
     return { pinnedKeys, encrypt, scheme, mimeType, sign };

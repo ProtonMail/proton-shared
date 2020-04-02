@@ -1,5 +1,6 @@
 import ICAL from 'ical.js';
 import { readFileAsString } from '../helpers/file';
+import isTruthy from '../helpers/isTruthy';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts/Contact';
 import { hasPref, sortByPref } from './properties';
 import { getValue } from './property';
@@ -97,7 +98,7 @@ export const toICAL = (properties: ContactProperties = []) => {
     comp.addProperty(versionProperty);
 
     return versionLessProperties.reduce((component, { field, type, pref, value, group }) => {
-        const fieldWithGroup = [group, field].filter(Boolean).join('.');
+        const fieldWithGroup = [group, field].filter(isTruthy).join('.');
         const property = new ICAL.Property(fieldWithGroup);
         property.setValue(value);
         type && property.setParameter('type', type);

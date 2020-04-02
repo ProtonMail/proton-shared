@@ -2,6 +2,7 @@ import { c } from 'ttag';
 import { OpenPGPKey, serverTime } from 'pmcrypto';
 import { extractDraftMIMEType, extractScheme, extractSign } from '../api/helpers/mailSettings';
 import { DRAFT_MIME_TYPES, KEY_FLAGS, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
+import isTruthy from '../helpers/isTruthy';
 import { toBitMap } from '../helpers/object';
 import { normalize } from '../helpers/string';
 import { ApiKeysConfig, PublicKeyConfigs, PublicKeyModel } from '../interfaces/Key';
@@ -113,7 +114,7 @@ export const getKeyEncryptStatus = async (
  */
 export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiKeysConfig): boolean | undefined => {
     const fingerprint = publicKey.getFingerprint();
-    const index = config.publicKeys.findIndex((publicKey) => publicKey && publicKey.getFingerprint() === fingerprint);
+    const index = config.publicKeys.findIndex((publicKey) => publicKey?.getFingerprint() === fingerprint);
     if (index === -1) {
         return undefined;
     }
@@ -157,7 +158,7 @@ export const getPublicKeyModel = async ({
     const isInternalUser = getIsInternalUser(apiKeysConfig);
     const isExternalUser = !isInternalUser;
     const verifyOnlyFingerprints = new Set<string>();
-    const apiKeys = apiKeysConfig.publicKeys.filter(Boolean) as OpenPGPKey[];
+    const apiKeys = apiKeysConfig.publicKeys.filter(isTruthy);
     apiKeys.forEach((publicKey) => {
         if (getKeyVerificationOnlyStatus(publicKey, apiKeysConfig)) {
             verifyOnlyFingerprints.add(publicKey.getFingerprint());

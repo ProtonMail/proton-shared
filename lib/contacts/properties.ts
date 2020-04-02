@@ -1,4 +1,5 @@
 // Vcard fields for which we keep track of PREF parameter
+import isTruthy from '../helpers/isTruthy';
 import { PublicKeyWithPref } from '../interfaces';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts/Contact';
 
@@ -130,7 +131,7 @@ export const generateNewGroupName = (existingGroups: string[] = []): string => {
  * @returns {Array}
  */
 export const addGroup = (properties: ContactProperties = []) => {
-    const existingGroups = properties.map(({ group }) => group).filter(Boolean) as string[];
+    const existingGroups = properties.map(({ group }) => group).filter(isTruthy);
     return properties.map((property) => {
         if (!['email'].includes(property.field) || property.group) {
             return property;
