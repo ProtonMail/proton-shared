@@ -4,7 +4,7 @@ import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
 import { PublicKeyModel, SelfSend } from '../interfaces';
 import { getEmailMismatchWarning } from '../keys/publicKeys';
 
-enum EncryptionPreferencesFailureTypes {
+export enum EncryptionPreferencesFailureTypes {
     INTERNAL_USER_DISABLED = 0,
     INTERNAL_USER_NO_API_KEY = 1,
     INTERNAL_USER_NO_VALID_API_KEY = 2,
