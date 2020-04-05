@@ -121,6 +121,7 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
         return {
             ...result,
+            publicKey: apiKeys[0],
             failure: {
                 type: EncryptionPreferencesFailureTypes.INTERNAL_USER_PRIMARY_NOT_PINNED,
                 error: new Error(c('Error').t`The sending key is not trusted`)
@@ -171,6 +172,7 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
     if (!trustedFingerprints.has(primaryKeyFingerprint)) {
         return {
             ...result,
+            publicKey: apiKeys[0],
             failure: {
                 type: EncryptionPreferencesFailureTypes.WKD_USER_PRIMARY_NOT_PINNED,
                 error: new Error(c('Error').t`The sending key is not trusted`)
