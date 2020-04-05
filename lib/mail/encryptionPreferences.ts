@@ -2,7 +2,7 @@ import { c } from 'ttag';
 import { OpenPGPKey } from 'pmcrypto';
 import { DRAFT_MIME_TYPES, PGP_SCHEMES } from '../constants';
 import { PublicKeyModel, SelfSend } from '../interfaces';
-import { getEmailMismatchWarning } from '../keys/publicKeys';
+import { getEmailMismatchWarning, isValidForSending } from '../keys/publicKeys';
 
 export enum EncryptionPreferencesFailureTypes {
     INTERNAL_USER_DISABLED = 0,
@@ -79,11 +79,7 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
         emailAddress,
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
         scheme,
-        mimeType,
-        trustedFingerprints,
-        revokedFingerprints,
-        expiredFingerprints,
-        verifyOnlyFingerprints
+        mimeType
     } = publicKeyModel;
     const hasApiKeys = !!apiKeys.length;
     const hasPinnedKeys = !!pinnedKeys.length;
@@ -97,41 +93,38 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
             }
         };
     }
-    // API keys are ordered in terms of preference. Make sure the primary is valid
-    const primaryKeyFingerprint = apiKeys[0].getFingerprint();
-    const isPrimaryValid =
-        !verifyOnlyFingerprints.has(primaryKeyFingerprint) &&
-        !revokedFingerprints.has(primaryKeyFingerprint) &&
-        !expiredFingerprints.has(primaryKeyFingerprint);
-    if (!isPrimaryValid) {
+    // API keys are ordered in terms of user preference. The primary key (first in the list) will be used for sending
+    const primaryKey = apiKeys[0];
+    const primaryKeyFingerprint = primaryKey.getFingerprint();
+    const validSendingKey = apiKeys.find((key) => isValidForSending(key.getFingerprint(), publicKeyModel));
+    if (!validSendingKey) {
         return {
             ...result,
             failure: {
                 type: EncryptionPreferencesFailureTypes.INTERNAL_USER_NO_VALID_API_KEY,
-                error: new Error(c('Error').t`No valid keys retrieved for internal user`)
+                error: new Error(c('Error').t`No key retrieved for internal user is valid for sending`)
             }
         };
     }
     if (!hasPinnedKeys) {
-        const publicKey = apiKeys[0];
-        const warnings = getEmailMismatchWarning(publicKey, emailAddress);
-        return { ...result, publicKey, isPublicKeyPinned: false, warnings };
+        const warnings = getEmailMismatchWarning(primaryKey, emailAddress);
+        return { ...result, publicKey: primaryKey, isPublicKeyPinned: false, warnings };
     }
-    // Make sure the primary API key is trusted
-    if (!trustedFingerprints.has(primaryKeyFingerprint)) {
+    // if there are pinned keys, make sure the primary API key is valid for sending
+    if (!isValidForSending(primaryKeyFingerprint, publicKeyModel)) {
         return {
             ...result,
-            publicKey: apiKeys[0],
+            publicKey: validSendingKey,
             failure: {
                 type: EncryptionPreferencesFailureTypes.INTERNAL_USER_PRIMARY_NOT_PINNED,
-                error: new Error(c('Error').t`The sending key is not trusted`)
+                error: new Error(c('Error').t`Trusted keys are not valid for sending`)
             }
         };
     }
     // return the pinned key, not the API one
-    const publicKey = pinnedKeys.find((key) => key.getFingerprint() === primaryKeyFingerprint) as OpenPGPKey;
-    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
-    return { ...result, publicKey, isPublicKeyPinned: true, warnings };
+    const sendingKey = pinnedKeys[0];
+    const warnings = getEmailMismatchWarning(sendingKey, emailAddress);
+    return { ...result, publicKey: sendingKey, isPublicKeyPinned: true, warnings };
 };
 
 const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
@@ -139,50 +132,43 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
         emailAddress,
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
         scheme,
-        mimeType,
-        trustedFingerprints,
-        revokedFingerprints,
-        expiredFingerprints,
-        verifyOnlyFingerprints
+        mimeType
     } = publicKeyModel;
     const hasApiKeys = true;
     const hasPinnedKeys = !!pinnedKeys.length;
     const result = { encrypt: true, sign: true, scheme, mimeType, isInternal: false, hasApiKeys, hasPinnedKeys };
-    // WKD keys are ordered in terms of preference. Make sure the primary is valid
-    const primaryKeyFingerprint = apiKeys[0].getFingerprint();
-    const isPrimaryValid =
-        !verifyOnlyFingerprints.has(primaryKeyFingerprint) &&
-        !revokedFingerprints.has(primaryKeyFingerprint) &&
-        !expiredFingerprints.has(primaryKeyFingerprint);
-    if (!isPrimaryValid) {
+    // WKD keys are ordered in terms of user preference. The primary key (first in the list) will be used for sending
+    const primaryKey = apiKeys[0];
+    const primaryKeyFingerprint = primaryKey.getFingerprint();
+    const validSendingKey = apiKeys.find((key) => isValidForSending(key.getFingerprint(), publicKeyModel));
+    if (!validSendingKey) {
         return {
             ...result,
             failure: {
                 type: EncryptionPreferencesFailureTypes.WKD_USER_NO_VALID_WKD_KEY,
-                error: new Error(c('Error').t`No valid WKD keys retrieved for external user`)
+                error: new Error(c('Error').t`No WKD key retrieved for user is valid for sending`)
             }
         };
     }
     if (!hasPinnedKeys) {
-        const publicKey = apiKeys[0];
-        const warnings = getEmailMismatchWarning(publicKey, emailAddress);
-        return { ...result, publicKey, isPublicKeyPinned: false, warnings };
+        const warnings = getEmailMismatchWarning(primaryKey, emailAddress);
+        return { ...result, publicKey: primaryKey, isPublicKeyPinned: false, warnings };
     }
-    // Make sure the primary API key is trusted
-    if (!trustedFingerprints.has(primaryKeyFingerprint)) {
+    // if there are pinned keys, make sure the primary API key is valid for sending
+    if (!isValidForSending(primaryKeyFingerprint, publicKeyModel)) {
         return {
             ...result,
-            publicKey: apiKeys[0],
+            publicKey: validSendingKey,
             failure: {
                 type: EncryptionPreferencesFailureTypes.WKD_USER_PRIMARY_NOT_PINNED,
-                error: new Error(c('Error').t`The sending key is not trusted`)
+                error: new Error(c('Error').t`Trusted keys are not valid for sending`)
             }
         };
     }
     // return the pinned key, not the API one
-    const publicKey = pinnedKeys.find((key) => key.getFingerprint() === primaryKeyFingerprint) as OpenPGPKey;
-    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
-    return { ...result, publicKey, isPublicKeyPinned: true, warnings };
+    const sendingKey = pinnedKeys[0];
+    const warnings = getEmailMismatchWarning(sendingKey, emailAddress);
+    return { ...result, publicKey: sendingKey, isPublicKeyPinned: true, warnings };
 };
 
 const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: PublicKeyModel): EncryptionPreferences => {
@@ -192,9 +178,7 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: Publ
         encrypt,
         sign,
         scheme,
-        mimeType,
-        revokedFingerprints,
-        expiredFingerprints
+        mimeType
     } = publicKeyModel;
     const hasPinnedKeys = !!pinnedKeys.length;
     const result = {
@@ -210,10 +194,8 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: Publ
         return result;
     }
     // Pinned keys are ordered in terms of preference. Make sure the first is valid
-    const preferredKeyFingerprint = pinnedKeys[0].getFingerprint();
-    const isPreferredValid =
-        !revokedFingerprints.has(preferredKeyFingerprint) && !expiredFingerprints.has(preferredKeyFingerprint);
-    if (!isPreferredValid) {
+    const sendingKey = pinnedKeys[0];
+    if (!isValidForSending(sendingKey.getFingerprint(), publicKeyModel)) {
         return {
             ...result,
             failure: {
@@ -222,9 +204,8 @@ const extractEncryptionPreferencesExternalWithoutWKDKeys = (publicKeyModel: Publ
             }
         };
     }
-    const publicKey = pinnedKeys[0];
-    const warnings = getEmailMismatchWarning(publicKey, emailAddress);
-    return { ...result, publicKey, isPublicKeyPinned: true, warnings };
+    const warnings = getEmailMismatchWarning(sendingKey, emailAddress);
+    return { ...result, publicKey: sendingKey, isPublicKeyPinned: true, warnings };
 };
 
 /**
