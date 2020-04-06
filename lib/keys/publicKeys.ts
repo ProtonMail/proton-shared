@@ -125,7 +125,7 @@ export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiK
  * Check if a public key is valid for sending according to the information stored in a public key model
  * We rely only on the fingerprint of the key to do this check
  */
-export const isValidForSending = (fingerprint: string, publicKeyModel: PublicKeyModel): boolean => {
+export const getIsValidForSending = (fingerprint: string, publicKeyModel: PublicKeyModel): boolean => {
     const { verifyOnlyFingerprints, revokedFingerprints, expiredFingerprints } = publicKeyModel;
     return (
         !verifyOnlyFingerprints.has(fingerprint) &&
