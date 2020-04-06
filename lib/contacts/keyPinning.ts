@@ -17,6 +17,8 @@ interface Params {
 
 /**
  * Pin a public key in a contact. Give to it the highest preference
+ * Public keys need to be passed to check signature validity of signed contact cards
+ * Private keys (typically only the primary one) need to be passed to sign the new contact card with the new pinned key
  */
 export const pinKey = async ({
     contactCards,
