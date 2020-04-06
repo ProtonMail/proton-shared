@@ -58,7 +58,7 @@ export const pinKey = async ({
     const untouchedSignedProperties = signedProperties.filter(
         ({ field, group }) => field !== 'key' || group !== emailGroup
     );
-    const newSignedProperties = [...newKeyProperties, ...untouchedSignedProperties];
+    const newSignedProperties = [...untouchedSignedProperties, ...newKeyProperties];
 
     // sign the new properties
     const toSignVcard = toICAL(newSignedProperties).toString();
