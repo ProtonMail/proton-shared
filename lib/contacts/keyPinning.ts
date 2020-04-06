@@ -1,4 +1,5 @@
 import { OpenPGPKey, signMessage } from 'pmcrypto';
+import { c } from 'ttag';
 import { CONTACT_CARD_TYPE } from '../constants';
 import { ContactCard, ContactProperty } from '../interfaces/contacts';
 import { CRYPTO_PROCESSING_TYPES } from './constants';
@@ -41,9 +42,10 @@ export const pinKey = async ({
 
     // get the key properties that correspond to the email address
     const signedProperties = parse(signedVcard);
-    const emailProperty = signedProperties.find(
-        ({ field, value }) => field === 'email' && value === emailAddress
-    ) as ContactProperty;
+    const emailProperty = signedProperties.find(({ field, value }) => field === 'email' && value === emailAddress);
+    if (!emailProperty) {
+        throw new Error(c('Error').t`The key properties for ${emailAddress} could not be extracted`);
+    }
     const emailGroup = emailProperty.group as string;
     const keyProperties = signedProperties.filter(
         ({ field, group }) => field === 'key' && group === emailGroup
