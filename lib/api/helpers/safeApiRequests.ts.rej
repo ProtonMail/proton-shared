@@ -1,0 +1,4 @@
+diff a/lib/api/helpers/safeApiRequests.ts b/lib/api/helpers/safeApiRequests.ts	(rejected hunks)
+@@ -5 +5 @@ import { wait } from '../../helpers/promise';
+-export async function batchApiRequestsSafe<T> (
++export async function batchApiRequestsSafe<T>(
