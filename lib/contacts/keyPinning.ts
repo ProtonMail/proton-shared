@@ -43,13 +43,15 @@ export const pinKey = async ({
     // get the key properties that correspond to the email address
     const signedProperties = parse(signedVcard);
     const emailProperty = signedProperties.find(({ field, value }) => field === 'email' && value === emailAddress);
-    if (!emailProperty) {
+    const emailGroup = emailProperty?.group as string;
+    const keyProperties =
+        emailGroup &&
+        (signedProperties.filter(({ field, group }) => field === 'key' && group === emailGroup) as Required<
+            ContactProperty
+        >[]);
+    if (!keyProperties) {
         throw new Error(c('Error').t`The key properties for ${emailAddress} could not be extracted`);
     }
-    const emailGroup = emailProperty.group as string;
-    const keyProperties = signedProperties.filter(
-        ({ field, group }) => field === 'key' && group === emailGroup
-    ) as Required<ContactProperty>[];
 
     // add the new key as the preferred one
     const shiftedPrefKeyProperties = keyProperties.map((property) => ({ ...property, pref: property.pref + 1 }));
