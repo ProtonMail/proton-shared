@@ -1,0 +1,61 @@
+diff a/test/mail/encryptionPreferences.spec.ts b/test/mail/encryptionPreferences.spec.ts	(rejected hunks)
+@@ -9,3 +9,5 @@ const fakeKey1 = {
+-    users: [{
+-        userId: {
+-            userid: '<user1@pm.me>'
++    users: [
++        {
++            userId: {
++                userid: '<user1@pm.me>'
++            }
+@@ -19,3 +21,5 @@ const pinnedFakeKey1 = {
+-    users: [{
+-        userId: {
+-            userid: '<user1@pm.me>'
++    users: [
++        {
++            userId: {
++                userid: '<user1@pm.me>'
++            }
+@@ -29,3 +33,5 @@ const fakeKey2 = {
+-    users: [{
+-        userId: {
+-            userid: '<user2@pm.me>'
++    users: [
++        {
++            userId: {
++                userid: '<user2@pm.me>'
++            }
+@@ -39,3 +45,5 @@ const pinnedFakeKey2 = {
+-    users: [{
+-        userId: {
+-            userid: '<user2@pm.me>'
++    users: [
++        {
++            userId: {
++                userid: '<user2@pm.me>'
++            }
+@@ -49,3 +57,5 @@ const fakeKey3 = {
+-    users: [{
+-        userId: {
+-            userid: '<user3@pm.me>'
++    users: [
++        {
++            userId: {
++                userid: '<user3@pm.me>'
++            }
+@@ -53 +63 @@ const fakeKey3 = {
+-    }]
++    ]
+@@ -59,3 +69,5 @@ const pinnedFakeKey3 = {
+-    users: [{
+-        userId: {
+-            userid: '<user3@pm.me>'
++    users: [
++        {
++            userId: {
++                userid: '<user3@pm.me>'
++            }
+@@ -63 +75 @@ const pinnedFakeKey3 = {
+-    }]
++    ]

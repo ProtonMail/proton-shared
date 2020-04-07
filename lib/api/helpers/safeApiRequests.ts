@@ -1,7 +1,7 @@
 import { wait } from '../../helpers/promise';
 
 /**
- *
+ * Process multiple requests involving API calls safely to avoid getting jailed
  * @param interval      should be in milliseconds
  */
 export async function processApiRequestsSafe<T>(

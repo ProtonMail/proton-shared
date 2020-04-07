@@ -79,7 +79,8 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
         emailAddress,
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
         scheme,
-        mimeType
+        mimeType,
+        trustedFingerprints
     } = publicKeyModel;
     const hasApiKeys = !!apiKeys.length;
     const hasPinnedKeys = !!pinnedKeys.length;
@@ -110,8 +111,10 @@ const extractEncryptionPreferencesInternal = (publicKeyModel: PublicKeyModel): E
         const warnings = getEmailMismatchWarning(primaryKey, emailAddress);
         return { ...result, publicKey: primaryKey, isPublicKeyPinned: false, warnings };
     }
-    // if there are pinned keys, make sure the primary API key is valid for sending
-    if (!getIsValidForSending(primaryKeyFingerprint, publicKeyModel)) {
+    // if there are pinned keys, make sure the primary API key is trusted and valid for sending
+    const isPrimaryTrustedAndValid =
+        trustedFingerprints.has(primaryKeyFingerprint) && getIsValidForSending(primaryKeyFingerprint, publicKeyModel);
+    if (!isPrimaryTrustedAndValid) {
         return {
             ...result,
             publicKey: validSendingKey,
@@ -132,7 +135,8 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
         emailAddress,
         publicKeys: { api: apiKeys, pinned: pinnedKeys } = { api: [], pinned: [] },
         scheme,
-        mimeType
+        mimeType,
+        trustedFingerprints
     } = publicKeyModel;
     const hasApiKeys = true;
     const hasPinnedKeys = !!pinnedKeys.length;
@@ -154,8 +158,10 @@ const extractEncryptionPreferencesExternalWithWKDKeys = (publicKeyModel: PublicK
         const warnings = getEmailMismatchWarning(primaryKey, emailAddress);
         return { ...result, publicKey: primaryKey, isPublicKeyPinned: false, warnings };
     }
-    // if there are pinned keys, make sure the primary API key is valid for sending
-    if (!getIsValidForSending(primaryKeyFingerprint, publicKeyModel)) {
+    // if there are pinned keys, make sure the primary API key is trusted and valid for sending
+    const isPrimaryTrustedAndValid =
+        trustedFingerprints.has(primaryKeyFingerprint) && getIsValidForSending(primaryKeyFingerprint, publicKeyModel);
+    if (!isPrimaryTrustedAndValid) {
         return {
             ...result,
             publicKey: validSendingKey,
