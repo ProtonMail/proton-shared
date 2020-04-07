@@ -8,7 +8,7 @@ export const queryCreateUser = (data: {
     Email: string;
     Token: string;
     TokenType: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
-    Type: number; // 1 = mail, 2 = VPN
+    Type: 1 | 2; // 1 = mail, 2 = VPN
     Auth: {
         Version: number;
         ModulusID: string;
@@ -61,6 +61,9 @@ export const queryVerificationCode = (
     Type: 'email' | 'sms',
     Destination: {
         Address: string;
+        Phone?: never;
+    } | {
+        Address?: never;
         Phone: string;
     }
 ) => ({
@@ -76,7 +79,7 @@ export const queryCheckUsernameAvailability = (Name: string) => ({
 });
 
 export const queryDirectSignupStatus = (
-    Type: number // 1 = mail, 2 = VPN
+    Type: 1 | 2 // 1 = mail, 2 = VPN
 ) => ({
     url: 'users/direct',
     method: 'get',
@@ -86,7 +89,7 @@ export const queryDirectSignupStatus = (
 export const queryCheckVerificationCode = (
     Token: string,
     TokenType: 'email' | 'sms' | 'invite' | 'coupon' | 'payment',
-    Type: number // 1 = mail, 2 = VPN
+    Type: 1 | 2 // 1 = mail, 2 = VPN
 ) => ({
     url: 'users/check',
     method: 'put',
