@@ -1,43 +1,47 @@
-import { serverTime } from 'pmcrypto';
-import { API_SAFE_REQUESTS } from '../../constants';
 import { wait } from '../../helpers/promise';
 
+/**
+ *
+ * @param interval      should be in milliseconds
+ */
 export async function processApiRequestsSafe<T>(
     requests: (() => Promise<T>)[],
     apiCallsPerRequest = 1,
-    maxConcurrent?: number
+    interval = 900 * 1000,
+    maxCallsPerInterval = 25000
 ): Promise<T[]> {
-    const mutableRequests = [...requests];
-    const maxProcessing = Math.floor(API_SAFE_REQUESTS.MAX / apiCallsPerRequest);
-
+    const maxRequestsPerInterval = Math.floor(maxCallsPerInterval / apiCallsPerRequest);
+    const queue = requests.map((request, index) => ({ request, index }));
     const results: T[] = [];
-    const resolvedTimes: number[] = [];
+    let totalResolved = 0;
+    let iterations = 0;
 
-    const runNextRequest = (): Promise<any> => {
-        const executor = mutableRequests.shift();
-        if (executor) {
-            return executor().then((result) => {
-                const totalResolved = resolvedTimes.push(+serverTime());
-                const sortedResolvedTimes = [...resolvedTimes].sort();
-                results.push(result);
-                const elapsedTime =
-                    totalResolved >= maxProcessing
-                        ? +serverTime() - sortedResolvedTimes[totalResolved - maxProcessing]
-                        : Infinity;
-                if (elapsedTime < API_SAFE_REQUESTS.INTERVAL_MILLISECONDS) {
-                    return wait(API_SAFE_REQUESTS.INTERVAL_MILLISECONDS - elapsedTime).then(() => {
-                        runNextRequest();
-                    });
-                }
-                return runNextRequest();
-            });
+    const process = async (): Promise<any> => {
+        const leftover = iterations * maxRequestsPerInterval - totalResolved;
+        const concurrentRequests = maxRequestsPerInterval - leftover;
+        if (concurrentRequests === 0) {
+            await wait(interval);
+            return process();
         }
-        return Promise.resolve();
+        const requests = queue.splice(0, concurrentRequests);
+        iterations += 1;
+        const promises = Promise.all(
+            requests.map(({ request, index }) => {
+                return request().then((result) => {
+                    totalResolved += 1;
+                    results[index] = result;
+                });
+            })
+        );
+        if (!queue.length) {
+            await promises;
+            return;
+        }
+        await wait(interval);
+        return process();
     };
-    const promises: Promise<any>[] = [];
-    for (let i = 0; i < (maxConcurrent || maxProcessing); i++) {
-        promises.push(runNextRequest());
-    }
-    await Promise.all(promises);
+
+    await process();
+
     return results;
 }
