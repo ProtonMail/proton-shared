@@ -9,19 +9,18 @@ export const processApiRequestsSafe = <T>(
 ): Promise<T[]> => {
     const queue = [...promisesGenerators];
     let results: Promise<T>[] = [];
-    let resolve: (data: Promise<T[]>) => void;
-    const run = () => {
-        const callbacks = queue.splice(0, maxConcurrentPerInterval);
-        const promises = callbacks.map((cb) => cb());
-        results = results.concat(promises);
-        if (queue.length) {
-            setTimeout(() => run(), interval);
-        } else {
-            resolve(Promise.all(results));
-        }
-    };
-    run();
-    return new Promise<T[]>((_resolve) => {
-        resolve = _resolve;
+
+    return new Promise((resolve) => {
+        const run = () => {
+            const callbacks = queue.splice(0, maxConcurrentPerInterval);
+            const promises = callbacks.map((cb) => cb());
+            results = results.concat(promises);
+            if (queue.length) {
+                setTimeout(run, interval);
+            } else {
+                resolve(Promise.all(results));
+            }
+        };
+        run();
     });
 };
