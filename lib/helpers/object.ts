@@ -38,8 +38,8 @@ export const omit = <T extends object, K extends keyof T>(model: T, properties: 
  * @param properties Properties to keep.
  * @return Returns a new object.
  */
-export const pick = <T extends object, K extends keyof T>(model: T, properties: K[] = []): Pick<T, K> => {
-    const result: T = {} as any;
+export const pick = <T extends object, K extends keyof T>(model: T, properties: K[] = []) => {
+    const result: Pick<T, K> = {} as any;
     for (let i = 0; i < properties.length; ++i) {
         const key = properties[i];
         result[key] = model[key];
