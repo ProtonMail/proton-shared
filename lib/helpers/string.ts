@@ -109,6 +109,14 @@ export const binaryStringToArray = (str: string) => {
     return result;
 };
 
+/**
+ * Encode a binary string in the so-called base64 URL (https://tools.ietf.org/html/rfc4648#section-5)
+ * @dev Each character in a binary string can only be one of the characters in a reduced 255 ASCII alphabet. I.e. morally each character is one byte
+ * @dev This function will fail if the argument contains characters which are not in this alphabet
+ * @dev This encoding works by converting groups of three "bytes" into groups of four base64 characters (2 ** 6 ** 4 is also three bytes)
+ * @dev Therefore, if the argument string has a length not divisible by three, the returned string will be padded with one or two '=' characters
+ * @dev WE REMOVE THE PADDING CHARACTERS
+ */
 export const encodeBase64URL = (str: string) => {
     return encodeBase64(str)
         .replace(/\+/g, '-')
@@ -116,6 +124,10 @@ export const encodeBase64URL = (str: string) => {
         .replace(/=/g, '');
 };
 
+/**
+ * Convert a string encoded in base64 URL into a binary string
+ * @param str
+ */
 export const decodeBase64URL = (str: string) => {
     return decodeBase64((str + '==='.slice((str.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
 };
