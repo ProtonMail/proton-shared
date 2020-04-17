@@ -1,5 +1,5 @@
 import getRandomValues from 'get-random-values';
-import { encodeBase64 } from 'pmcrypto';
+import { decodeBase64, encodeBase64 } from 'pmcrypto';
 
 enum CURRENCIES {
     USD = '$',
@@ -110,13 +110,14 @@ export const binaryStringToArray = (str: string) => {
 };
 
 export const encodeBase64URL = (str: string) => {
-    const base64String = encodeBase64(str);
-    if (!base64String) {
-        return;
-    }
     return encodeBase64(str)
         .replace(/\+/g, '-')
-        .replace(/\//g, '_');
+        .replace(/\//g, '_')
+        .replace(/=/g, '');
+};
+
+export const decodeBase64URL = (str: string) => {
+    return decodeBase64((str + '==='.slice((str.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
 };
 
 export const hasProtonDomain = (email = '') => {
