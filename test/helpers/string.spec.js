@@ -1,4 +1,11 @@
-import { capitalize, getRandomString, getInitial, findLongestMatchingIndex, truncate } from '../../lib/helpers/string';
+import {
+    capitalize,
+    getRandomString,
+    getInitial,
+    findLongestMatchingIndex,
+    truncate,
+    encodeBase64URL
+} from '../../lib/helpers/string';
 
 describe('string', () => {
     describe('getRandomString', () => {
@@ -67,6 +74,19 @@ describe('string', () => {
             expect(truncate('abcd', 4)).toEqual('abcd');
             expect(truncate('abcde', 4)).toEqual('a...');
             expect(truncate('abcde', 8)).toEqual('abcde');
+        });
+    });
+
+    describe('encodeBase64URL', () => {
+        const validChars = '=_-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        it('should only use valid characters', () => {
+            const filterEncode = (str) =>
+                encodeBase64URL(str)
+                    .split('')
+                    .filter((char) => validChars.includes(char))
+                    .join('');
+            const strings = ['The quick brown fox jumps over the lazy dog', '@#N{}|*sdgOnf&çÇéöªº'];
+            expect(strings.map(encodeBase64URL)).toEqual(strings.map(filterEncode));
         });
     });
 });
