@@ -26,6 +26,28 @@ export const queryCreateUser = (data: {
     data
 });
 
+export const queryCreateUserExternal = (data: {
+    Email: string;
+    Token: string;
+    TokenType: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
+    Type: 1 | 2; // 1 = mail, 2 = VPN
+    Auth: {
+        Version: number;
+        ModulusID: string;
+        Salt: string;
+        Verifier: string;
+    };
+    Referrer?: string;
+    Payload?: {
+        [key: string]: string;
+    };
+    Salt?: string;
+}) => ({
+    url: 'users/external',
+    method: 'post',
+    data
+});
+
 export const queryUnlock = () => ({
     url: 'users/unlock',
     method: 'put'

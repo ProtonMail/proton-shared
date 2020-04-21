@@ -22,6 +22,31 @@ export const createAddressKeyRoute = (data: {
     data
 });
 
+interface AddressKey {
+    AddressID: string;
+    PrivateKey: string;
+    SignedKeyList: {
+        Data: string;
+        Signature: string;
+    };
+}
+
+export const setupKeys = (data: {
+    PrimaryKey: string;
+    KeySalt: string;
+    AddressKeys: AddressKey[];
+    Auth: {
+        Version: number;
+        ModulusID: string;
+        Salt: string;
+        Verifier: string;
+    };
+}) => ({
+    url: 'keys/setup',
+    method: 'post',
+    data
+});
+
 /**
  * @param ID
  * @param PrivateKey
