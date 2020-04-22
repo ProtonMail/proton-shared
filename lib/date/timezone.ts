@@ -179,7 +179,7 @@ export const getTimeZoneOptions = (date = new Date()) => {
     );
 };
 
-const findUTCTransitionIndex = (unixTime: number, untils: number[]) => {
+const findUTCTransitionIndex = ({ unixTime, untils }: { unixTime: number; untils: number[] }) => {
     const max = untils.length - 1;
     for (let i = 0; i < max; i++) {
         if (unixTime < untils[i]) {
@@ -189,13 +189,23 @@ const findUTCTransitionIndex = (unixTime: number, untils: number[]) => {
     return max;
 };
 
-const findZoneTransitionIndex = (
-    unixTime: number,
-    untils: number[],
-    offsets: number[],
-    moveAmbiguousForward = true, // move an ambiguous date like Sunday 27 October 2019 2:00 AM CET, which corresponds to two times because of DST change, to the latest of the two
-    moveInvalidForward = true // move an invalid date like Sunday 31 March 2019 2:00 AM CET, which does not correspond to any time because of DST change, to Sunday 31 March 2019 3:00 AM CET
-) => {
+/**
+ * @param moveAmbiguousForward  move an ambiguous date like Sunday 27 October 2019 2:00 AM CET, which corresponds to two times because of DST  change, to the latest of the two
+ * @param moveInvalidForward    move an invalid date like Sunday 31 March 2019 2:00 AM CET, which does not correspond to any time because of DST change, to Sunday 31 March 2019 3:00 AM CET
+ */
+const findZoneTransitionIndex = ({
+    unixTime,
+    untils,
+    offsets,
+    moveAmbiguousForward = true,
+    moveInvalidForward = true
+}: {
+    unixTime: number;
+    untils: number[];
+    offsets: number[];
+    moveAmbiguousForward?: boolean;
+    moveInvalidForward?: boolean;
+}) => {
     const max = untils.length - 1;
 
     for (let i = 0; i < max; i++) {
@@ -231,13 +241,12 @@ export const convertZonedDateTimeToUTC = (dateTime: DateTime, tzid: string, opti
         dateTime.minutes,
         dateTime.seconds || 0
     );
-    const idx = findZoneTransitionIndex(
+    const idx = findZoneTransitionIndex({
+        ...options,
         unixTime,
-        timezone.untils,
-        timezone.offsets,
-        options?.moveAmbiguousForward,
-        options?.moveInvalidForward
-    );
+        untils: timezone.untils,
+        offsets: timezone.offsets
+    });
     const offset = timezone.offsets[idx];
     const date = new Date(unixTime + offset * 60000);
     return fromUTCDate(date);
@@ -253,7 +262,7 @@ export const convertUTCDateTimeToZone = (dateTime: DateTime, tzid: string) => {
         dateTime.minutes,
         dateTime.seconds || 0
     );
-    const idx = findUTCTransitionIndex(unixTime, timezone.untils);
+    const idx = findUTCTransitionIndex({ unixTime, untils: timezone.untils });
     const offset = timezone.offsets[idx];
     const date = new Date(unixTime - offset * 60000);
     return fromUTCDate(date);
