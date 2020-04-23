@@ -27,7 +27,7 @@ const getPublicKeysVcardHelper = async (
             return defaultConfig;
         }
         // pick the first contact with the desired email. The API returns them ordered by decreasing priority already
-        const { Contact } = (await api(getContact(ContactEmails[0].ContactID))) as { Contact: Contact };
+        const { Contact } = await api<{ Contact: Contact }>(getContact(ContactEmails[0].ContactID)))
         // all the info we need is in the signed part
         const signedCard = Contact.Cards.find(
             ({ Type, Data }) => Type === CONTACT_CARD_TYPE.SIGNED && Data.includes(Email)
