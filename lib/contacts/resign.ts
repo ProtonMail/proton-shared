@@ -1,7 +1,6 @@
 import { OpenPGPKey, signMessage } from 'pmcrypto';
 import { CONTACT_CARD_TYPE } from '../constants';
 import { ContactCard } from '../interfaces/contacts';
-import { CRYPTO_PROCESSING_TYPES } from './constants';
 import { readSigned } from './decrypt';
 
 /**
@@ -28,11 +27,6 @@ export const resignCards = async ({ contactCards, publicKeys, privateKeys }: Par
         { signedCards: [], otherCards: [] }
     );
     const readSignedCards = await Promise.all(signedCards.map((card) => readSigned(card, { publicKeys })));
-    readSignedCards.forEach(({ type, error }) => {
-        if (type !== CRYPTO_PROCESSING_TYPES.SUCCESS) {
-            throw error;
-        }
-    });
     const signedVcards = readSignedCards.map(({ data }) => data as string);
     const reSignedCards = await Promise.all(
         signedVcards.map((vcard) => {
