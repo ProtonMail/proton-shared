@@ -41,7 +41,7 @@ const getPublicKeysVcardHelper = async (
         if (!emailProperty || !emailProperty.group) {
             throw new Error('Invalid vcard');
         }
-        return { ...getKeyInfoFromProperties(properties, emailProperty.group), isContactSignatureVerified };
+        return { ...(await getKeyInfoFromProperties(properties, emailProperty.group)), isContactSignatureVerified };
     } catch (error) {
         return { pinnedKeys: [], isContactSignatureVerified: false, error };
     }
