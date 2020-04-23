@@ -16,7 +16,9 @@ import { computeKeyPassword, generateKeySalt } from 'pm-srp';
 import { decryptMemberToken } from './memberToken';
 import { CachedKey, EncryptionConfig, Key, KeySalt as tsKeySalt } from '../interfaces';
 
-export const generateKeySaltAndPassphrase = async (password: string) => {
+export const generateKeySaltAndPassphrase = async (
+    password: string
+): Promise<{ salt: tsKeySalt; passphrase: string }> => {
     const salt = generateKeySalt();
     return {
         salt,
