@@ -32,7 +32,7 @@ interface ContactClearTextData {
 
 interface ContactSignedData {
     type: CRYPTO_PROCESSING_TYPES.SUCCESS | CRYPTO_PROCESSING_TYPES.SIGNATURE_NOT_VERIFIED;
-    data?: string;
+    data: string;
     error?: Error;
 }
 
@@ -79,7 +79,7 @@ export const readSigned = async (
         }
         return { type: SUCCESS, data: Data };
     } catch (error) {
-        return { type: SIGNATURE_NOT_VERIFIED, error };
+        return { type: SIGNATURE_NOT_VERIFIED, data: Data, error };
     }
 };
 

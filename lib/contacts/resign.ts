@@ -14,32 +14,22 @@ interface Params {
     privateKeys: OpenPGPKey[];
 }
 export const resignCards = async ({ contactCards, publicKeys, privateKeys }: Params): Promise<ContactCard[]> => {
-    // get the signed cards of the contact. Throw if there are errors
-    const { signedCards, otherCards } = contactCards.reduce<{ signedCards: ContactCard[]; otherCards: ContactCard[] }>(
-        (acc, card) => {
-            if (card.Type === CONTACT_CARD_TYPE.SIGNED) {
-                acc.signedCards.push(card);
-            } else {
-                acc.otherCards.push(card);
-            }
-            return acc;
-        },
-        { signedCards: [], otherCards: [] }
+    const signedCards = contactCards.filter((card) => card.Type === CONTACT_CARD_TYPE.SIGNED);
+    const otherCards = contactCards.filter((card) => card.Type !== CONTACT_CARD_TYPE.SIGNED);
+    const signedVcards = await Promise.all(
+        signedCards.map(async (card) => {
+            const { data } = await readSigned(card, { publicKeys });
+            return data;
+        })
     );
-    const readSignedCards = await Promise.all(signedCards.map((card) => readSigned(card, { publicKeys })));
-    const signedVcards = readSignedCards.map(({ data }) => data as string);
     const reSignedCards = await Promise.all(
-        signedVcards.map((vcard) => {
-            return signMessage({ data: vcard, privateKeys, armor: true, detached: true }).then(
-                ({ signature: Signature }) => {
-                    const card: ContactCard = {
-                        Type: CONTACT_CARD_TYPE.SIGNED,
-                        Data: vcard,
-                        Signature
-                    };
-                    return card;
-                }
-            );
+        signedVcards.map(async (vcard) => {
+            const { signature } = await signMessage({ data: vcard, privateKeys, armor: true, detached: true });
+            return {
+                Type: CONTACT_CARD_TYPE.SIGNED,
+                Data: vcard,
+                Signature: signature
+            };
         })
     );
     return [...reSignedCards, ...otherCards];
