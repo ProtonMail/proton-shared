@@ -3,8 +3,6 @@ import { toBase64 } from './file';
 
 /**
  * Convert url to Image
- * @param  {String} url
- * @return {Object}
  */
 export const toImage = (url: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
@@ -29,30 +27,37 @@ export const toImage = (url: string): Promise<HTMLImageElement> => {
         image.src = url;
     });
 };
-/**
- * Base64 representation of image with resize params.
- * @param {String} original Base64 representation of image to be resized.
- * @param {Number} maxWidth Maximum amount of pixels for the width of the resized image.
- * @param {Number} maxHeight Maximum amount of pixels for the height of the resized image
- * @param {String} finalMimeType Mime type of the resulting resized image.
- * @param {Number} encoderOptions A Number between 0 and 1 indicating image quality if the requested type is image/jpeg or image/webp
- * @param {Boolean} bigResize If both maxHeight and maxWidth are specified, pick the smaller resize factor
- */
-interface ResizeImageProps {
+
+interface IResizeImageProps {
+    /**
+     * Base64 representation of image to be resized.
+     */
     original: string;
+    /**
+     * Maximum amount of pixels for the width of the resized image.
+     */
     maxWidth?: number;
+    /**
+     * Maximum amount of pixels for the height of the resized image.
+     */
     maxHeight?: number;
+    /**
+     * Mime type of the resulting resized image.
+     */
     finalMimeType?: string;
+    /**
+     * A Number between 0 and 1 indicating image quality if the requested type is image/jpeg or image/webp.
+     */
     encoderOptions?: number;
+    /**
+     * If both maxHeight and maxWidth are specified, pick the smaller resize factor.
+     */
     bigResize?: boolean;
 }
 
 /**
  * Resizes a picture to a maximum height/width (preserving height/width ratio). When both dimensions are specified,
  * two resizes are possible: we pick the one with the bigger resize factor (so that both max dimensions are respected in the resized image)
- * @param {ResizeImageProps} props Base64 representation of image with resize params.
- * @return {Promise} receives base64 string of resized image.
- *
  * @dev If maxWidth or maxHeight are equal to zero, the corresponding dimension is ignored
  */
 export const resizeImage = async ({
@@ -62,7 +67,7 @@ export const resizeImage = async ({
     finalMimeType = 'image/jpeg',
     encoderOptions = 1,
     bigResize = false,
-}: ResizeImageProps) => {
+}: IResizeImageProps) => {
     const image = await toImage(original);
     // Resize the image
     let { width, height } = image;
@@ -93,8 +98,6 @@ export const resizeImage = async ({
 
 /**
  * Extract the mime and base64 str from a base64 image.
- * @param {String} str
- * @returns {Promise} {mime, base64}
  */
 const extractBase64Image = (str = '') => {
     const [mimeInfo = '', base64 = ''] = (str || '').split(',');
@@ -104,8 +107,6 @@ const extractBase64Image = (str = '') => {
 
 /**
  * Convert a base 64 str to an uint8 array.
- * @param {String} base64str
- * @returns {Uint8Array}
  */
 const toUint8Array = (base64str: string) => {
     const bstr = atob(base64str);
@@ -119,9 +120,6 @@ const toUint8Array = (base64str: string) => {
 
 /**
  * Convert a data URL to a Blob Object
- * @param {String} base64str
- * @param {String} filename
- * @return {Object}
  */
 export const toFile = (base64str: string, filename = 'file') => {
     const { base64, mime } = extractBase64Image(base64str);
@@ -130,8 +128,6 @@ export const toFile = (base64str: string, filename = 'file') => {
 
 /**
  * Convert a data URL to a Blob Object
- * @param  {String} base64str
- * @return {Blob}
  */
 export const toBlob = (base64str: string) => {
     const { base64, mime } = extractBase64Image(base64str);
@@ -140,11 +136,6 @@ export const toBlob = (base64str: string) => {
 
 /**
  * Down size image to reach the max size limit
- * @param  {String} base64str
- * @param  {Number} maxSize in bytes
- * @param  {String} mimeType
- * @param  {Number} encoderOptions
- * @return {Promise}
  */
 export const downSize = async (base64str: string, maxSize: number, mimeType = 'image/jpeg', encoderOptions = 1) => {
     const process = async (source: string, maxWidth: number, maxHeight: number): Promise<string> => {
@@ -170,23 +161,16 @@ export const downSize = async (base64str: string, maxSize: number, mimeType = 'i
 
 /**
  * Returns true if the URL is an inline embedded image.
- * @param {String} src
- * @returns {boolean}
  */
 export const isInlineEmbedded = (src = '') => src.startsWith('data:');
 
 /**
  * Returns true if the URL is an embedded image.
- * @param {String} src
- * @returns {boolean}
  */
 export const isEmbedded = (src = '') => src.startsWith('cid:');
 
 /**
  * Resize image file
- * @param {File} fileImage
- * @param {Number} maxSize in bytes
- * @returns {Promise<String>} Base64
  */
 export const resize = async (fileImage: File, maxSize: number) => {
     const base64str = await toBase64(fileImage);
@@ -195,8 +179,6 @@ export const resize = async (fileImage: File, maxSize: number) => {
 
 /**
  * Prepare image source to be display
- * @param {String} value
- * @return {String}
  */
 export const formatImage = (value = '') => {
     if (!value) {
