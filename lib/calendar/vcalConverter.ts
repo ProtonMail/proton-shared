@@ -46,19 +46,8 @@ export const getDateTimeProperty = (zonelessTime: DateTime, tzid = '') => {
     return dateTimeToProperty(zonelessTime, isUTC, isUTC ? undefined : tzid);
 };
 
-export const getDateOrDateTimeProperty = (property: VcalDateOrDateTimeProperty, start: Date) => {
-    if (isIcalPropertyAllDay(property)) {
-        return getDateProperty(fromUTCDate(start));
-    }
-    return getDateTimeProperty(fromUTCDate(start), getPropertyTzid(property));
-};
-
 export const isIcalPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
     return property.parameters?.type === 'date' ?? false;
-};
-
-export const isIcalAllDay = ({ dtstart, dtend }: VcalVeventComponent) => {
-    return (dtstart && isIcalPropertyAllDay(dtstart)) || (dtend && isIcalPropertyAllDay(dtend));
 };
 
 export const getPropertyTzid = (property: VcalDateOrDateTimeProperty) => {
@@ -66,6 +55,17 @@ export const getPropertyTzid = (property: VcalDateOrDateTimeProperty) => {
         return;
     }
     return property.value.isUTC ? 'UTC' : property.parameters?.tzid;
+};
+
+export const getDateOrDateTimeProperty = (property: VcalDateOrDateTimeProperty, start: Date) => {
+    if (isIcalPropertyAllDay(property)) {
+        return getDateProperty(fromUTCDate(start));
+    }
+    return getDateTimeProperty(fromUTCDate(start), getPropertyTzid(property));
+};
+
+export const isIcalAllDay = ({ dtstart, dtend }: VcalVeventComponent) => {
+    return (dtstart && isIcalPropertyAllDay(dtstart)) || (dtend && isIcalPropertyAllDay(dtend));
 };
 
 export const propertyToUTCDate = (property: VcalDateOrDateTimeProperty) => {
