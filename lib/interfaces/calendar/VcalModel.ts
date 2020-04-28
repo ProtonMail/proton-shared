@@ -123,7 +123,7 @@ export interface VcalVeventComponent {
     geo?: VcalGeoProperty;
     class?: VcalStringProperty;
     priority?: VcalNumberProperty;
-    seq?: VcalNumberProperty[];
+    sequence?: VcalNumberProperty;
     status?: VcalStringProperty;
     created?: VcalDateTimeProperty;
     'last-modified'?: VcalDateTimeProperty[];
