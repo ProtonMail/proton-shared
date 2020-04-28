@@ -126,7 +126,7 @@ export interface VcalVeventComponent {
     sequence?: VcalNumberProperty;
     status?: VcalStringProperty;
     created?: VcalDateTimeProperty;
-    'last-modified'?: VcalDateTimeProperty[];
+    'last-modified'?: VcalDateTimeProperty;
     transp?: VcalStringProperty;
     url?: VcalStringProperty;
     attach?: VcalStringWithParamsProperty[];
