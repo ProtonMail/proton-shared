@@ -1,4 +1,16 @@
-export type VcalByDayValues = 'SU' | 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA';
+export enum VcalDays {
+    SU,
+    MO,
+    TU,
+    WE,
+    TH,
+    FR,
+    SA
+}
+
+export type VcalDaysKeys = keyof typeof VcalDays;
+
+export type VcalByDayValues = VcalDaysKeys;
 
 export interface VcalDateValue {
     year: number;
