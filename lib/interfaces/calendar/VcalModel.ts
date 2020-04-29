@@ -10,8 +10,6 @@ export enum VcalDays {
 
 export type VcalDaysKeys = keyof typeof VcalDays;
 
-export type VcalByDayValues = VcalDaysKeys;
-
 export interface VcalDateValue {
     year: number;
     month: number;
@@ -54,7 +52,7 @@ export interface VcalRrulePropertyValue {
     interval?: number;
     until?: VcalDateOrDateTimeValue;
     bysetpos?: number;
-    byday?: VcalByDayValues | VcalByDayValues[];
+    byday?: VcalDaysKeys | VcalDaysKeys[];
     bymonthday?: number | number[];
     bymonth?: number | number[];
     bysecond?: number | number[];
