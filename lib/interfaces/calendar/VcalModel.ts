@@ -62,7 +62,7 @@ export interface VcalRrulePropertyValue {
     byhour?: number | number[];
     byyearday?: number | number[];
     byweekno?: number | number[];
-    wkst?: number;
+    wkst?: VcalDaysKeys;
 }
 
 export interface VcalRruleProperty {
