@@ -6,7 +6,8 @@ import {
     truncate,
     encodeBase64URL,
     decodeBase64URL,
-    normalizeEmail
+    normalizeEmail,
+    normalizeInternalEmail
 } from '../../lib/helpers/string';
 
 describe('string', () => {
@@ -110,6 +111,7 @@ describe('string', () => {
             const emails = ['testing@pm.me', 'TeS.--TinG@PM.ME', 'ABC;;@pm.me', 'mo____.-..reTes--_---ting@pm.me'];
             const normalized = ['testing@pm.me', 'testing@PM.ME', 'abc;;@pm.me', 'moretesting@pm.me'];
             expect(emails.map((email) => normalizeEmail(email, true))).toEqual(normalized);
+            expect(emails.map(normalizeInternalEmail)).toEqual(normalized);
         });
 
         it('should throw for malformed emails', () => {
@@ -124,12 +126,12 @@ describe('string', () => {
                 expect(e.message).toBe('Invalid email address');
             }
             try {
-                normalizeEmail('@pm.me');
+                normalizeInternalEmail('@pm.me');
             } catch (e) {
                 expect(e.message).toBe('Invalid email address');
             }
             try {
-                normalizeEmail('test@test@pm.me');
+                normalizeInternalEmail('test@test@pm.me');
             } catch (e) {
                 expect(e.message).toBe('Invalid email address');
             }
