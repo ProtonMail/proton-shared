@@ -164,22 +164,22 @@ export const findLongestMatchingIndex = (strings: string[] = [], substring = '')
 };
 
 /**
+ * Normalize an internal email. This is needed to compare when two internal emails should be considered equivalent
+ * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization
+ */
+export const normalizeInternalEmail = (email: string) => {
+    const [localPart, domain] = email.split('@');
+    const normalizedLocalPart = localPart.replace(/[._-]/g, '').toLowerCase();
+    return `${normalizedLocalPart}@${domain}`;
+};
+
+/**
  * Normalize an email. This is needed to compare when two emails should be considered equivalent
  * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization
  */
 export const normalizeEmail = (email: string, isInternal?: boolean) => {
-    if (!isInternal) {
-        return email;
-    }
-    const emailSplit = email.split('@');
-    if (emailSplit.length !== 2) {
+    if (email.split('@').length !== 2) {
         throw new Error('Invalid email address');
     }
-    const [localPart, domain] = email.split('@');
-    const normalizedLocalPart = localPart
-        .replace(/\./g, '')
-        .replace(/-/g, '')
-        .replace(/_/g, '')
-        .toLowerCase();
-    return `${normalizedLocalPart}@${domain}`;
+    return isInternal ? normalizeInternalEmail(email) : email;
 };
