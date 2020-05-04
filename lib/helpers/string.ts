@@ -201,28 +201,22 @@ export const validateDomain = (domain: string) => {
 };
 
 /**
+ * Split an email into local part plus domain.
+ */
+const getEmailParts = (email: string): string[] => {
+    const split = email.split('@');
+    const domain = split.pop();
+    const localPart = split.join('@');
+    return [localPart || '', domain || ''];
+};
+
+/**
  * Validate an email string according to the RFC https://tools.ietf.org/html/rfc5322;
  * see also https://en.wikipedia.org/wiki/Email_address
  */
 export const validateEmailAddress = (email: string) => {
-    const split = email.split('@');
-    const domain = split.pop();
-    const localPart = split.join('@');
-    if (!domain || !localPart) {
-        return false;
-    }
+    const [localPart, domain] = getEmailParts(email);
     return validateLocalPart(localPart) && validateDomain(domain);
-};
-
-/**
- * Split an email into local part plus domain. Throw if the email is invalid
- */
-const getEmailParts = (email: string) => {
-    const result = email.split('@');
-    if (result.length !== 2) {
-        throw new Error('Invalid email address');
-    }
-    return result;
 };
 
 /**
@@ -230,6 +224,9 @@ const getEmailParts = (email: string) => {
  * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization
  */
 export const normalizeInternalEmail = (email: string) => {
+    if (!validateEmailAddress(email)) {
+        throw new Error('Invalid email address');
+    }
     const [localPart, domain] = getEmailParts(email);
     const normalizedLocalPart = localPart.replace(/[._-]/g, '').toLowerCase();
     return `${normalizedLocalPart}@${domain}`;
@@ -241,6 +238,9 @@ export const normalizeInternalEmail = (email: string) => {
  * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization for more information
  */
 export const normalizeExternalEmail = (email: string) => {
+    if (!validateEmailAddress(email)) {
+        throw new Error('Invalid email address');
+    }
     const [localPart, domain] = getEmailParts(email);
     return `${localPart}@${domain}`;
 };
