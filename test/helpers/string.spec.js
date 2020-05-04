@@ -136,39 +136,28 @@ describe('string', () => {
 
     describe('normalizeEmail', () => {
         it('should leave external emails the same', () => {
-            const emails = ['testing@myDomain', 'TeS.--TinG@MYDOMAIN', 'ABC;;@cde'];
+            const emails = ['testing@myDomain', 'TeS.--TinG@MYDOMAIN', 'ABC;;@cde', 'bad@email@this.is'];
             expect(emails.map((email) => normalizeEmail(email))).toEqual(emails);
             expect(emails.map((email) => normalizeEmail(email, false))).toEqual(emails);
         });
 
         it('should normalize internal emails properly', () => {
-            const emails = ['testing@pm.me', 'TeS.--TinG@PM.ME', 'ABC;;@pm.me', 'mo____.-..reTes--_---ting@pm.me'];
-            const normalized = ['testing@pm.me', 'testing@PM.ME', 'abc;;@pm.me', 'moretesting@pm.me'];
+            const emails = [
+                'testing@pm.me',
+                'TeS.--TinG@PM.ME',
+                'ABC;;@pm.me',
+                'mo____.-..reTes--_---ting@pm.me',
+                'bad@email@this.is'
+            ];
+            const normalized = [
+                'testing@pm.me',
+                'testing@PM.ME',
+                'abc;;@pm.me',
+                'moretesting@pm.me',
+                'bad@email@this.is'
+            ];
             expect(emails.map((email) => normalizeEmail(email, true))).toEqual(normalized);
             expect(emails.map(normalizeInternalEmail)).toEqual(normalized);
-        });
-
-        it('should throw for malformed emails', () => {
-            try {
-                normalizeEmail('');
-            } catch (e) {
-                expect(e.message).toBe('Invalid email address');
-            }
-            try {
-                normalizeEmail('lorororo');
-            } catch (e) {
-                expect(e.message).toBe('Invalid email address');
-            }
-            try {
-                normalizeInternalEmail('@pm.me');
-            } catch (e) {
-                expect(e.message).toBe('Invalid email address');
-            }
-            try {
-                normalizeInternalEmail('test@test@pm.me');
-            } catch (e) {
-                expect(e.message).toBe('Invalid email address');
-            }
         });
     });
 });
