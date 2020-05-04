@@ -7,7 +7,8 @@ import {
     encodeBase64URL,
     decodeBase64URL,
     normalizeEmail,
-    normalizeInternalEmail
+    normalizeInternalEmail,
+    validateEmailAddress
 } from '../../lib/helpers/string';
 
 describe('string', () => {
@@ -97,6 +98,39 @@ describe('string', () => {
             strings.forEach((string) => {
                 expect(decodeBase64URL(encodeBase64URL(string))).toEqual(string);
             });
+        });
+    });
+
+    describe('validateEmailAddress', () => {
+        it('should validate good email addresses', () => {
+            const emails = [
+                'test@protonmail.com',
+                '(comment)test+test(ot@" her)@pm.me',
+                'test@[192.168.1.1]',
+                'test(rare)@[192.168.12.23]',
+                '(comment)"te@ st"(rare)@[192.168.12.23]',
+                "weird!#$%&'*+-/=?^_`{|}~123@pa-ta-Ton32.com.edu.org"
+            ];
+            expect(emails.map((email) => validateEmailAddress(email)).filter(Boolean).length).toBe(emails.length);
+        });
+
+        it('should not validate malformed email addresses', () => {
+            const emails = [
+                'hello',
+                'hello.@test.com',
+                'he..lo@test.com',
+                '.hello@test.com',
+                'test@[192.168.1.1.2]',
+                'test(rare)@[19245.168.12.23]',
+                'test@domain',
+                'test@domain.b',
+                'test@-domain.com',
+                'test@domain-.com',
+                'test@test@domain.com',
+                'français@baguette.fr',
+                'ezpaña@espain.es'
+            ];
+            expect(emails.map((email) => validateEmailAddress(email)).filter(Boolean).length).toBe(0);
         });
     });
 

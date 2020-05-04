@@ -164,13 +164,85 @@ export const findLongestMatchingIndex = (strings: string[] = [], substring = '')
 };
 
 /**
+ * Validate the local part of an email string according to the RFC https://tools.ietf.org/html/rfc5322;
+ * see also https://en.wikipedia.org/wiki/Email_address#Local-part
+ */
+export const validateLocalPart = (localPart: string) => {
+    const match = localPart.match(/(^\(.+?\))?([^()]*)(\(.+?\)$)?/);
+    if (!match) {
+        return false;
+    }
+    const uncommentedPart = match[2];
+    if (/".+"/.test(uncommentedPart)) {
+        return true;
+    }
+    return !/[^a-zA-Z0-9!#$%&'*+-/=?^_`{|}~]|^\.|\.$|\.\./.test(uncommentedPart);
+};
+
+/**
+ * Validate the domain of an email string according to the RFC https://tools.ietf.org/html/rfc5322;
+ * see also https://en.wikipedia.org/wiki/Email_address#Domain
+ */
+export const validateDomain = (domain: string) => {
+    if (/\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\]/.test(domain)) {
+        return true;
+    }
+    const dnsLabels = domain.split('.');
+    if (dnsLabels.length < 2) {
+        return false;
+    }
+    const topLevelDomain = dnsLabels.pop() as string;
+    if (!/[a-zA-Z]{2,}/.test(topLevelDomain)) {
+        return false;
+    }
+    return !dnsLabels.some((label) => {
+        return /[^a-zA-Z0-9-]|^-|-$/.test(label);
+    });
+};
+
+/**
+ * Validate an email string according to the RFC https://tools.ietf.org/html/rfc5322;
+ * see also https://en.wikipedia.org/wiki/Email_address
+ */
+export const validateEmailAddress = (email: string) => {
+    const split = email.split('@');
+    const domain = split.pop();
+    const localPart = split.join('@');
+    if (!domain || !localPart) {
+        return false;
+    }
+    return validateLocalPart(localPart) && validateDomain(domain);
+};
+
+/**
+ * Split an email into local part plus domain. Throw if the email is invalid
+ */
+const getEmailParts = (email: string) => {
+    const result = email.split('@');
+    if (result.length !== 2) {
+        throw new Error('Invalid email address');
+    }
+    return result;
+};
+
+/**
  * Normalize an internal email. This is needed to compare when two internal emails should be considered equivalent
  * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization
  */
 export const normalizeInternalEmail = (email: string) => {
-    const [localPart, domain] = email.split('@');
+    const [localPart, domain] = getEmailParts(email);
     const normalizedLocalPart = localPart.replace(/[._-]/g, '').toLowerCase();
     return `${normalizedLocalPart}@${domain}`;
+};
+
+/**
+ * Normalize an external email. This is needed to compare when two external emails should be considered equivalent.
+ * Basically we just check email validity
+ * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization for more information
+ */
+export const normalizeExternalEmail = (email: string) => {
+    const [localPart, domain] = getEmailParts(email);
+    return `${localPart}@${domain}`;
 };
 
 /**
@@ -178,8 +250,5 @@ export const normalizeInternalEmail = (email: string) => {
  * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization
  */
 export const normalizeEmail = (email: string, isInternal?: boolean) => {
-    if (email.split('@').length !== 2) {
-        throw new Error('Invalid email address');
-    }
-    return isInternal ? normalizeInternalEmail(email) : email;
+    return isInternal ? normalizeInternalEmail(email) : normalizeExternalEmail(email);
 };
