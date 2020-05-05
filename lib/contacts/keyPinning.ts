@@ -2,6 +2,7 @@ import { OpenPGPKey, signMessage } from 'pmcrypto';
 import { c } from 'ttag';
 import { CONTACT_CARD_TYPE } from '../constants';
 import isTruthy from '../helpers/isTruthy';
+import { normalizeEmail } from '../helpers/string';
 import { generateProtonWebUID } from '../helpers/uid';
 import { ContactCard, ContactProperty } from '../interfaces/contacts';
 import { CRYPTO_PROCESSING_TYPES } from './constants';
@@ -17,6 +18,7 @@ import { parse, toICAL } from './vcard';
 interface ParamsUpdate {
     contactCards: ContactCard[];
     emailAddress: string;
+    isInternal: boolean;
     bePinnedPublicKey: OpenPGPKey;
     publicKeys: OpenPGPKey[];
     privateKeys: OpenPGPKey[];
@@ -24,13 +26,14 @@ interface ParamsUpdate {
 export const pinKeyUpdateContact = async ({
     contactCards,
     emailAddress,
+    isInternal,
     bePinnedPublicKey,
     publicKeys,
     privateKeys
 }: ParamsUpdate): Promise<ContactCard[]> => {
     // get the signed card of the contact that contains the key properties. Throw if there are errors
     const [signedCard, ...otherCards] = contactCards.reduce<ContactCard[]>((acc, card) => {
-        if (card.Type === CONTACT_CARD_TYPE.SIGNED && card.Data.includes(emailAddress)) {
+        if (card.Type === CONTACT_CARD_TYPE.SIGNED) {
             acc.unshift(card);
         } else {
             acc.push(card);
@@ -45,7 +48,11 @@ export const pinKeyUpdateContact = async ({
 
     // get the key properties that correspond to the email address
     const signedProperties = parse(signedVcard);
-    const emailProperty = signedProperties.find(({ field, value }) => field === 'email' && value === emailAddress);
+    const emailProperty = signedProperties.find(
+        ({ field, value }) =>
+            field === 'email' &&
+            normalizeEmail(value as string, isInternal) === normalizeEmail(emailAddress, isInternal)
+    );
     const emailGroup = emailProperty?.group as string;
     const keyProperties =
         emailGroup &&
