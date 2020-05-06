@@ -40,7 +40,7 @@ export default ({
     let STATE: {
         retryIndex: number;
         lastEventID?: string;
-        timeoutHandle?: number;
+        timeoutHandle?: any;
         abortController?: AbortController;
     } = {
         retryIndex: 0,
