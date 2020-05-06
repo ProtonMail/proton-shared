@@ -76,16 +76,12 @@ export const pinKeyUpdateContact = async ({
 
     // sign the new properties
     const toSignVcard = toICAL(newSignedProperties).toString();
-    const newSignedCard = await signMessage({ data: toSignVcard, privateKeys, armor: true, detached: true }).then(
-        ({ signature: Signature }) => {
-            const card: ContactCard = {
-                Type: CONTACT_CARD_TYPE.SIGNED,
-                Data: toSignVcard,
-                Signature
-            };
-            return card;
-        }
-    );
+    const { signature } = await signMessage({ data: toSignVcard, privateKeys, armor: true, detached: true });
+    const newSignedCard = {
+        Type: CONTACT_CARD_TYPE.SIGNED,
+        Data: toSignVcard,
+        Signature: signature
+    };
     return [newSignedCard, ...otherCards];
 };
 
@@ -95,11 +91,13 @@ export const pinKeyUpdateContact = async ({
  */
 interface ParamsCreate {
     emailAddress: string;
+    isInternal: boolean;
     bePinnedPublicKey: OpenPGPKey;
     privateKeys: OpenPGPKey[];
 }
 export const pinKeyCreateContact = async ({
     emailAddress,
+    isInternal,
     bePinnedPublicKey,
     privateKeys
 }: ParamsCreate): Promise<ContactCard[]> => {
@@ -107,21 +105,17 @@ export const pinKeyCreateContact = async ({
         { field: 'fn', value: emailAddress },
         { field: 'uid', value: generateProtonWebUID() },
         { field: 'email', value: emailAddress, group: 'item1' },
-        { field: 'x-pm-encrypt', value: 'true', group: 'item1' },
-        { field: 'x-pm-sign', value: 'true', group: 'item1' },
+        !isInternal && { field: 'x-pm-encrypt', value: 'true', group: 'item1' },
+        !isInternal && { field: 'x-pm-sign', value: 'true', group: 'item1' },
         toKeyProperty({ publicKey: bePinnedPublicKey, group: 'item1', index: 0 })
     ].filter(isTruthy);
     // sign the properties
     const toSignVcard = toICAL(properties).toString();
-    const newSignedCard = await signMessage({ data: toSignVcard, privateKeys, armor: true, detached: true }).then(
-        ({ signature: Signature }) => {
-            const card: ContactCard = {
-                Type: CONTACT_CARD_TYPE.SIGNED,
-                Data: toSignVcard,
-                Signature
-            };
-            return card;
-        }
-    );
+    const { signature } = await signMessage({ data: toSignVcard, privateKeys, armor: true, detached: true });
+    const newSignedCard = {
+        Type: CONTACT_CARD_TYPE.SIGNED,
+        Data: toSignVcard,
+        Signature: signature
+    };
     return [newSignedCard];
 };
