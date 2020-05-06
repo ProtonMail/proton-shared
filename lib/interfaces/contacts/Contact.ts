@@ -30,6 +30,11 @@ export interface Contact {
     Cards: ContactCard[];
 }
 
+export interface ContactFormatted extends Contact {
+    emails: string[];
+    isChecked: boolean;
+}
+
 export interface ContactWithBePinnedPublicKey {
     contactID?: string;
     emailAddress: string;
