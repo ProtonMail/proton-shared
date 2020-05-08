@@ -85,7 +85,7 @@ export const readPersonalPart = async (
     publicKeys: OpenPGPKey | OpenPGPKey[]
 ) => {
     const result = await verifySignedCard(Data, Signature, publicKeys);
-    return parse(unwrap(result)) as VcalValarmComponent;
+    return parse(unwrap(result)) as VcalVeventComponent;
 };
 
 export const getPersonalPartMap = ({ PersonalEvent = [] }: CalendarEvent) => {
