@@ -11,7 +11,7 @@ import {
     CalendarEventDataMap,
     CalendarPersonalEventData
 } from '../interfaces/calendar';
-import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 
 export const readSessionKey = (KeyPacket: string, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
     return getDecryptedSessionKey(deserializeUint8Array(KeyPacket), privateKeys);
