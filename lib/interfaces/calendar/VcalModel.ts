@@ -52,7 +52,7 @@ export interface VcalRrulePropertyValue {
     interval?: number;
     until?: VcalDateOrDateTimeValue;
     bysetpos?: number;
-    byday?: VcalDaysKeys | VcalDaysKeys[];
+    byday?: string | string[];
     bymonthday?: number | number[];
     bymonth?: number | number[];
     bysecond?: number | number[];
