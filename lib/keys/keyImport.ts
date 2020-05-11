@@ -1,6 +1,6 @@
 import { getKeys } from 'pmcrypto';
 
-import { readFileAsString } from '../helpers/file';
+import { readFileAsBinaryString } from '../helpers/file';
 import isTruthy from '../helpers/isTruthy';
 
 const PRIVATE_KEY_EXPR = /-----BEGIN PGP (PRIVATE|PUBLIC) KEY BLOCK-----(?:(?!-----)[\s\S])*-----END PGP (PRIVATE|PUBLIC) KEY BLOCK-----/g;
@@ -28,6 +28,6 @@ export const parseKeys = (filesAsStrings: string[] = []) => {
 };
 
 export const parseKeyFiles = async (files: File[] = []) => {
-    const filesAsStrings = await Promise.all(files.map(readFileAsString)).catch(() => []);
+    const filesAsStrings = await Promise.all(files.map(readFileAsBinaryString)).catch(() => []);
     return parseKeys(filesAsStrings);
 };

@@ -1,5 +1,5 @@
 import { toFile } from '../../lib/helpers/image';
-import { toBase64, readFileAsString, readFileAsBuffer, splitExtension } from '../../lib/helpers/file';
+import { toBase64, readFileAsBinaryString, readFileAsBuffer, splitExtension } from '../../lib/helpers/file';
 import img from './file.data';
 
 describe('toBase64', () => {
@@ -55,14 +55,14 @@ describe('readFile', () => {
     });
 
     it('should be a string !base 64', async () => {
-        const output = await readFileAsString(file);
+        const output = await readFileAsBinaryString(file);
         expect(typeof output).toBe('string');
         expect(output.startsWith('data:')).toBe(false);
     });
 
     it('should throw an error if the file is not defined', async () => {
         try {
-            await readFileAsString(null);
+            await readFileAsBinaryString(null);
         } catch (e) {
             expect(typeof e.stack).toBe('string');
         }
