@@ -75,7 +75,7 @@ describe('readFile', () => {
     });
 
     const toTextFile = (text, filename, mime = 'text/plain') => {
-        return new File([new Blob([text], { encoding: 'utf-8', type: mime })], filename, { type: mime });
+        return new File([new Blob([text])], filename, { type: mime });
     };
 
     it('should read a utf-8 encoded file as a string', async () => {
