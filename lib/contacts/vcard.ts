@@ -1,5 +1,5 @@
 import ICAL from 'ical.js';
-import { readFileAsBinaryString } from '../helpers/file';
+import { readFileAsString } from '../helpers/file';
 import isTruthy from '../helpers/isTruthy';
 import { ContactProperties, ContactProperty } from '../interfaces/contacts';
 import { addPref, hasPref, sortByPref } from './properties';
@@ -145,7 +145,7 @@ const isValid = (vcf = ''): boolean => {
  * Read a vCard file as a string. If there are errors when parsing the csv, throw
  */
 export const readVcf = async (file: File): Promise<string> => {
-    const vcf = await readFileAsBinaryString(file);
+    const vcf = await readFileAsString(file);
     if (!isValid(vcf)) {
         throw new Error('Error when reading vcf file');
     }
