@@ -43,6 +43,13 @@ export interface VcalDateProperty {
     value: VcalDateValue;
 }
 
+export interface VcalFloatingDateTimeProperty {
+    parameters?: {
+        type?: 'date-time';
+    };
+    value: VcalDateTimeValue;
+}
+
 export type VcalDateOrDateTimeProperty = VcalDateProperty | VcalDateTimeProperty;
 
 export type VcalRruleFreqValue = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | undefined | string;
@@ -180,4 +187,5 @@ export interface VcalVcalendar {
     version: VcalStringProperty;
     calscale?: VcalStringProperty[];
     method?: VcalStringProperty;
+    'x-wr-timezone'?: VcalStringProperty[];
 }
