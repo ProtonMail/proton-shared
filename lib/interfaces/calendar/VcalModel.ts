@@ -110,10 +110,6 @@ export interface VcalStringArrayProperty {
     value: string[];
 }
 
-export interface VcalNumberProperty {
-    value: number;
-}
-
 export interface VcalStringWithParamsProperty {
     value: string;
     params?: { [key: string]: string };
@@ -139,8 +135,8 @@ export interface VcalVeventComponent {
     location?: VcalStringProperty;
     geo?: VcalGeoProperty;
     class?: VcalStringProperty;
-    priority?: VcalNumberProperty;
-    sequence?: VcalNumberProperty;
+    priority?: VcalStringProperty;
+    sequence?: VcalStringProperty;
     status?: VcalStringProperty;
     created?: VcalDateTimeProperty;
     'last-modified'?: VcalDateTimeProperty;
