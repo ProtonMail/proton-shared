@@ -30,13 +30,17 @@ export const dateTimeToProperty = (
     isUTC = false,
     tzid?: string
 ): VcalDateTimeProperty => {
-    const parameters = tzid ? { tzid } : undefined;
+    const value = { year, month, day, hours, minutes, seconds, isUTC };
+    if (tzid) {
+        return {
+            value,
+            parameters: {
+                tzid
+            }
+        };
+    }
     return {
-        value: { year, month, day, hours, minutes, seconds, isUTC },
-        parameters: {
-            type: 'date-time',
-            ...parameters
-        }
+        value
     };
 };
 
