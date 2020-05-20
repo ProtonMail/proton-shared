@@ -170,11 +170,17 @@ export interface VcalVfreebusyComponent {
     uid: VcalUidProperty;
 }
 
+export interface VcalVtimezoneComponent {
+    component: 'vtimezone';
+    tzid: VcalStringProperty[];
+}
+
 export type VcalCalendarComponent =
     | VcalVeventComponent
     | VcalVtodoComponent
     | VcalVjournalComponent
-    | VcalVfreebusyComponent;
+    | VcalVfreebusyComponent
+    | VcalVtimezoneComponent;
 
 export interface VcalVcalendar {
     component: string;
