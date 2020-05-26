@@ -34,7 +34,8 @@ const getPublicKeysVcardHelper = async (
         // all the info we need is in the signed part
         const signedCard = Contact.Cards.find(({ Type, Data }) => Type === CONTACT_CARD_TYPE.SIGNED);
         if (!signedCard) {
-            throw new Error('Contact lacks signed card');
+            // contacts created by the server are not signed
+            return { pinnedKeys: [], isContact: !!Contact.Cards.length, isContactSignatureVerified: true };
         }
         const { type, data: signedVcard } = await readSigned(signedCard, { publicKeys });
         const isContactSignatureVerified = type === CRYPTO_PROCESSING_TYPES.SUCCESS;
