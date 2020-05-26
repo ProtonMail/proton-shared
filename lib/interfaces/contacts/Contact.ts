@@ -65,7 +65,7 @@ export interface ContactProperty {
     uid?: string;
     pref?: number;
     field: string;
-    value: string & string[];
+    value: string | string[];
     type?: string;
     group?: string;
 }
