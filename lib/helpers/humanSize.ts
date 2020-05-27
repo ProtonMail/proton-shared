@@ -22,8 +22,8 @@ const i18nSuffix = (key: SizeUnits) => {
     return map[key];
 };
 
-const transformTo = (bytes: number, unit: SizeUnits, withoutUnit: boolean) => {
-    const value = (bytes / units[unit]).toFixed(2);
+const transformTo = (bytes: number, unit: SizeUnits, withoutUnit: boolean, fractionDigits = 2) => {
+    const value = (bytes / units[unit]).toFixed(fractionDigits);
     const suffix = withoutUnit ? '' : ` ${i18nSuffix(unit)}`;
 
     return value + suffix;
@@ -37,7 +37,7 @@ const humanSize = (input = 0, forceUnit?: SizeUnits, withoutUnit = false) => {
     }
 
     if (bytes < units.KB) {
-        return transformTo(bytes, 'B', withoutUnit);
+        return transformTo(bytes, 'B', withoutUnit, 0);
     }
 
     if (bytes < units.MB) {
