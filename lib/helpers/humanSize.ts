@@ -2,7 +2,7 @@ import { c } from 'ttag';
 
 import { BASE_SIZE } from '../constants';
 
-type SizeUnits = 'B' | 'KB' | 'MB' | 'GB';
+export type SizeUnits = 'B' | 'KB' | 'MB' | 'GB';
 
 const units = {
     B: 1,
