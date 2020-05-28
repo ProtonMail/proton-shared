@@ -74,7 +74,7 @@ export interface VcalRruleProperty {
     value: VcalRrulePropertyValue;
 }
 
-export interface VcalTriggerValue {
+export interface VcalDurationValue {
     weeks: number;
     days: number;
     hours: number;
@@ -91,16 +91,55 @@ export interface VcalGeoProperty {
     value: number[];
 }
 
-export interface VcalValarmComponent {
+export interface VcalAudioAlarmComponent {
     component: 'valarm';
-    uid?: VcalUidProperty;
-    trigger?: {
-        value: VcalTriggerValue;
+    action: {
+        value: 'AUDIO';
     };
-    action?: {
-        value?: string;
+    trigger: {
+        value: VcalDurationValue;
     };
+    duration?: {
+        value: VcalDurationValue;
+    };
+    repeat?: VcalStringProperty;
+    attach?: VcalStringProperty;
 }
+
+export interface VcalDisplayAlarmComponent {
+    component: 'valarm';
+    action: {
+        value: 'DISPLAY';
+    };
+    description: VcalStringProperty;
+    trigger: {
+        value: VcalDurationValue;
+    };
+    duration?: {
+        value: VcalDurationValue;
+    };
+    repeat?: VcalStringProperty;
+}
+
+export interface VcalEmailAlarmComponent {
+    component: 'valarm';
+    action: {
+        value: 'EMAIL';
+    };
+    description: VcalStringProperty;
+    summary: VcalStringProperty;
+    trigger: {
+        value: VcalDurationValue;
+    };
+    attendee: VcalAttendeeProperty[];
+    duration?: {
+        value: VcalDurationValue;
+    };
+    repeat?: VcalStringProperty;
+    attach?: VcalStringProperty;
+}
+
+export type VcalValarmComponent = VcalAudioAlarmComponent | VcalDisplayAlarmComponent | VcalEmailAlarmComponent;
 
 export interface VcalStringProperty {
     value: string;
