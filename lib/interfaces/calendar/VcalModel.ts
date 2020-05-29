@@ -83,6 +83,16 @@ export interface VcalDurationValue {
     isNegative: boolean;
 }
 
+export interface VcalTriggerRelativeProperty {
+    value: VcalDurationValue;
+    parameters?: {
+        type?: 'duration';
+        related?: string;
+    };
+}
+
+export type VcalTriggerProperty = VcalTriggerRelativeProperty | VcalDateTimeProperty;
+
 export interface VcalUidProperty {
     value: string;
 }
@@ -93,9 +103,7 @@ export interface VcalGeoProperty {
 
 interface VcalBaseValarmComponent {
     component: 'valarm';
-    trigger: {
-        value: VcalDurationValue;
-    };
+    trigger: VcalTriggerProperty;
     duration?: {
         value: VcalDurationValue;
     };
