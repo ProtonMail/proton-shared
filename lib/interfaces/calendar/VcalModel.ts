@@ -149,8 +149,22 @@ export interface VcalStringWithParamsProperty {
     params?: { [key: string]: string };
 }
 
-// todo
-export type VcalAttendeeProperty = any;
+export interface VcalAttendeeProperty {
+    value: string;
+    parameters?: {
+        cutype?: string;
+        member?: string;
+        role?: string;
+        partstat?: string;
+        cn?: string;
+        rsvp?: string;
+        dir?: string;
+        language?: string;
+        'sent-by'?: string;
+        'delegated-from'?: string;
+        'delegated-to': string;
+    };
+}
 
 export interface VcalVeventComponent {
     component: 'vevent';
