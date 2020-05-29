@@ -130,7 +130,7 @@ export interface VcalEmailAlarmComponent extends VcalBaseValarmComponent {
     };
     description: VcalStringProperty;
     summary: VcalStringProperty;
-    attendee: VcalAttendeeProperty[];
+    attendee?: VcalAttendeeProperty[];
     attach?: VcalStringProperty;
 }
 
