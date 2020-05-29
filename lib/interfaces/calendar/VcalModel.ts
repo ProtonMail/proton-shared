@@ -101,40 +101,21 @@ export interface VcalGeoProperty {
     value: number[];
 }
 
-interface VcalBaseValarmComponent {
+export interface VcalValarmComponent {
     component: 'valarm';
+    action: {
+        value: string;
+    };
     trigger: VcalTriggerProperty;
     duration?: {
         value: VcalDurationValue;
     };
     repeat?: VcalStringProperty;
-}
-
-export interface VcalAudioAlarmComponent extends VcalBaseValarmComponent {
-    action: {
-        value: 'AUDIO';
-    };
-    attach?: VcalStringProperty;
-}
-
-export interface VcalDisplayAlarmComponent extends VcalBaseValarmComponent {
-    action: {
-        value: 'DISPLAY';
-    };
-    description: VcalStringProperty;
-}
-
-export interface VcalEmailAlarmComponent extends VcalBaseValarmComponent {
-    action: {
-        value: 'EMAIL';
-    };
-    description: VcalStringProperty;
-    summary: VcalStringProperty;
+    description?: VcalStringProperty;
+    summary?: VcalStringProperty;
     attendee?: VcalAttendeeProperty[];
     attach?: VcalStringProperty;
 }
-
-export type VcalValarmComponent = VcalAudioAlarmComponent | VcalDisplayAlarmComponent | VcalEmailAlarmComponent;
 
 export interface VcalStringProperty {
     value: string;
