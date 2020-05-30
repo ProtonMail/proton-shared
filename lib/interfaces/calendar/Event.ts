@@ -40,6 +40,18 @@ interface CalendarEventSharedData {
     Permissions: number;
 }
 
+export interface CalendarEventMetadata {
+    StartTime: number;
+    StartTimezone: string;
+    EndTime: number;
+    EndTimezone: string;
+    FullDay: number;
+    RRule: string;
+    UID: string;
+    RecurrenceID: number;
+    Exdates: number[];
+}
+
 export interface CalendarEvent extends CalendarEventSharedData, CalendarEventBlobData {}
 
-export type CalendarEventWithoutBlob = CalendarEventSharedData;
+export interface CalendarEventWithoutBlob extends CalendarEventSharedData, CalendarEventMetadata {}
