@@ -101,8 +101,8 @@ export interface PublicKeyModel {
     publicKeys: { apiKeys: OpenPGPKey[]; pinnedKeys: OpenPGPKey[] };
     encrypt: boolean;
     sign: boolean;
-    mimeType: DRAFT_MIME_TYPES;
-    scheme: PGP_SCHEMES;
+    mimeType: DRAFT_MIME_TYPES | string;
+    scheme: PGP_SCHEMES | string;
     trustedFingerprints: Set<string>;
     expiredFingerprints: Set<string>;
     revokedFingerprints: Set<string>;
