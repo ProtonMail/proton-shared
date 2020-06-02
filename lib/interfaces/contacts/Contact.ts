@@ -72,6 +72,12 @@ export interface ContactProperty {
 
 export type ContactProperties = ContactProperty[];
 
+export type ContactPropertyChange = {
+    uid?: string;
+    value: string | string[];
+    key?: string;
+};
+
 export type ContactCache = Map<string, Contact>;
 
 export type ContactEmailCache = Map<string, ContactEmail>;
