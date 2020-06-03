@@ -279,27 +279,19 @@ const extractEncryptionPreferences = (
     mailSettings: MailSettings,
     selfSend?: SelfSend
 ): EncryptionPreferences => {
-    const {
-        encrypt: vcardEncrypt,
-        publicKeys: { apiKeys },
-        isPGPExternal
-    } = model;
-
     // Determine encrypt and sign flags, plus PGP scheme and MIME type.
     // Take mail settings into account if they are present
-    const encrypt = !!vcardEncrypt;
+    const encrypt = !!model.encrypt;
     const sign = extractSign(model, mailSettings);
     const scheme = extractScheme(model, mailSettings);
     const mimeType = extractDraftMIMEType(model, mailSettings);
-    // remember that when signing messages for external PGP users with the PGP_INLINE scheme, the email format must be plain text
-    const isExternalPGPInline = sign && isPGPExternal && !apiKeys.length && scheme === PGP_SCHEMES.PGP_INLINE;
 
     const publicKeyModel = {
         ...model,
         encrypt,
         sign: encrypt || sign,
         scheme,
-        mimeType: isExternalPGPInline ? DRAFT_MIME_TYPES.PLAINTEXT : mimeType
+        mimeType
     };
     // case of own address
     if (selfSend) {
