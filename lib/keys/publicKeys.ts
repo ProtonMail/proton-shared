@@ -153,7 +153,6 @@ export const getContactPublicKeyModel = async ({
     apiKeysConfig,
     pinnedKeysConfig
 }: Omit<PublicKeyConfigs, 'mailSettings'>): Promise<ContactPublicKeyModel> => {
-    // prepare keys retrieved from the vCard
     const {
         pinnedKeys = [],
         encrypt,
@@ -165,6 +164,8 @@ export const getContactPublicKeyModel = async ({
     const trustedFingerprints = new Set<string>();
     const expiredFingerprints = new Set<string>();
     const revokedFingerprints = new Set<string>();
+
+    // prepare keys retrieved from the vCard
     await Promise.all(
         pinnedKeys.map(async (publicKey) => {
             const fingerprint = publicKey.getFingerprint();
