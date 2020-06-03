@@ -22,11 +22,17 @@ export const extractScheme = (model: ContactPublicKeyModel, mailSettings: MailSe
     }
     return PGP_SCHEMES.PGP_MIME;
 };
+
 /**
  * Extract MIME type (for the composer) from the contact public key model and mail settings
  */
 export const extractDraftMIMEType = (model: ContactPublicKeyModel, mailSettings: MailSettings): DRAFT_MIME_TYPES => {
     const { mimeType } = model;
+    const sign = extractSign(model, mailSettings);
+    const scheme = extractScheme(model, mailSettings);
+    if (sign) {
+        return scheme === PGP_SCHEMES.PGP_MIME ? DRAFT_MIME_TYPES.DEFAULT : DRAFT_MIME_TYPES.PLAINTEXT;
+    }
     if (mimeType === DRAFT_MIME_TYPES.PLAINTEXT) {
         return mimeType;
     }
