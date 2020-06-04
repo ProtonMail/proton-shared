@@ -7,6 +7,7 @@ import { CALENDAR_CARD_TYPE } from './constants';
 import { VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 import { AttendeeClearPartResult, EncryptPartResult, SignPartResult } from './interface';
 import isTruthy from '../helpers/isTruthy';
+import { getIsEventComponent } from './vcalHelper';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR } = CALENDAR_CARD_TYPE;
 
@@ -93,7 +94,7 @@ export const formatData = ({
  * Split the properties of the component into parts.
  */
 const getParts = (eventComponent: VcalVeventComponent) => {
-    if (eventComponent.component !== 'vevent') {
+    if (!getIsEventComponent(eventComponent)) {
         throw new Error('Type other than vevent not supported');
     }
     return getVeventParts(eventComponent);
