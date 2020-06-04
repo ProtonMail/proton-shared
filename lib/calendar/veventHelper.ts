@@ -2,13 +2,11 @@ import { wrap, generateUID, hasMoreThan } from './helper';
 import { serialize } from './vcal';
 import { CALENDAR_CARD_TYPE } from './constants';
 import { fromInternalAttendee } from './attendees';
-import {
-    VcalAttendeeProperty,
-    VcalAttendeePropertyParameters,
-    VcalValarmComponent,
-    VcalVeventComponent
-} from '../interfaces/calendar/VcalModel';
+import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 import { omit, pick } from '../helpers/object';
+import { dateTimeToProperty } from './vcalConverter';
+import { fromUTCDate } from '../date/timezone';
+import { AttendeeClearPartResult, AttendeePart } from './interface';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR } = CALENDAR_CARD_TYPE;
 
@@ -58,26 +56,17 @@ export const withUid = (properties: VcalVeventComponent): VcalVeventComponent =>
         uid: { value: generateUID() }
     };
 };
+
 export const withDtstamp = (properties: VcalVeventComponent): VcalVeventComponent => {
     if (properties.dtstamp) {
         return properties;
     }
-    const creationDate = new Date();
     return {
         ...properties,
-        dtstamp: {
-            value: {
-                year: creationDate.getUTCFullYear(),
-                month: creationDate.getUTCMonth() + 1,
-                day: creationDate.getUTCDate(),
-                hours: creationDate.getUTCHours(),
-                minutes: creationDate.getUTCMinutes(),
-                seconds: creationDate.getUTCSeconds(),
-                isUTC: true
-            }
-        }
+        dtstamp: dateTimeToProperty(fromUTCDate(new Date()), true)
     };
 };
+
 export const withRequiredProperties = (properties: VcalVeventComponent): VcalVeventComponent => {
     return withDtstamp(withUid(properties));
 };
@@ -103,19 +92,9 @@ export const getUserPart = (veventProperties: VcalVeventComponent) => {
     };
 };
 
-interface AttendeeClearPart {
-    permissions: number;
-    token: string;
-}
-interface AttendeeParameters extends VcalAttendeePropertyParameters {
-    'x-pm-token': string;
-}
-interface AttendeePart extends VcalAttendeeProperty {
-    parameters: AttendeeParameters;
-}
 export const getAttendeesPart = (veventProperties: VcalVeventComponent) => {
     const formattedAttendees = Array.isArray(veventProperties.attendee)
-        ? veventProperties.attendee.reduce<{ [CLEAR]: AttendeeClearPart[]; attendee: AttendeePart[] }>(
+        ? veventProperties.attendee.reduce<{ [CLEAR]: AttendeeClearPartResult[]; attendee: AttendeePart[] }>(
               (acc, attendee) => {
                   const { clear, attendee: newAttendee } = fromInternalAttendee(attendee);
                   acc[CLEAR].push(clear);

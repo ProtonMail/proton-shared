@@ -5,7 +5,7 @@ import { getVeventParts } from './veventHelper';
 import { createSessionKey, encryptPart, getEncryptedSessionKey, signPart } from './encrypt';
 import { CALENDAR_CARD_TYPE } from './constants';
 import { VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import { EncryptPartResult, SignPartResult } from './interface';
+import { AttendeeClearPartResult, EncryptPartResult, SignPartResult } from './interface';
 import isTruthy from '../helpers/isTruthy';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR } = CALENDAR_CARD_TYPE;
@@ -22,7 +22,7 @@ interface FormatDataArguments {
     calendarSessionKey?: Uint8Array;
     personalSignedPart?: SignPartResult;
     attendeesEncryptedPart?: EncryptPartResult;
-    attendeesClearPart?: { token: string; permissions: number }[];
+    attendeesClearPart?: AttendeeClearPartResult[];
 }
 export const formatData = ({
     sharedSignedPart,
