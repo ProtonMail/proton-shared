@@ -62,7 +62,7 @@ export interface ContactOrGroup {
 }
 
 export interface ContactProperty {
-    uid?: string;
+    uid: string;
     pref?: number;
     field: string;
     value: string | string[];
