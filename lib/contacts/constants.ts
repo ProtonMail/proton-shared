@@ -38,8 +38,10 @@ export const OTHER_INFORMATION_FIELDS = [
     'url'
 ];
 
-export const PGP_INLINE_TEXT = 'PGP/Inline';
-export const PGP_MIME_TEXT = 'PGP/MIME';
+export enum PGP_SCHEME_TEXT {
+    INLINE = 'PGP/Inline',
+    MIME = 'PGP/MIME'
+}
 
 export enum ADDRESS_COMPONENTS {
     POST_BOX,
