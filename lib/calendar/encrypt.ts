@@ -9,9 +9,15 @@ import {
     OpenPGPKey
 } from 'pmcrypto';
 
-import { CALENDAR_CARD_TYPE } from './constants';
+import { EncryptPartResult, SignPartResult } from './interface';
 
-export const signCard = async (dataToSign: string, signingKey: OpenPGPKey) => {
+export function signPart(dataToSign: string, signingKey: OpenPGPKey): Promise<SignPartResult>;
+export function signPart(dataToSign: string | undefined, signingKey: OpenPGPKey): Promise<SignPartResult | undefined>;
+
+export async function signPart(
+    dataToSign: string | undefined,
+    signingKey: OpenPGPKey
+): Promise<SignPartResult | undefined> {
     if (!dataToSign) {
         return;
     }
@@ -25,9 +31,24 @@ export const signCard = async (dataToSign: string, signingKey: OpenPGPKey) => {
         data: dataToSign,
         signature
     };
-};
+}
 
-export const encryptCard = async (dataToEncrypt: string, signingKey: OpenPGPKey, sessionKey: SessionKey) => {
+export function encryptPart(
+    dataToEncrypt: string,
+    signingKey: OpenPGPKey,
+    sessionKey: SessionKey
+): Promise<EncryptPartResult>;
+export function encryptPart(
+    dataToEncrypt: string | undefined,
+    signingKey: OpenPGPKey,
+    sessionKey: SessionKey
+): Promise<EncryptPartResult | undefined>;
+
+export async function encryptPart(
+    dataToEncrypt: string | undefined,
+    signingKey: OpenPGPKey,
+    sessionKey: SessionKey
+): Promise<EncryptPartResult | undefined> {
     if (!dataToEncrypt) {
         return;
     }
@@ -43,7 +64,7 @@ export const encryptCard = async (dataToEncrypt: string, signingKey: OpenPGPKey,
         dataPacket: encrypted[0],
         signature
     };
-};
+}
 
 export const getEncryptedSessionKey = async ({ data, algorithm }: SessionKey, publicKey: OpenPGPKey) => {
     const { message } = await encryptSessionKey({ data, algorithm, publicKeys: [publicKey] });
@@ -58,16 +79,4 @@ export const createSessionKey = async (publicKey: OpenPGPKey) => {
         data: sessionKey,
         algorithm
     };
-};
-
-interface PartToEncrypt {
-    [CALENDAR_CARD_TYPE.SIGNED]: string;
-    [CALENDAR_CARD_TYPE.ENCRYPTED_AND_SIGNED]: string;
-}
-export const encryptAndSignPart = (
-    { [CALENDAR_CARD_TYPE.SIGNED]: toSign, [CALENDAR_CARD_TYPE.ENCRYPTED_AND_SIGNED]: toEncryptAndSign }: PartToEncrypt,
-    signingKey: OpenPGPKey,
-    sessionKey: SessionKey
-) => {
-    return Promise.all([signCard(toSign, signingKey), encryptCard(toEncryptAndSign, signingKey, sessionKey)]);
 };
