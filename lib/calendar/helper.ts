@@ -13,32 +13,6 @@ export const generateUID = () => {
     return `${base64String}@proton.me`;
 };
 
-export const splitProperties = (properties: { [key: string]: any }, splits: { [key: string]: string[] }) => {
-    const keys = Object.keys(splits);
-    return Object.keys(properties).reduce<{ [key: string]: any }>((acc, propertyName) => {
-        keys.forEach((key) => {
-            if (splits[key].includes(propertyName)) {
-                if (!acc[key]) {
-                    acc[key] = {};
-                }
-                acc[key][propertyName] = properties[propertyName];
-            }
-        });
-        return acc;
-    }, {});
-};
-
-export const getRestProperties = (properties: { [key: string]: any }, takenKeysMap: Map<string, any>) => {
-    const allKeys = Object.keys(properties);
-    return allKeys.reduce<{ [key: string]: any }>((acc, key) => {
-        if (takenKeysMap.has(key)) {
-            return acc;
-        }
-        acc[key] = properties[key];
-        return acc;
-    }, {});
-};
-
 /**
  * Check whether an object has more keys than a set of keys.
  */
