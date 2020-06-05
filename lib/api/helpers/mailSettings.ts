@@ -31,7 +31,7 @@ export const extractDraftMIMEType = (model: ContactPublicKeyModel, mailSettings:
     const sign = extractSign(model, mailSettings);
     const scheme = extractScheme(model, mailSettings);
     if (sign) {
-        return scheme === PGP_SCHEMES.PGP_MIME ? DRAFT_MIME_TYPES.DEFAULT : DRAFT_MIME_TYPES.PLAINTEXT;
+        return scheme === PGP_SCHEMES.PGP_INLINE ? DRAFT_MIME_TYPES.PLAINTEXT : mailSettings.DraftMIMEType;
     }
     if (mimeType === DRAFT_MIME_TYPES.PLAINTEXT) {
         return mimeType;

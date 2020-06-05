@@ -1,14 +1,6 @@
 import { OpenPGPKey, serverTime } from 'pmcrypto';
 import { c } from 'ttag';
-import { extractSign, extractDraftMIMEType, extractScheme } from '../api/helpers/mailSettings';
-import {
-    DRAFT_MIME_TYPES,
-    KEY_FLAGS,
-    MIME_TYPES_MORE,
-    PGP_SCHEMES,
-    PGP_SCHEMES_MORE,
-    RECIPIENT_TYPES
-} from '../constants';
+import { KEY_FLAGS, MIME_TYPES_MORE, PGP_SCHEMES_MORE, RECIPIENT_TYPES } from '../constants';
 import isTruthy from '../helpers/isTruthy';
 import { toBitMap } from '../helpers/object';
 import { normalizeEmail } from '../helpers/string';
@@ -207,40 +199,5 @@ export const getContactPublicKeyModel = async ({
         pgpAddressDisabled: isDisabledUser(apiKeysConfig),
         isContactSignatureVerified,
         emailAddressWarnings: apiKeysConfig.Warnings
-    };
-};
-
-/**
- * For a given email address and its corresponding public keys (retrieved from the API and/or the corresponding vCard),
- * construct the public key model taking into account the preferences in mailSettings.
- * The public key model contains information about public keys that one can use for sending email to an email address
- */
-export const getPublicKeyModel = async ({
-    emailAddress,
-    apiKeysConfig,
-    pinnedKeysConfig,
-    mailSettings
-}: PublicKeyConfigs): Promise<PublicKeyModel> => {
-    const contactPublicKeyModel = await getContactPublicKeyModel({ emailAddress, apiKeysConfig, pinnedKeysConfig });
-    const {
-        encrypt: vcardEncrypt,
-        publicKeys: { apiKeys },
-        isPGPExternal
-    } = contactPublicKeyModel;
-
-    // Take mail settings into account if they are present
-    const encrypt = !!vcardEncrypt;
-    const sign = extractSign(contactPublicKeyModel, mailSettings);
-    const scheme = extractScheme(contactPublicKeyModel, mailSettings);
-    const mimeType = extractDraftMIMEType(contactPublicKeyModel, mailSettings);
-    // remember that when signing messages for external PGP users with the PGP_INLINE scheme, the email format must be plain text
-    const isExternalPGPInline = sign && isPGPExternal && !apiKeys.length && scheme === PGP_SCHEMES.PGP_INLINE;
-
-    return {
-        ...contactPublicKeyModel,
-        encrypt,
-        sign: encrypt || sign,
-        scheme,
-        mimeType: isExternalPGPInline ? DRAFT_MIME_TYPES.PLAINTEXT : mimeType
     };
 };
