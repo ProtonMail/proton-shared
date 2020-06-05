@@ -385,7 +385,7 @@ describe('extractEncryptionPreferences for an external user without WKD keys', (
         expect(result).toEqual({
             encrypt: false,
             sign: true,
-            mimeType: DRAFT_MIME_TYPES.DEFAULT,
+            mimeType: DRAFT_MIME_TYPES.PLAINTEXT,
             scheme: PGP_SCHEMES.PGP_MIME,
             apiKeys: [],
             pinnedKeys: [],
@@ -506,7 +506,7 @@ describe('extractEncryptionPreferences for an own address', () => {
         expect(result).toEqual({
             encrypt: true,
             sign: true,
-            mimeType: DRAFT_MIME_TYPES.DEFAULT,
+            mimeType: DRAFT_MIME_TYPES.PLAINTEXT,
             scheme: PGP_SCHEMES.PGP_MIME,
             sendKey: pinnedFakeKey1,
             isSendKeyPinned: false,
