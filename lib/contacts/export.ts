@@ -1,6 +1,6 @@
-import { toICAL } from 'proton-shared/lib/contacts/vcard';
-import downloadFile from 'proton-shared/lib/helpers/downloadFile';
-import { ContactProperties } from 'proton-shared/lib/interfaces/contacts/Contact';
+import { toICAL } from './vcard';
+import downloadFile from '../helpers/downloadFile';
+import { ContactProperties } from '../interfaces/contacts/Contact';
 
 /**
  * Export a single contact, given as an array of properties
