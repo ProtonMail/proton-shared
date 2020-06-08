@@ -4,7 +4,7 @@ import { KEY_FLAGS, MIME_TYPES_MORE, PGP_SCHEMES_MORE, RECIPIENT_TYPES } from '.
 import isTruthy from '../helpers/isTruthy';
 import { toBitMap } from '../helpers/object';
 import { normalizeEmail } from '../helpers/string';
-import { ApiKeysConfig, ContactPublicKeyModel, PublicKeyConfigs, PublicKeyModel } from '../interfaces/Key';
+import { ApiKeysConfig, ContactPublicKeyModel, PublicKeyConfigs } from '../interfaces/Key';
 
 const { TYPE_INTERNAL } = RECIPIENT_TYPES;
 const { ENABLE_ENCRYPTION } = KEY_FLAGS;
@@ -127,7 +127,7 @@ export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiK
  * Check if a public key is valid for sending according to the information stored in a public key model
  * We rely only on the fingerprint of the key to do this check
  */
-export const getIsValidForSending = (fingerprint: string, publicKeyModel: PublicKeyModel): boolean => {
+export const getIsValidForSending = (fingerprint: string, publicKeyModel: ContactPublicKeyModel): boolean => {
     const { verifyOnlyFingerprints, revokedFingerprints, expiredFingerprints } = publicKeyModel;
     return (
         !verifyOnlyFingerprints.has(fingerprint) &&
