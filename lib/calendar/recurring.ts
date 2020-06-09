@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { getInternalDateTimeValue, internalValueToIcalValue } from './vcal';
-import { getPropertyTzid, isIcalAllDay, propertyToUTCDate } from './vcalConverter';
+import { getDtendProperty, getPropertyTzid, isIcalAllDay, propertyToUTCDate } from './vcalConverter';
 import { addDays, addMilliseconds, differenceInCalendarDays, max } from '../date-fns-utc';
 import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, fromUTCDate, toUTCDate } from '../date/timezone';
 import { createExdateMap } from './exdate';
@@ -151,7 +151,8 @@ const getModifiedUntilRrule = (internalRrule: VcalRruleProperty, startTzid: stri
 };
 
 const getOccurrenceSetup = (component: VcalVeventComponent) => {
-    const { dtstart: internalDtstart, dtend: internalDtEnd, rrule: internalRrule, exdate: internalExdate } = component;
+    const { dtstart: internalDtstart, rrule: internalRrule, exdate: internalExdate } = component;
+    const internalDtEnd = getDtendProperty(component);
 
     const isAllDay = isIcalAllDay(component);
     const dtstartType = isAllDay ? 'date' : 'date-time';
@@ -247,7 +248,8 @@ export const getOccurrencesBetween = (
         cache.start = getOccurrenceSetup(component);
     }
 
-    const { dtstart: originalDtstart, dtend: originalDtend } = component;
+    const originalDtstart = component.dtstart;
+    const originalDtend = getDtendProperty(component);
 
     const { eventDuration, isAllDay, utcStart, dtstart, modifiedRrule, exdateMap } = cache.start;
 
