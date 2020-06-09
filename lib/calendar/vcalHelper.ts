@@ -43,6 +43,18 @@ export const getIsTimezoneComponent = (
     return vcalComponent.component.toLowerCase() === 'vtimezone';
 };
 
+export const getHasUid = (
+    vevent: VcalVeventComponent
+): vevent is VcalVeventComponent & Required<Pick<VcalVeventComponent, 'uid'>> => {
+    return !!vevent.uid?.value;
+};
+
+export const getHasDtStart = (
+    vevent: VcalVeventComponent
+): vevent is VcalVeventComponent & Required<Pick<VcalVeventComponent, 'dtstart'>> => {
+    return !!vevent.dtstart?.value;
+};
+
 export const getHasDtend = (
     vevent: VcalVeventComponent
 ): vevent is VcalVeventComponent & Required<Pick<VcalVeventComponent, 'dtend'>> => {
