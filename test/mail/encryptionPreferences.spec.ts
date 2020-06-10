@@ -323,8 +323,8 @@ describe('extractEncryptionPreferences for an external user with WKD keys', () =
         expect(result).toEqual({
             encrypt: true,
             sign: true,
-            mimeType: DRAFT_MIME_TYPES.DEFAULT,
-            scheme: PGP_SCHEMES.PGP_MIME,
+            mimeType: DRAFT_MIME_TYPES.PLAINTEXT,
+            scheme: PGP_SCHEMES.PGP_INLINE,
             sendKey: fakeKey1,
             isSendKeyPinned: false,
             apiKeys,
@@ -522,16 +522,19 @@ describe('extractEncryptionPreferences for an external user without WKD keys', (
     });
 
     it('should pick no key when the email address does not belong to any contact', () => {
-        const result = extractEncryptionPreferences({
-            ...model,
-            isContact: false,
-            isContactSignatureVerified: undefined
-        }, mailSettings);
+        const result = extractEncryptionPreferences(
+            {
+                ...model,
+                isContact: false,
+                isContactSignatureVerified: undefined
+            },
+            mailSettings
+        );
 
         expect(result).toEqual({
             encrypt: false,
-            sign: true,
-            mimeType: DRAFT_MIME_TYPES.DEFAULT,
+            sign: false,
+            mimeType: DRAFT_MIME_TYPES.PLAINTEXT,
             scheme: PGP_SCHEMES.PGP_MIME,
             apiKeys: [],
             pinnedKeys: [],

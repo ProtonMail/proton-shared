@@ -75,7 +75,7 @@
     "require-inject": "^1.4.4",
     "ts-loader": "^6.2.0",
     "ttag": "^1.7.17",
-    "typescript": "^3.6.3",
+    "typescript": "^3.9.2",
     "webpack": "^4.33.0"
   },
   "peerDependencies": {

@@ -90,7 +90,8 @@ export interface ContactPublicKeyModel {
     isPGPExternalWithWKDKeys: boolean;
     isPGPExternalWithoutWKDKeys: boolean;
     pgpAddressDisabled: boolean;
-    isContactSignatureVerified: boolean;
+    isContact: boolean;
+    isContactSignatureVerified?: boolean;
     emailAddressWarnings?: string[];
     emailAddressErrors?: string[];
 }
