@@ -69,7 +69,7 @@ export const getDateOrDateTimeProperty = (property: VcalDateOrDateTimeProperty, 
     return getDateTimeProperty(fromUTCDate(start), getPropertyTzid(property));
 };
 
-export const isIcalAllDay = ({ dtstart }: VcalVeventComponent) => {
+export const getIsIcalAllDay = ({ dtstart }: VcalVeventComponent) => {
     return getIsIcalPropertyAllDay(dtstart);
 };
 

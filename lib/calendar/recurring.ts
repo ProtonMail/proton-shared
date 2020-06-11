@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { getInternalDateTimeValue, internalValueToIcalValue } from './vcal';
-import { getDtendProperty, getPropertyTzid, isIcalAllDay, propertyToUTCDate } from './vcalConverter';
+import { getDtendProperty, getPropertyTzid, getIsIcalAllDay, propertyToUTCDate } from './vcalConverter';
 import { addDays, addMilliseconds, differenceInCalendarDays, max } from '../date-fns-utc';
 import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, fromUTCDate, toUTCDate } from '../date/timezone';
 import { createExdateMap } from './exdate';
@@ -154,7 +154,7 @@ const getOccurrenceSetup = (component: VcalVeventComponent) => {
     const { dtstart: internalDtstart, rrule: internalRrule, exdate: internalExdate } = component;
     const internalDtEnd = getDtendProperty(component);
 
-    const isAllDay = isIcalAllDay(component);
+    const isAllDay = getIsIcalAllDay(component);
     const dtstartType = isAllDay ? 'date' : 'date-time';
 
     // Pretend the (local) date is in UTC time to keep the absolute times.
