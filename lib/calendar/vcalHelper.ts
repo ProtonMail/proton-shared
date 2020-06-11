@@ -11,8 +11,27 @@ import {
     VcalVtodoComponent
 } from '../interfaces/calendar/VcalModel';
 
-export const getIsIcalPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
+export const getIsPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
     return property.parameters?.type === 'date' ?? false;
+};
+
+export const getPropertyTzid = (property: VcalDateOrDateTimeProperty) => {
+    if (getIsPropertyAllDay(property)) {
+        return;
+    }
+    return property.value.isUTC ? 'UTC' : property.parameters?.tzid;
+};
+
+export const getIsAllDay = ({ dtstart }: VcalVeventComponent) => {
+    return getIsPropertyAllDay(dtstart);
+};
+
+export const getIsRecurring = ({ rrule }: VcalVeventComponent) => {
+    return !!rrule;
+};
+
+export const getRecurrenceId = ({ 'recurrence-id': recurrenceId }: VcalVeventComponent) => {
+    return recurrenceId;
 };
 
 export const getIsDateTimeValue = (value: VcalDateOrDateTimeValue): value is VcalDateTimeValue => {

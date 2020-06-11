@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { getInternalDateTimeValue, internalValueToIcalValue } from './vcal';
-import { getDtendProperty, getPropertyTzid, getIsIcalAllDay, propertyToUTCDate } from './vcalConverter';
+import { getDtendProperty, propertyToUTCDate } from './vcalConverter';
+import { getIsAllDay, getPropertyTzid } from './vcalHelper';
 import { addDays, addMilliseconds, differenceInCalendarDays, max } from '../date-fns-utc';
 import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, fromUTCDate, toUTCDate } from '../date/timezone';
 import { createExdateMap } from './exdate';
@@ -38,14 +39,6 @@ export interface OccurrenceIterationCache {
 }
 
 const YEAR_IN_MS = Date.UTC(1971, 0, 1);
-
-export const isIcalRecurring = ({ rrule }: VcalVeventComponent) => {
-    return !!rrule;
-};
-
-export const getIcalRecurrenceId = ({ 'recurrence-id': recurrenceId }: VcalVeventComponent) => {
-    return recurrenceId;
-};
 
 const isInInterval = (a1: number, a2: number, b1: number, b2: number) => a1 <= b2 && a2 >= b1;
 
@@ -154,7 +147,7 @@ const getOccurrenceSetup = (component: VcalVeventComponent) => {
     const { dtstart: internalDtstart, rrule: internalRrule, exdate: internalExdate } = component;
     const internalDtEnd = getDtendProperty(component);
 
-    const isAllDay = getIsIcalAllDay(component);
+    const isAllDay = getIsAllDay(component);
     const dtstartType = isAllDay ? 'date' : 'date-time';
 
     // Pretend the (local) date is in UTC time to keep the absolute times.
