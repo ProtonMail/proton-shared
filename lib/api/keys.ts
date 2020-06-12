@@ -1,4 +1,4 @@
-import { AddressKey, SignedKeyList, KeySalt } from '../interfaces';
+import { AddressKey, SignedKeyList } from '../interfaces';
 
 export const getPublicKeys = (params: { Email: string; Fingerprint?: string }) => ({
     url: 'keys',
@@ -22,17 +22,7 @@ export const createAddressKeyRoute = (data: {
     data
 });
 
-export const setupKeys = (data: {
-    PrimaryKey: string;
-    KeySalt: KeySalt;
-    AddressKeys: AddressKey[];
-    Auth: {
-        Version: number;
-        ModulusID: string;
-        Salt: string;
-        Verifier: string;
-    };
-}) => ({
+export const setupKeys = (data: { PrimaryKey: string; KeySalt: string; AddressKeys: AddressKey[] }) => ({
     url: 'keys/setup',
     method: 'post',
     data

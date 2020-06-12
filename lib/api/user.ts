@@ -6,15 +6,9 @@ export const getUser = () => ({
 export const queryCreateUser = (data: {
     Username: string;
     Email: string;
-    Token: string;
-    TokenType: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
+    Token?: string;
+    TokenType?: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
     Type: 1 | 2; // 1 = mail, 2 = VPN
-    Auth: {
-        Version: number;
-        ModulusID: string;
-        Salt: string;
-        Verifier: string;
-    };
     Referrer?: string;
     Payload?: {
         [key: string]: string;
@@ -31,12 +25,6 @@ export const queryCreateUserExternal = (data: {
     Token: string;
     TokenType: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
     Type: 1 | 2; // 1 = mail, 2 = VPN
-    Auth: {
-        Version: number;
-        ModulusID: string;
-        Salt: string;
-        Verifier: string;
-    };
     Referrer?: string;
     Payload?: {
         [key: string]: string;
