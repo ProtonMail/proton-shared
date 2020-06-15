@@ -167,6 +167,10 @@ export interface CreateCalendarEventBlobData {
 export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
     Permissions: number;
 }
+export interface CreateFromSharedCalendarEventData extends CreateCalendarEventBlobData {
+    SharedEventUID: string;
+    UID: string;
+}
 export interface CreateSingleCalendarEventData extends CreateCalendarEventData {
     MemberID: string;
 }
@@ -179,16 +183,6 @@ export const createEvent = (calendarID: string, data: CreateSingleCalendarEventD
 export const updateEvent = (calendarID: string, eventID: string, data: CreateSingleCalendarEventData) => ({
     url: `${CALENDAR_V1}/${calendarID}/events/${eventID}`,
     method: 'put',
-    data
-});
-
-interface CreateCalendarSharedEventData extends CreateSingleCalendarEventData {
-    UID: string;
-    Overwrite: number;
-}
-export const addSharedEvent = (calendarID: string, data: CreateCalendarSharedEventData) => ({
-    url: `${CALENDAR_V1}/${calendarID}/shared/events`,
-    method: 'post',
     data
 });
 
@@ -256,9 +250,17 @@ export interface UpdateCalendarEventSyncData {
     ID: string;
     Event?: CreateCalendarEventData;
 }
+export interface CreateFromSharedCalendarEventSyncData {
+    Event: CreateFromSharedCalendarEventData;
+}
 interface SyncMultipleEventsData {
     MemberID: string;
-    Events: (CreateCalendarEventSyncData | DeleteCalendarEventSyncData | UpdateCalendarEventSyncData)[];
+    Events: (
+        | CreateCalendarEventSyncData
+        | DeleteCalendarEventSyncData
+        | UpdateCalendarEventSyncData
+        | CreateFromSharedCalendarEventSyncData
+    )[];
 }
 export const syncMultipleEvents = (calendarID: string, data: SyncMultipleEventsData) => ({
     url: `${CALENDAR_V1}/${calendarID}/events/sync`,
