@@ -15,7 +15,7 @@ export const queryCreateUser = (data: {
     };
     Salt?: string;
 }) => ({
-    url: 'users',
+    url: 'v4/users',
     method: 'post',
     data
 });
