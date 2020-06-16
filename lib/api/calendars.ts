@@ -168,7 +168,7 @@ export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
     Permissions: number;
 }
 export interface CreateFromSharedCalendarEventData extends CreateCalendarEventBlobData {
-    SharedEventUID: string;
+    SharedEventID: string;
     UID: string;
 }
 export interface CreateSingleCalendarEventData extends CreateCalendarEventData {
