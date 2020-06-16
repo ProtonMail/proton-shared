@@ -6,11 +6,7 @@ import {
     truncate,
     encodeBase64URL,
     decodeBase64URL,
-    normalizeEmail,
-    normalizeInternalEmail,
-    validateEmailAddress,
-    truncateMore,
-    validateDomain
+    truncateMore
 } from '../../lib/helpers/string';
 
 describe('string', () => {

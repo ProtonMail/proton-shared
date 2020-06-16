@@ -1,6 +1,5 @@
 import getRandomValues from 'get-random-values';
 import { decodeBase64, encodeBase64 } from 'pmcrypto';
-import isTruthy from './isTruthy';
 
 enum CURRENCIES {
     USD = '$',
