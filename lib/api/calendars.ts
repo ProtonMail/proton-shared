@@ -167,10 +167,6 @@ export interface CreateCalendarEventBlobData {
 export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
     Permissions: number;
 }
-export interface CreateFromSharedCalendarEventData extends CreateCalendarEventBlobData {
-    SharedEventID: string;
-    UID: string;
-}
 export interface CreateSingleCalendarEventData extends CreateCalendarEventData {
     MemberID: string;
 }
@@ -250,16 +246,18 @@ export interface UpdateCalendarEventSyncData {
     ID: string;
     Event?: CreateCalendarEventData;
 }
-export interface CreateFromSharedCalendarEventSyncData {
-    Event: CreateFromSharedCalendarEventData;
+export interface CreateLinkedCalendarEventsSyncData {
+    UID: string;
+    SharedEventID: string;
+    Event: CreateCalendarEventData;
 }
 interface SyncMultipleEventsData {
     MemberID: string;
     Events: (
         | CreateCalendarEventSyncData
+        | CreateLinkedCalendarEventsSyncData
         | DeleteCalendarEventSyncData
         | UpdateCalendarEventSyncData
-        | CreateFromSharedCalendarEventSyncData
     )[];
 }
 export const syncMultipleEvents = (calendarID: string, data: SyncMultipleEventsData) => ({
