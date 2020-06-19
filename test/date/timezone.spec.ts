@@ -1,5 +1,10 @@
 import { listTimeZones } from 'timezone-support';
-import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, getSupportedTimezone } from '../../lib/date/timezone';
+import {
+    changePropertyTimezone,
+    convertUTCDateTimeToZone,
+    convertZonedDateTimeToUTC,
+    getSupportedTimezone
+} from '../../lib/date/timezone';
 import { MANUAL_TIMEZONE_LINKS, unsupportedTimezoneLinks } from '../../lib/date/timezoneDatabase';
 
 describe('convert utc', () => {
@@ -115,5 +120,51 @@ describe('getSupportedTimezone', () => {
         const results = unknown.map((tzid) => getSupportedTimezone(tzid));
         const expected = unknown.map(() => undefined);
         expect(results).toEqual(expected);
+    });
+});
+
+describe('changePropertyTimezone', () => {
+    const tzid = 'Pacific/Honolulu';
+    it('should not modify all-day properties', () => {
+        const property = {
+            value: { year: 2020, month: 4, day: 23 },
+            parameters: { type: 'date' as const }
+        };
+        expect(changePropertyTimezone(property, tzid)).toEqual(property);
+        expect(changePropertyTimezone(property, tzid, true)).toEqual(property);
+    });
+
+    it('should change the timezone of UTC dates', () => {
+        const property = {
+            value: { year: 2020, month: 4, day: 23, hours: 12, minutes: 30, seconds: 0, isUTC: true }
+        };
+        const expected = {
+            value: { year: 2020, month: 4, day: 23, hours: 2, minutes: 30, seconds: 0, isUTC: false },
+            parameters: { tzid }
+        };
+        expect(changePropertyTimezone(property, tzid)).toEqual(expected);
+    });
+
+    it('should change the timezone of timezoned dates', () => {
+        const property = {
+            value: { year: 2020, month: 4, day: 23, hours: 12, minutes: 30, seconds: 0, isUTC: false },
+            parameters: { tzid: 'Europe/Zurich' }
+        };
+        const expected = {
+            value: { year: 2020, month: 4, day: 23, hours: 0, minutes: 30, seconds: 0, isUTC: false },
+            parameters: { tzid }
+        };
+        expect(changePropertyTimezone(property, tzid)).toEqual(expected);
+    });
+
+    it('should return simplified form of UTC dates', () => {
+        const property = {
+            value: { year: 2020, month: 4, day: 23, hours: 12, minutes: 30, seconds: 0, isUTC: false },
+            parameters: { tzid: 'Europe/Zurich' }
+        };
+        const expected = {
+            value: { year: 2020, month: 4, day: 23, hours: 10, minutes: 30, seconds: 0, isUTC: true }
+        };
+        expect(changePropertyTimezone(property, 'UTC')).toEqual(expected);
     });
 });
