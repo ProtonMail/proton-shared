@@ -148,7 +148,7 @@ export const getEvent = (calendarID: string, eventID: string) => ({
     method: 'get'
 });
 
-interface GetEventByUIDArguments extends Partial<PaginationParams> {
+interface GetEventByUIDArguments extends PaginationParams {
     UID: string;
 }
 export const getEventByUID = (params: GetEventByUIDArguments) => ({
