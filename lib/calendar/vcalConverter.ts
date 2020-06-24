@@ -95,7 +95,11 @@ export const numericDayToDay = (number: VcalDays): VcalDaysKeys => {
     return VcalDays[mod(number, 7)] as VcalDaysKeys;
 };
 
-export const changePropertyTimezone = (property: VcalDateOrDateTimeProperty, tzid: string, isAllDay?: boolean) => {
+export const getDateTimePropertyInDifferentTimezone = (
+    property: VcalDateOrDateTimeProperty,
+    tzid: string,
+    isAllDay?: boolean
+) => {
     if (isAllDay === true || getIsPropertyAllDay(property)) {
         return getDateProperty(property.value);
     }
