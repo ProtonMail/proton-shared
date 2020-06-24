@@ -1,10 +1,5 @@
 import { listTimeZones } from 'timezone-support';
-import {
-    changePropertyTimezone,
-    convertUTCDateTimeToZone,
-    convertZonedDateTimeToUTC,
-    getSupportedTimezone
-} from '../../lib/date/timezone';
+import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, getSupportedTimezone } from '../../lib/date/timezone';
 import { MANUAL_TIMEZONE_LINKS, unsupportedTimezoneLinks } from '../../lib/date/timezoneDatabase';
 
 describe('convert utc', () => {
