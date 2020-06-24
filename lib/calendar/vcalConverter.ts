@@ -97,16 +97,9 @@ export const numericDayToDay = (number: VcalDays): VcalDaysKeys => {
 
 export const changePropertyTimezone = (property: VcalDateOrDateTimeProperty, tzid: string, isAllDay?: boolean) => {
     if (isAllDay === true || getIsPropertyAllDay(property)) {
-        return { ...property };
+        return getDateProperty(property.value);
     }
     const utcDate = propertyToUTCDate(property);
     const zonedDate = convertUTCDateTimeToZone(fromUTCDate(utcDate), tzid);
-    return tzid === 'UTC'
-        ? {
-              value: { ...zonedDate, isUTC: true }
-          }
-        : {
-              value: { ...zonedDate, isUTC: false },
-              parameters: { tzid }
-          };
+    return getDateTimeProperty(zonedDate, tzid);
 };
