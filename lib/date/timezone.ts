@@ -1,8 +1,5 @@
 import { listTimeZones, findTimeZone, getZonedTime, getUTCOffset } from 'timezone-support';
-import { propertyToUTCDate } from '../calendar/vcalConverter';
-import { getIsPropertyAllDay } from '../calendar/vcalHelper';
 import { DateTime } from '../interfaces/calendar/Date';
-import { VcalDateOrDateTimeProperty } from '../interfaces/calendar/VcalModel';
 import { MANUAL_TIMEZONE_LINKS, unsupportedTimezoneLinks } from './timezoneDatabase';
 
 export const toLocalDate = ({
@@ -244,20 +241,4 @@ export const convertUTCDateTimeToZone = (dateTime: DateTime, tzid: string) => {
     const offset = timezone.offsets[idx];
     const date = new Date(unixTime - offset * 60000);
     return fromUTCDate(date);
-};
-
-export const changePropertyTimezone = (property: VcalDateOrDateTimeProperty, tzid: string, isAllDay?: boolean) => {
-    if (isAllDay === true || getIsPropertyAllDay(property)) {
-        return { ...property };
-    }
-    const utcDate = propertyToUTCDate(property);
-    const zonedDate = convertUTCDateTimeToZone(fromUTCDate(utcDate), tzid);
-    return tzid === 'UTC'
-        ? {
-              value: { ...zonedDate, isUTC: true }
-          }
-        : {
-              value: { ...zonedDate, isUTC: false },
-              parameters: { tzid }
-          };
 };
