@@ -22,7 +22,7 @@ export const TYPES = [
         value: ConditionType.RECIPIENT
     },
     {
-        label: c('Filter modal type').t`The attachments`,
+        label: c('Filter modal type').t`The attachment`,
         value: ConditionType.ATTACHMENTS
     }
 ];
