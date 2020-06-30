@@ -1,6 +1,8 @@
 import createListeners, { Listeners } from './listeners';
 
-export interface Cache<K, V> extends Pick<Listeners<[K, V | undefined], void>, 'subscribe'>, Map<K, V> {}
+export interface Cache<K, V> extends Pick<Listeners<[K, V | undefined], void>, 'subscribe'>, Map<K, V> {
+    clearListeners: () => void;
+}
 
 /**
  * Wraps a map with support for subscribe/unsubscribe on changes.
@@ -23,10 +25,7 @@ const createCache = <K, V>(map = new Map<K, V>()): Cache<K, V> => {
         get [Symbol.toStringTag]() {
             return map[Symbol.toStringTag];
         },
-        clear: () => {
-            listeners.clear();
-            map.clear();
-        },
+        clear: () => map.clear(),
         delete: (key: K) => {
             const r = map.delete(key);
             listeners.notify(key, undefined);
@@ -37,7 +36,8 @@ const createCache = <K, V>(map = new Map<K, V>()): Cache<K, V> => {
             listeners.notify(key, value);
             return this;
         },
-        subscribe: listeners.subscribe
+        subscribe: listeners.subscribe,
+        clearListeners: listeners.clear
     };
 };
 
