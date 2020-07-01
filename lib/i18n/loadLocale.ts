@@ -3,16 +3,18 @@ import { setLocales } from './index';
 import { loadTtagLocale } from './ttagLocale';
 import { loadDateFnLocale } from './dateFnLocale';
 
+interface Config {
+    localeCode: string;
+    dateLocaleCode: string;
+    longDateLocaleCode: string;
+    languageCode: string;
+    locales: object;
+}
+
 /**
  * Load a new ttag and date-fn locale in the app.
- * @param {String} localeCode
- * @param {String} dateLocaleCode
- * @param {String} longDateLocaleCode
- * @param {String} languageCode
- * @param {Object} locales
- * @return {Promise}
  */
-export default async ({ localeCode, dateLocaleCode, longDateLocaleCode, languageCode, locales }) => {
+export default async ({ localeCode, dateLocaleCode, longDateLocaleCode, languageCode, locales }: Config) => {
     const [dateLocale] = await Promise.all([
         loadDateFnLocale({
             locale: dateLocaleCode,
@@ -21,7 +23,6 @@ export default async ({ localeCode, dateLocaleCode, longDateLocaleCode, language
         }),
         loadTtagLocale({
             locale: localeCode,
-            language: languageCode,
             locales
         })
     ]);
