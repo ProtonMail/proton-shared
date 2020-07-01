@@ -156,7 +156,7 @@ export const getEvent = (calendarID: string, eventID: string) => ({
     method: 'get',
 });
 
-interface GetEventByUIDArguments extends Partial<PaginationParams> {
+export interface GetEventByUIDArguments extends Partial<PaginationParams> {
     UID: string;
     RecurrenceID?: number;
     GroupID?: string;
