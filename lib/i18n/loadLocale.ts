@@ -2,13 +2,14 @@ import dateFnLocales from './dateFnLocales';
 import { setLocales } from './index';
 import { loadTtagLocale } from './ttagLocale';
 import { loadDateFnLocale } from './dateFnLocale';
+import { TtagLocaleMap } from '../interfaces/Locale';
 
 interface Config {
     localeCode: string;
     dateLocaleCode: string;
     longDateLocaleCode: string;
     languageCode: string;
-    locales: object;
+    locales: TtagLocaleMap;
 }
 
 /**
