@@ -59,3 +59,21 @@ export enum PARTICIPANT_STATUS {
     TENTATIVE = 'TENTATIVE',
     DELEGATED = 'DELEGATED'
 }
+
+export const MAX_LENGTHS = {
+    UID: 191,
+    CALENDAR_NAME: 100,
+    CALENDAR_DESCRIPTION: 255,
+    TITLE: 255,
+    EVENT_DESCRIPTION: 3000,
+    LOCATION: 255
+};
+
+export const MINIMUM_DATE = new Date(1970, 0, 1);
+export const MINIMUM_DATE_UTC = new Date(
+    Date.UTC(MINIMUM_DATE.getFullYear(), MINIMUM_DATE.getMonth(), MINIMUM_DATE.getDate())
+);
+export const MAXIMUM_DATE = new Date(2037, 11, 31);
+export const MAXIMUM_DATE_UTC = new Date(
+    Date.UTC(MAXIMUM_DATE.getFullYear(), MAXIMUM_DATE.getMonth(), MAXIMUM_DATE.getDate())
+);

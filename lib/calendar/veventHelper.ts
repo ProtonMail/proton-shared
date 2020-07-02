@@ -47,7 +47,7 @@ const TAKEN_KEYS = [
     ]),
 ] as const;
 
-export const withUid = (properties: VcalVeventComponent): VcalVeventComponent => {
+export const withUid = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
     if (properties.uid) {
         return properties;
     }
@@ -57,7 +57,7 @@ export const withUid = (properties: VcalVeventComponent): VcalVeventComponent =>
     };
 };
 
-export const withDtstamp = (properties: VcalVeventComponent): VcalVeventComponent => {
+export const withDtstamp = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
     if (properties.dtstamp) {
         return properties;
     }
@@ -67,7 +67,7 @@ export const withDtstamp = (properties: VcalVeventComponent): VcalVeventComponen
     };
 };
 
-export const withRequiredProperties = (properties: VcalVeventComponent): VcalVeventComponent => {
+export const withRequiredProperties = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
     return withDtstamp(withUid(properties));
 };
 
