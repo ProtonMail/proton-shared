@@ -161,6 +161,10 @@ export interface VcalAttendeePropertyWithPartstat extends VcalAttendeeProperty {
     parameters: VcalAttendeePropertyParameters & Required<Pick<VcalAttendeePropertyParameters, 'partstat'>>;
 }
 
+export interface VcalAttendeePropertyWithRole extends VcalAttendeeProperty {
+    parameters: VcalAttendeePropertyParameters & Required<Pick<VcalAttendeePropertyParameters, 'role'>>;
+}
+
 export interface VcalVeventComponent {
     component: 'vevent';
     components?: VcalValarmComponent[]; // Not complete. Can be other components.

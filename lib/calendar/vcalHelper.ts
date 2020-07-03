@@ -1,6 +1,7 @@
 import {
     VcalAttendeeProperty,
     VcalAttendeePropertyWithPartstat,
+    VcalAttendeePropertyWithRole,
     VcalCalendarComponent,
     VcalDateOrDateTimeProperty,
     VcalDateOrDateTimeValue,
@@ -98,4 +99,8 @@ export const getAttendeeHasPartStat = (
     attendee: VcalAttendeeProperty
 ): attendee is VcalAttendeePropertyWithPartstat => {
     return !!attendee.parameters?.partstat;
+};
+
+export const getAttendeeHasRole = (attendee: VcalAttendeeProperty): attendee is VcalAttendeePropertyWithRole => {
+    return !!attendee.parameters?.role;
 };

@@ -1,3 +1,4 @@
+import { c } from 'ttag';
 import getRandomValues from 'get-random-values';
 import { arrayToBinaryString } from 'pmcrypto';
 import { encodeBase64URL } from '../helpers/string';
@@ -11,6 +12,10 @@ export const generateUID = () => {
     const base64String = encodeBase64URL(arrayToBinaryString(randomBytes));
     // and we encode them in base 64
     return `${base64String}@proton.me`;
+};
+
+export const getDisplayTitle = (title = '') => {
+    return title.trim() || c('Event title').t`(no title)`;
 };
 
 /**
