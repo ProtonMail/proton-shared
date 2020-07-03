@@ -1,4 +1,6 @@
 import {
+    VcalAttendeeProperty,
+    VcalAttendeePropertyWithPartstat,
     VcalCalendarComponent,
     VcalDateOrDateTimeProperty,
     VcalDateOrDateTimeValue,
@@ -90,4 +92,10 @@ export const getHasAttendee = (
     vevent: VcalVeventComponent
 ): vevent is VcalVeventComponent & Required<Pick<VcalVeventComponent, 'attendee'>> => {
     return !!vevent.attendee;
+};
+
+export const getAttendeeHasPartStat = (
+    attendee: VcalAttendeeProperty
+): attendee is VcalAttendeePropertyWithPartstat => {
+    return !!attendee.parameters?.partstat;
 };
