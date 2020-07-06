@@ -67,6 +67,16 @@ export const withDtstamp = (properties: VcalVeventComponent): VcalVeventComponen
     };
 };
 
+export const withSequence = (properties: VcalVeventComponent): VcalVeventComponent => {
+    if (properties.sequence) {
+        return properties;
+    }
+    return {
+        ...properties,
+        sequence: { value: 0 }
+    };
+};
+
 export const withRequiredProperties = (properties: VcalVeventComponent): VcalVeventComponent => {
     return withDtstamp(withUid(properties));
 };
