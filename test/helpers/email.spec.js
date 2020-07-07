@@ -1,4 +1,4 @@
-import { normalizeEmail, normalizeInternalEmail, validateEmailAddress } from '../../lib/helpers/email';
+import { normalizeEmail, normalizeInternalEmail, parseMailtoURL, validateEmailAddress } from '../../lib/helpers/email';
 
 describe('email', () => {
     describe('validateEmailAddress', () => {
@@ -58,6 +58,26 @@ describe('email', () => {
             ];
             expect(emails.map((email) => normalizeEmail(email, true))).toEqual(normalized);
             expect(emails.map(normalizeInternalEmail)).toEqual(normalized);
+        });
+    });
+
+    describe('parseMailtoURL', () => {
+        it('should extract all "to emails" from the mailtoURL', () => {
+            const mailtoURLs = [
+                'mailTo:addr1@an.example',
+                'mailto:infobot@example.com?body=send%20current-issue',
+                'mailto:?to=addr1@an.example,addr2@an.example',
+                'mailto:list@example.org?In-Reply-To=%3C3469A91.D10AF4C@example.com%3E',
+                'mailto:addr1@an.example,addr2@an.example?to=addr3@an.example,addr4@an.example'
+            ];
+            const expected = [
+                ['addr1@an.example'],
+                ['infobot@example.com'],
+                ['addr1@an.example', 'addr2@an.example'],
+                ['list@example.org'],
+                ['addr1@an.example', 'addr2@an.example', 'addr3@an.example', 'addr4@an.example']
+            ];
+            expect(mailtoURLs.map(parseMailtoURL)).toEqual(expected.map((to) => ({ to })));
         });
     });
 });

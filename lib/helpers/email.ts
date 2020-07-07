@@ -2,6 +2,8 @@
  * Validate the local part of an email string according to the RFC https://tools.ietf.org/html/rfc5322;
  * see also https://en.wikipedia.org/wiki/Email_address#Local-part
  */
+import isTruthy from './isTruthy';
+
 export const validateLocalPart = (localPart: string) => {
     const match = localPart.match(/(^\(.+?\))?([^()]*)(\(.+?\)$)?/);
     if (!match) {
@@ -81,4 +83,29 @@ export const normalizeExternalEmail = (email: string) => {
  */
 export const normalizeEmail = (email: string, isInternal?: boolean) => {
     return isInternal ? normalizeInternalEmail(email) : normalizeExternalEmail(email);
+};
+
+const extractStringItems = (str: string) => {
+    return str.split(',').filter(isTruthy);
+};
+
+/**
+ * Extract "to address" and headers from a mailto URL https://tools.ietf.org/html/rfc6068
+ * TODO: extract headers. Only "to address" extracted atm
+ */
+export const parseMailtoURL = (mailtoURL: string) => {
+    const mailtoString = 'mailto:';
+    const toString = 'to=';
+    if (!mailtoURL.toLowerCase().startsWith(mailtoString)) {
+        throw new Error('Malformed mailto URL');
+    }
+    const url = mailtoURL.substring(mailtoString.length);
+    const [tos, hfields = ''] = url.split('?');
+    const addressTos = extractStringItems(tos);
+    const headers = hfields.split('&').filter(isTruthy);
+    const headerTos = headers
+        .filter((header) => header.toLowerCase().startsWith('to='))
+        .map((headerTo) => extractStringItems(headerTo.substring(toString.length)))
+        .flat();
+    return { to: [...addressTos, ...headerTos] };
 };

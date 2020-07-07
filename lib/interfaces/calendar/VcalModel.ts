@@ -148,7 +148,7 @@ export interface VcalOrganizerProperty {
     parameters?: VcalOrganizerPropertyParameters;
 }
 
-export interface VcalAttendeePropertyParameters extends VcalOrganizerProperty {
+export interface VcalAttendeePropertyParameters extends VcalOrganizerPropertyParameters {
     cutype?: string;
     member?: string;
     role?: string;
