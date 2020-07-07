@@ -136,16 +136,24 @@ export interface VcalStringWithParamsProperty {
     params?: { [key: string]: string };
 }
 
-export interface VcalAttendeePropertyParameters {
+export interface VcalOrganizerPropertyParameters {
+    cn?: string;
+    dir?: string;
+    language?: string;
+    'sent-by'?: string;
+}
+
+export interface VcalOrganizerProperty {
+    value: string;
+    parameters?: VcalOrganizerPropertyParameters;
+}
+
+export interface VcalAttendeePropertyParameters extends VcalOrganizerProperty {
     cutype?: string;
     member?: string;
     role?: string;
     partstat?: string;
-    cn?: string;
     rsvp?: string;
-    dir?: string;
-    language?: string;
-    'sent-by'?: string;
     'delegated-from'?: string;
     'delegated-to'?: string;
     'x-pm-permissions'?: ATTENDEE_PERMISSIONS;
@@ -175,7 +183,7 @@ export interface VcalVeventComponent {
     rrule?: VcalRruleProperty;
     'recurrence-id'?: VcalDateOrDateTimeProperty;
     exdate?: VcalDateOrDateTimeProperty[];
-    organizer?: VcalStringWithParamsProperty;
+    organizer?: VcalOrganizerProperty;
     attendee?: VcalAttendeeProperty[];
     description?: VcalStringProperty;
     summary?: VcalStringProperty;
