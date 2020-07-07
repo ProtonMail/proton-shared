@@ -29,7 +29,7 @@ export const checkStatus = (response: Response, config: any) => {
             return {};
         })
         .then((data) => {
-            throw createApiError({ name: 'StatusCodeError', response, data, config });
+            throw createApiError('StatusCodeError', response, config, data);
         });
 };
 
