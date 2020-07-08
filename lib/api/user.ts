@@ -1,3 +1,5 @@
+import { HumanVerificationMethodType } from '../interfaces';
+
 export const getUser = () => ({
     url: 'users',
     method: 'get'
@@ -7,7 +9,7 @@ export const queryCreateUser = (data: {
     Username: string;
     Email: string;
     Token?: string;
-    TokenType?: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
+    TokenType?: HumanVerificationMethodType;
     Type: 1 | 2; // 1 = mail, 2 = VPN
     Referrer?: string;
     Payload?: {
