@@ -4,16 +4,13 @@ export interface CalendarEventData {
     Type: CalendarEventDataType;
     Data: string;
     Signature: string;
+    Author: string;
 }
 
 export type CalendarEventDataMap = { [key in CalendarEventDataType]?: CalendarEventData };
 
 export interface CalendarPersonalEventData extends CalendarEventData {
     MemberID: string;
-    Author: string;
-    Data: string;
-    Signature: string;
-    Type: CalendarEventDataType;
 }
 
 export interface Attendee {
@@ -29,7 +26,6 @@ export interface CalendarEventBlobData {
     PersonalEvent: CalendarPersonalEventData[];
     AttendeesEvent: CalendarEventData;
     Attendees: Attendee[];
-    Author: string;
 }
 
 export interface CalendarEventSharedData {
