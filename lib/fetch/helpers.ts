@@ -1,4 +1,4 @@
-import { createApiError } from './error';
+import { createApiError } from './ApiError';
 
 const appendQueryParams = (url: URL, params: { [key: string]: any }) => {
     Object.keys(params).forEach((key) => {
