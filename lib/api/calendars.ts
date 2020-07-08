@@ -136,7 +136,7 @@ export enum CalendarEventsQueryType {
     PartDayInsideWindow = 0,
     PartDayBeforeWindow = 1,
     FullDayInsideWindow = 2,
-    FullDayBeforeWindow = 3,
+    FullDayBeforeWindow = 3
 }
 
 interface CalendarEventsQuery extends PaginationParams {
@@ -167,10 +167,10 @@ export const getEventByUID = (params: GetEventByUIDArguments) => ({
 
 export interface CreateCalendarEventBlobData {
     CalendarKeyPacket?: string;
-    CalendarEventContent?: CalendarEventData[];
+    CalendarEventContent?: Omit<CalendarEventData, 'Author'>[];
     SharedKeyPacket?: string;
-    SharedEventContent: CalendarEventData[];
-    PersonalEventContent?: CalendarEventData;
+    SharedEventContent: Omit<CalendarEventData, 'Author'>[];
+    PersonalEventContent?: Omit<CalendarEventData, 'Author'>;
 }
 export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
     Permissions: number;

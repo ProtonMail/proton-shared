@@ -11,8 +11,9 @@ import {
 } from 'pmcrypto';
 
 import { deserializeUint8Array } from '../helpers/serialization';
+import { SimpleMap } from '../interfaces/utils';
 import { CALENDAR_CARD_TYPE } from './constants';
-import { CalendarEventDataMap } from '../interfaces/calendar';
+import { CalendarEventData, CalendarEventDataMap } from '../interfaces/calendar';
 
 export const getDecryptedSessionKey = async (data: Uint8Array, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
     return decryptSessionKey({ message: await getMessage(data), privateKeys });
@@ -83,4 +84,18 @@ export const decryptAndVerifyPart = (
                 sessionKey
             ),
     ]);
+};
+
+export const decryptAndVerifyCalendarEvent = (
+    { Type, Data, Signature, Author }: CalendarEventData,
+    mapPublicKeys: SimpleMap<OpenPGPKey | OpenPGPKey[]>,
+    sessionKey: SessionKey | undefined
+) => {
+    const publicKeys = mapPublicKeys[Author] || [];
+    if (Type === CALENDAR_CARD_TYPE.SIGNED) {
+        return verifySignedCard(Data, Signature, publicKeys);
+    }
+    if (Type === CALENDAR_CARD_TYPE.ENCRYPTED_AND_SIGNED) {
+        return decryptCard(deserializeUint8Array(Data), Signature, publicKeys, sessionKey);
+    }
 };

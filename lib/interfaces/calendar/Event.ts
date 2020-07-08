@@ -24,7 +24,7 @@ export interface CalendarEventBlobData {
     SharedKeyPacket: string;
     SharedEvents: CalendarEventData[];
     PersonalEvent: CalendarPersonalEventData[];
-    AttendeesEvent: CalendarEventData;
+    AttendeesEvents: CalendarEventData[];
     Attendees: Attendee[];
 }
 
@@ -35,6 +35,7 @@ export interface CalendarEventSharedData {
     CreateTime: number;
     ModifyTime: number;
     Permissions: number;
+    Author: string;
 }
 
 export interface CalendarEventMetadata {
