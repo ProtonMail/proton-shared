@@ -31,25 +31,21 @@ export const readSessionKeys = (
  */
 interface ReadCalendarEventArguments {
     event: CalendarEvent;
-    mapPublicKeys: SimpleMap<OpenPGPKey | OpenPGPKey[]>;
+    publicKeysMap: SimpleMap<OpenPGPKey | OpenPGPKey[]>;
     sharedSessionKey?: SessionKey;
     calendarSessionKey?: SessionKey;
 }
 export const readCalendarEvent = async ({
     event: { SharedEvents = [], CalendarEvents = [], AttendeesEvents = [], Attendees = [] },
-    mapPublicKeys,
+    publicKeysMap,
     sharedSessionKey,
     calendarSessionKey,
 }: ReadCalendarEventArguments) => {
-    const decryptedSharedEvents = await Promise.all(
-        SharedEvents.map((event) => decryptAndVerifyCalendarEvent(event, mapPublicKeys, sharedSessionKey))
-    );
-    const decryptedCalendarEvents = await Promise.all(
-        CalendarEvents.map((event) => decryptAndVerifyCalendarEvent(event, mapPublicKeys, calendarSessionKey))
-    );
-    const decryptedAttendeesEvents = await Promise.all(
-        AttendeesEvents.map((event) => decryptAndVerifyCalendarEvent(event, mapPublicKeys, sharedSessionKey))
-    );
+    const [decryptedSharedEvents, decryptedCalendarEvents, decryptedAttendeesEvents] = await Promise.all([
+        Promise.all(SharedEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, sharedSessionKey))),
+        Promise.all(CalendarEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, calendarSessionKey))),
+        Promise.all(AttendeesEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, sharedSessionKey)))
+    ]);
 
     const sharedVevent = decryptedSharedEvents.reduce((acc, event) => {
         return { ...acc, ...(event && parse(unwrap(event))) };

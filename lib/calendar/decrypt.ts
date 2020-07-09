@@ -69,10 +69,10 @@ export const decryptCard = async (
 
 export const decryptAndVerifyCalendarEvent = (
     { Type, Data, Signature, Author }: CalendarEventData,
-    mapPublicKeys: SimpleMap<OpenPGPKey | OpenPGPKey[]>,
+    publicKeysMap: SimpleMap<OpenPGPKey | OpenPGPKey[]>,
     sessionKey: SessionKey | undefined
 ) => {
-    const publicKeys = mapPublicKeys[Author] || [];
+    const publicKeys = publicKeysMap[Author] || [];
     if (Type === CALENDAR_CARD_TYPE.SIGNED) {
         return verifySignedCard(Data, Signature, publicKeys);
     }
