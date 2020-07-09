@@ -52,8 +52,9 @@ export const decryptCard = async (
         signature: await getSignature(signature),
         sessionKeys: sessionKey ? [sessionKey] : undefined,
     });
+    const hasPublicKeys = Array.isArray(publicKeys) ? !!publicKeys.length : !!publicKeys;
 
-    if (verified !== VERIFICATION_STATUS.SIGNED_AND_VALID) {
+    if (hasPublicKeys && verified !== VERIFICATION_STATUS.SIGNED_AND_VALID) {
         const error = new Error('Signature verification failed');
         error.name = 'SignatureError';
         throw error;
