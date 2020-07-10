@@ -1,6 +1,38 @@
-import { normalizeEmail, normalizeInternalEmail, parseMailtoURL, validateEmailAddress } from '../../lib/helpers/email';
+import {
+    normalizeEmail,
+    normalizeInternalEmail,
+    parseMailtoURL,
+    validateEmailAddress,
+    validateDomain
+} from '../../lib/helpers/email';
 
 describe('email', () => {
+    describe('validateDomain', () => {
+        it('should accept valid domains', () => {
+            const domains = [
+                'protonmail.com',
+                'mail.proton.me.',
+                'vpn.at.proton.me',
+                'pro-ton.mail.com',
+                'xn--80ak6aa92e.com',
+                '_dnslink.ipfs.io',
+                'n.mk',
+                'a-1234567890-1234567890-1234567890-1234567890-1234567890-1234-z.eu.us',
+                'external.asd1230-123.asd_internal.asd.gm-_ail.com'
+            ];
+            const results = domains.map((domain) => validateDomain(domain));
+            const expected = domains.map(() => true);
+            expect(results).toEqual(expected);
+        });
+
+        it('should reject invalid domains', () => {
+            const domains = ['protonmail', '-mail.proton.me.', '1234', '[123.32]', 'pro*ton.mail.com'];
+            const results = domains.map((domain) => validateDomain(domain));
+            const expected = domains.map(() => false);
+            expect(results).toEqual(expected);
+        });
+    });
+
     describe('validateEmailAddress', () => {
         it('should validate good email addresses', () => {
             const emails = [
@@ -35,10 +67,11 @@ describe('email', () => {
     });
 
     describe('normalizeEmail', () => {
-        it('should leave external emails the same', () => {
+        it('should lower case external emails', () => {
             const emails = ['testing@myDomain', 'TeS.--TinG@MYDOMAIN', 'ABC;;@cde', 'bad@email@this.is'];
-            expect(emails.map((email) => normalizeEmail(email))).toEqual(emails);
-            expect(emails.map((email) => normalizeEmail(email, false))).toEqual(emails);
+            const expected = emails.map((email) => email.toLowerCase());
+            expect(emails.map((email) => normalizeEmail(email))).toEqual(expected);
+            expect(emails.map((email) => normalizeEmail(email, false))).toEqual(expected);
         });
 
         it('should normalize internal emails properly', () => {
