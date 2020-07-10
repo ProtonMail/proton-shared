@@ -20,7 +20,15 @@ export const SHARED_SIGNED_FIELDS = [
     'exdate',
     'sequence',
 ] as const;
-export const SHARED_ENCRYPTED_FIELDS = ['uid', 'dtstamp', 'created', 'description', 'summary', 'location'] as const;
+export const SHARED_ENCRYPTED_FIELDS = [
+    'uid',
+    'dtstamp',
+    'created',
+    'description',
+    'summary',
+    'location',
+    'organizer'
+] as const;
 
 export const CALENDAR_SIGNED_FIELDS = ['uid', 'dtstamp', 'status', 'transp'] as const;
 export const CALENDAR_ENCRYPTED_FIELDS = ['uid', 'dtstamp', 'comment'] as const;
@@ -29,7 +37,7 @@ export const USER_SIGNED_FIELDS = ['uid', 'dtstamp'] as const;
 export const USER_ENCRYPTED_FIELDS = [] as const;
 
 export const ATTENDEES_SIGNED_FIELDS = [] as const;
-export const ATTENDEES_ENCRYPTED_FIELDS = ['uid', 'attendee', 'organizer'] as const;
+export const ATTENDEES_ENCRYPTED_FIELDS = ['uid', 'attendee'] as const;
 
 const REQUIRED_SET = new Set(['uid', 'dtstamp'] as const);
 
