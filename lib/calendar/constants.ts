@@ -20,6 +20,13 @@ export enum CALENDAR_PERMISSIONS {
     AVAILABILITY = 1,
 }
 
+export enum ATTENDEE_PERMISSIONS {
+    SEE = 1,
+    INVITE = 2,
+    EDIT = 4,
+    DELETE = 8
+}
+
 export enum CALENDAR_FLAGS {
     INACTIVE = 0,
     ACTIVE = 1,
@@ -46,13 +53,13 @@ export enum EVENT_STATUS {
     CANCELLED = 'CANCELLED'
 }
 
-export enum PARTICIPANT_ROLE {
+export enum ATTENDEE_ROLE {
     REQUIRED = 'REQ-PARTICIPANT', // Indicates a participant whose participation is required
     OPTIONAL = 'OPT-PARTICIPANT', // Indicates a participant whose participation is optional
     NON = 'NON-PARTICIPANT' // Indicates a participant who is copied for information purposes only
 }
 
-export enum PARTICIPANT_STATUS {
+export enum ATTENDEE_STATUS {
     NEEDS_ACTION = 'NEEDS-ACTION',
     ACCEPTED = 'ACCEPTED',
     DECLINED = 'DECLINED',

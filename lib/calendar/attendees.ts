@@ -1,29 +1,27 @@
 import getRandomValues from 'get-random-values';
 import { serializeUint8Array } from '../helpers/serialization';
-
-export const PERMISSIONS_SEE_ATTENDEES = 1;
-export const PERMISSIONS_INVITE = 2;
-export const PERMISSIONS_EDIT = 4;
-export const PERMISSIONS_DELETE = 8;
+import { Attendee } from '../interfaces/calendar';
+import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { ATTENDEE_PERMISSIONS } from './constants';
 
 const generateAttendeeToken = () => {
-    const value = getRandomValues(new Uint8Array(128));
+    // we need a random base64 string with 40 characters
+    const value = getRandomValues(new Uint8Array(30));
     return serializeUint8Array(value);
 };
 
 /**
  * Internally permissions are stored as x-pm-permissions in the vevent,
  * but stripped for the api.
- * @type any
  */
 export const fromInternalAttendee = ({
     parameters: {
-        'x-pm-permissions': oldPermissions = PERMISSIONS_SEE_ATTENDEES,
-        'x-pm-token': oldToken,
+        'x-pm-permissions': oldPermissions = ATTENDEE_PERMISSIONS.SEE,
+        'x-pm-token': oldToken = '',
         ...restParameters
     } = {},
     ...rest
-}) => {
+}: VcalAttendeeProperty) => {
     const token = oldToken || generateAttendeeToken();
     return {
         attendee: {
@@ -40,12 +38,10 @@ export const fromInternalAttendee = ({
     };
 };
 
-/**
- * @param {Object} attendees
- * @param {Array} clear
- * @returns {Object}
- */
-export const toInternalAttendee = ({ attendee: attendees = [] }, clear = []) => {
+export const toInternalAttendee = (
+    { attendee: attendees = [] }: Pick<VcalVeventComponent, 'attendee'>,
+    clear: Attendee[] = []
+) => {
     return {
         attendee: attendees.map((attendee) => {
             if (!attendee.parameters) {
