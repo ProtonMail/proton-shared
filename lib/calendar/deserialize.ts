@@ -8,9 +8,6 @@ import { unwrap } from './helper';
 import { toInternalAttendee } from './attendees';
 import { CalendarEventData, CalendarEvent, CalendarPersonalEventData } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import { withRequiredProperties } from './veventHelper';
-import { getDateProperty, getDateTimeProperty } from './vcalConverter';
-import { fromUTCDate } from '../date/timezone';
 
 export const readSessionKey = (KeyPacket: string, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
     return getDecryptedSessionKey(deserializeUint8Array(KeyPacket), privateKeys);
@@ -39,15 +36,6 @@ interface ReadCalendarEventArguments {
     calendarSessionKey?: SessionKey;
 }
 
-const DEFAULT_VCALEVENT: VcalVeventComponent = withRequiredProperties({
-    uid: {
-        value: 'default-uid'
-    },
-    component: 'vevent',
-    dtstart: getDateProperty({ year: 1970, month: 1, day: 1 }),
-    dtstamp: getDateTimeProperty(fromUTCDate(new Date()))
-});
-
 export const readCalendarEvent = async ({
     event: { SharedEvents = [], CalendarEvents = [], AttendeesEvents = [], Attendees = [] },
     publicKeysMap,
@@ -65,7 +53,7 @@ export const readCalendarEvent = async ({
             return acc;
         }
         return { ...acc, ...(event && parse(unwrap(event))) };
-    }, DEFAULT_VCALEVENT);
+    }, {} as VcalVeventComponent);
 
     const veventAttendees = decryptedAttendeesEvents.reduce<VcalAttendeeProperty[]>((acc, event) => {
         if (!event) {
