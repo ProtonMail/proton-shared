@@ -64,22 +64,14 @@ export const readCalendarEvent = async ({
         if (!event) {
             return acc;
         }
-        try {
-            return { ...acc, ...(event && parse(unwrap(event))) };
-        } catch (e) {
-            return acc;
-        }
+        return { ...acc, ...(event && parse(unwrap(event))) };
     }, DEFAULT_VCALEVENT);
 
     const veventAttendees = decryptedAttendeesEvents.reduce<VcalAttendeeProperty[]>((acc, event) => {
         if (!event) {
             return acc;
         }
-        try {
-            return acc.concat(toInternalAttendee(parse(unwrap(event)), Attendees));
-        } catch (e) {
-            return acc;
-        }
+        return acc.concat(toInternalAttendee(parse(unwrap(event)), Attendees));
     }, []);
 
     if (!veventAttendees.length) {
