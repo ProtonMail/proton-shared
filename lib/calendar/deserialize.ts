@@ -7,7 +7,10 @@ import { parse } from './vcal';
 import { unwrap } from './helper';
 import { toInternalAttendee } from './attendees';
 import { CalendarEventData, CalendarEvent, CalendarPersonalEventData } from '../interfaces/calendar';
-import { VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { withRequiredProperties } from './veventHelper';
+import { getDateProperty, getDateTimeProperty } from './vcalConverter';
+import { fromUTCDate } from '../date/timezone';
 
 export const readSessionKey = (KeyPacket: string, privateKeys: OpenPGPKey | OpenPGPKey[]) => {
     return getDecryptedSessionKey(deserializeUint8Array(KeyPacket), privateKeys);
@@ -35,6 +38,16 @@ interface ReadCalendarEventArguments {
     sharedSessionKey?: SessionKey;
     calendarSessionKey?: SessionKey;
 }
+
+const DEFAULT_VCALEVENT: VcalVeventComponent = withRequiredProperties({
+    uid: {
+        value: 'default-uid'
+    },
+    component: 'vevent',
+    dtstart: getDateProperty({ year: 1970, month: 1, day: 1 }),
+    dtstamp: getDateTimeProperty(fromUTCDate(new Date()))
+});
+
 export const readCalendarEvent = async ({
     event: { SharedEvents = [], CalendarEvents = [], AttendeesEvents = [], Attendees = [] },
     publicKeysMap,
@@ -47,17 +60,36 @@ export const readCalendarEvent = async ({
         Promise.all(AttendeesEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, sharedSessionKey)))
     ]);
 
-    const sharedVevent = decryptedSharedEvents.reduce((acc, event) => {
-        return { ...acc, ...(event && parse(unwrap(event))) };
-    }, {});
-    const calendarVevent = decryptedCalendarEvents.reduce((acc, event) => {
-        return { ...acc, ...(event && parse(unwrap(event))) };
-    }, {});
-    const attendeesVevent = decryptedAttendeesEvents.reduce((acc, event) => {
-        return { ...acc, ...(event && toInternalAttendee(parse(unwrap(event)), Attendees)) };
-    }, {});
+    const vevent = [...decryptedSharedEvents, ...decryptedCalendarEvents].reduce<VcalVeventComponent>((acc, event) => {
+        if (!event) {
+            return acc;
+        }
+        try {
+            return { ...acc, ...(event && parse(unwrap(event))) };
+        } catch (e) {
+            return acc;
+        }
+    }, DEFAULT_VCALEVENT);
 
-    return { ...sharedVevent, ...calendarVevent, ...attendeesVevent } as VcalVeventComponent;
+    const veventAttendees = decryptedAttendeesEvents.reduce<VcalAttendeeProperty[]>((acc, event) => {
+        if (!event) {
+            return acc;
+        }
+        try {
+            return acc.concat(toInternalAttendee(parse(unwrap(event)), Attendees));
+        } catch (e) {
+            return acc;
+        }
+    }, []);
+
+    if (!veventAttendees.length) {
+        return vevent;
+    }
+
+    return {
+        ...vevent,
+        attendee: veventAttendees
+    };
 };
 
 export const readPersonalPart = async (
