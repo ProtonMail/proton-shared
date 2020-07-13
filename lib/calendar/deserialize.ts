@@ -54,7 +54,7 @@ export const readCalendarEvent = async ({
         return { ...acc, ...(event && parse(unwrap(event))) };
     }, {});
     const attendeesVevent = decryptedAttendeesEvents.reduce((acc, event) => {
-        return { ...acc, ...(event && toInternalAttendee(parse(unwrap(event)))) };
+        return { ...acc, ...(event && toInternalAttendee(parse(unwrap(event)), Attendees)) };
     }, {});
 
     return { ...sharedVevent, ...calendarVevent, ...attendeesVevent } as VcalVeventComponent;

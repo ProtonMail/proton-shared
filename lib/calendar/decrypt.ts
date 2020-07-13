@@ -73,6 +73,9 @@ export const decryptAndVerifyCalendarEvent = (
     sessionKey: SessionKey | undefined
 ) => {
     const publicKeys = publicKeysMap[Author] || [];
+    if (Type === CALENDAR_CARD_TYPE.CLEAR) {
+        return Data;
+    }
     if (Type === CALENDAR_CARD_TYPE.SIGNED) {
         return verifySignedCard(Data, Signature, publicKeys);
     }

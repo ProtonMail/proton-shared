@@ -61,6 +61,29 @@ const veventComponent = {
     ]
 };
 
+const transformToExternal = (data, publicAddressKey, sharedSessionKey, calendarSessionKey) => {
+    const withAuthor = (x, author) => {
+        if (!x) {
+            return;
+        }
+        return x.map((y) => ({ ...y, Author: author }));
+    };
+
+    return {
+        event: {
+            SharedEvents: withAuthor(data.SharedEventContent, 'me'),
+            CalendarEvents: withAuthor(data.CalendarEventContent, 'me'),
+            AttendeesEvents: withAuthor([data.AttendeesEventContent], 'me'),
+            Attendees: data.Attendees
+        },
+        publicKeysMap: {
+            me: [publicAddressKey]
+        },
+        sharedSessionKey,
+        calendarSessionKey
+    };
+};
+
 describe('calendar encryption', () => {
     it('should encrypt and sign calendar events', async () => {
         const primaryCalendarKey = await decryptPrivateKey(DecryptableKey.PrivateKey, '123');
@@ -128,17 +151,9 @@ describe('calendar encryption', () => {
         });
 
         const [sharedSessionKey, calendarSessionKey] = await readSessionKeys(data, primaryCalendarKey);
-        const otherVeventComponent = await readCalendarEvent({
-            event: {
-                SharedEvents: data.SharedEventContent,
-                CalendarEvents: data.CalendarEventContent,
-                AttendeesEvent: data.AttendeesEventContent,
-                Attendees: data.Attendees
-            },
-            publicKeys: publicAddressKey,
-            sharedSessionKey,
-            calendarSessionKey
-        });
+        const otherVeventComponent = await readCalendarEvent(
+            transformToExternal(data, publicAddressKey, sharedSessionKey, calendarSessionKey)
+        );
         const { components } = await readPersonalPart(data.PersonalEventContent, publicAddressKey);
 
         expect({ ...otherVeventComponent, components }).toEqual(veventComponent);
