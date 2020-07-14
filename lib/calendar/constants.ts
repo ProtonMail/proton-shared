@@ -84,3 +84,48 @@ export const MAXIMUM_DATE = new Date(2037, 11, 31);
 export const MAXIMUM_DATE_UTC = new Date(
     Date.UTC(MAXIMUM_DATE.getFullYear(), MAXIMUM_DATE.getMonth(), MAXIMUM_DATE.getDate())
 );
+
+export enum FREQUENCY {
+    ONCE = 'ONCE',
+    DAILY = 'DAILY',
+    WEEKLY = 'WEEKLY',
+    MONTHLY = 'MONTHLY',
+    YEARLY = 'YEARLY',
+    CUSTOM = 'CUSTOM',
+    OTHER = 'OTHER'
+}
+
+export const FREQUENCY_INTERVALS_MAX = {
+    [FREQUENCY.ONCE]: 1000 - 1,
+    [FREQUENCY.DAILY]: 1000 - 1,
+    [FREQUENCY.WEEKLY]: 5000 - 1,
+    [FREQUENCY.MONTHLY]: 1000 - 1,
+    [FREQUENCY.YEARLY]: 100 - 1,
+    [FREQUENCY.CUSTOM]: 1000 - 1,
+    [FREQUENCY.OTHER]: 1
+};
+export const FREQUENCY_COUNT_MAX = 50 - 1;
+
+export enum DAILY_TYPE {
+    ALL_DAYS = 0
+}
+
+export enum WEEKLY_TYPE {
+    ON_DAYS = 0
+}
+
+export enum MONTHLY_TYPE {
+    ON_MONTH_DAY = 0,
+    ON_NTH_DAY = 1,
+    ON_MINUS_NTH_DAY = -1
+}
+
+export enum YEARLY_TYPE {
+    BY_MONTH_ON_MONTH_DAY = 0
+}
+
+export enum END_TYPE {
+    NEVER = 'NEVER',
+    AFTER_N_TIMES = 'COUNT',
+    UNTIL = 'UNTIL'
+}

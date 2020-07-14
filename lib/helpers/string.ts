@@ -53,6 +53,16 @@ export const capitalize = (str: any) => {
 };
 
 /**
+ * Uncapitalize a string
+ */
+export const uncapitalize = (str: any) => {
+    if (str === '' || typeof str !== 'string') {
+        return '';
+    }
+    return str[0].toLowerCase() + str.slice(1);
+};
+
+/**
  * Given a maximum number of characters to display,
  * truncate a string by adding omission if too long
  */
