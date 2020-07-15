@@ -25,7 +25,7 @@ export const queryCreateUser = (data: {
 export const queryCreateUserExternal = (data: {
     Email: string;
     Token?: string;
-    TokenType?: 'captcha' | 'email' | 'sms' | 'invite' | 'payment';
+    TokenType?: HumanVerificationMethodType;
     Type: 1 | 2; // 1 = mail, 2 = VPN
     Referrer?: string;
     Payload?: {
