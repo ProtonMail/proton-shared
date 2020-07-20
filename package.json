@@ -63,7 +63,7 @@
         "@types/jasmine": "^3.4.6",
         "eslint": "^7.3.1",
         "eslint-config-proton-lint": "github:ProtonMail/proton-lint#semver:^0.0.4",
-        "husky": "^2.4.1",
+        "husky": "^4.2.5",
         "jasmine": "^3.4.0",
         "jasmine-core": "^3.4.0",
         "karma": "^4.1.0",
