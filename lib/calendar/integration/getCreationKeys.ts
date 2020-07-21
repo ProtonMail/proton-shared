@@ -1,10 +1,9 @@
 import { c } from 'ttag';
 import getPrimaryKey from '../../keys/getPrimaryKey';
 import { hasBit } from '../../helpers/bitset';
-import { KeyFlags } from '../../keys/calendarKeys';
 import { readSessionKeys } from '../deserialize';
 import { splitKeys } from '../../keys/keys';
-import { CalendarEvent } from '../../interfaces/calendar';
+import { CalendarEvent, KeyFlags } from '../../interfaces/calendar';
 import { CachedKey } from '../../interfaces';
 
 interface GetCreationKeysArguments {
@@ -17,7 +16,7 @@ export const getCreationKeys = async ({
     Event,
     addressKeys,
     newCalendarKeys,
-    oldCalendarKeys
+    oldCalendarKeys,
 }: GetCreationKeysArguments) => {
     const primaryAddressKey = getPrimaryKey(addressKeys);
     const primaryPrivateAddressKey = primaryAddressKey ? primaryAddressKey.privateKey : undefined;
@@ -42,7 +41,7 @@ export const getCreationKeys = async ({
         publicKey: primaryPublicCalendarKey,
         signingKey: primaryPrivateAddressKey,
         sharedSessionKey,
-        calendarSessionKey
+        calendarSessionKey,
     };
 };
 
