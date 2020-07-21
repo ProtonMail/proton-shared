@@ -118,8 +118,14 @@ export const formatTimezoneOffset = (offset: number) => {
     return `${sign}${hours}`;
 };
 
-type FormatterProps = { utcOffset: string; name: string };
-type getTimeZoneOptions = (date: Date, options: {formatter: (a1: FormatterProps) => string}) => {
+interface FormatterProps {
+    utcOffset: string;
+    name: string;
+}
+type GetTimeZoneOptions = (
+    date: Date,
+    options: { formatter?: (a1: FormatterProps) => string }
+) => {
     text: string;
     value: string;
     key: number;
@@ -128,7 +134,7 @@ type getTimeZoneOptions = (date: Date, options: {formatter: (a1: FormatterProps)
  * Get a list of all IANA time zones that we support
  * @return {Array<Object>}      [{ text: 'Africa/Nairobi: UTC +03:00', value: 'Africa/Nairobi'}, ...]
  */
-export const getTimeZoneOptions = (
+export const getTimeZoneOptions: GetTimeZoneOptions = (
     date = new Date(),
     { formatter = ({ utcOffset, name }: FormatterProps) => `${name} (${utcOffset})` } = {}
 ) => {
