@@ -47,3 +47,7 @@ export interface ModulusResponse {
     Modulus: string;
     ModulusID: string;
 }
+
+export interface LocalKeyResponse {
+    ClientKey: string;
+}

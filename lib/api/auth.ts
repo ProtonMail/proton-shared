@@ -25,7 +25,13 @@ export const setRefreshCookies = () => ({
     url: 'auth/refresh',
 });
 
-export const setCookies = ({ UID, AccessToken, RefreshToken, State, RedirectURI = 'https://protonmail.com' }: any) => ({
+interface CookiesArgs {
+    UID: string;
+    RefreshToken: string;
+    State: string;
+    RedirectURI?: string;
+}
+export const setCookies = ({ UID, RefreshToken, State, RedirectURI = 'https://protonmail.com' }: CookiesArgs) => ({
     method: 'post',
     url: 'auth/cookies',
     data: {
@@ -36,10 +42,11 @@ export const setCookies = ({ UID, AccessToken, RefreshToken, State, RedirectURI 
         RedirectURI,
         State,
     },
-    headers: {
-        Authorization: `Bearer ${AccessToken}`,
-        'x-pm-uid': UID,
-    },
+});
+
+export const getLocalKey = () => ({
+    method: 'get',
+    url: '/auth/sessions/local/key',
 });
 
 export const getInfo = (Username?: string) => ({
