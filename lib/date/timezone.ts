@@ -124,7 +124,7 @@ interface FormatterProps {
 }
 type GetTimeZoneOptions = (
     date: Date,
-    options: { formatter?: (a1: FormatterProps) => string }
+    options?: { formatter?: (a1: FormatterProps) => string }
 ) => {
     text: string;
     value: string;
