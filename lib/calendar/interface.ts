@@ -1,6 +1,14 @@
 import { OpenPGPSignature } from 'pmcrypto';
 import { VcalAttendeeProperty, VcalAttendeePropertyParameters } from '../interfaces/calendar/VcalModel';
-import { DAILY_TYPE, END_TYPE, FREQUENCY, MONTHLY_TYPE, WEEKLY_TYPE, YEARLY_TYPE } from './constants';
+import {
+    DAILY_TYPE,
+    END_TYPE,
+    FREQUENCY,
+    MONTHLY_TYPE,
+    WEEKLY_TYPE,
+    YEARLY_TYPE,
+    ATTENDEE_STATUS_API,
+} from './constants';
 
 export interface EncryptPartResult {
     dataPacket: Uint8Array;
@@ -14,6 +22,7 @@ export interface SignPartResult {
 
 export interface AttendeeClearPartResult {
     permissions: number;
+    status: ATTENDEE_STATUS_API;
     token: string;
 }
 

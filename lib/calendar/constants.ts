@@ -24,7 +24,7 @@ export enum ATTENDEE_PERMISSIONS {
     SEE = 1,
     INVITE = 2,
     EDIT = 4,
-    DELETE = 8
+    DELETE = 8,
 }
 
 export enum CALENDAR_FLAGS {
@@ -44,27 +44,34 @@ export enum ICAL_METHOD {
     CANCEL = 'CANCEL',
     DECLINECOUNTER = 'DECLINECOUNTER',
     REFRESH = 'REFRESH',
-    COUNTER = 'COUNTER'
+    COUNTER = 'COUNTER',
 }
 
 export enum EVENT_STATUS {
     TENTATIVE = 'TENTATIVE',
     CONFIRMED = 'CONFIRMED',
-    CANCELLED = 'CANCELLED'
+    CANCELLED = 'CANCELLED',
 }
 
-export enum ATTENDEE_ROLE {
+export enum ICAL_ATTENDEE_ROLE {
     REQUIRED = 'REQ-PARTICIPANT', // Indicates a participant whose participation is required
     OPTIONAL = 'OPT-PARTICIPANT', // Indicates a participant whose participation is optional
-    NON = 'NON-PARTICIPANT' // Indicates a participant who is copied for information purposes only
+    NON = 'NON-PARTICIPANT', // Indicates a participant who is copied for information purposes only
 }
 
-export enum ATTENDEE_STATUS {
+export enum ICAL_ATTENDEE_STATUS {
     NEEDS_ACTION = 'NEEDS-ACTION',
     ACCEPTED = 'ACCEPTED',
     DECLINED = 'DECLINED',
     TENTATIVE = 'TENTATIVE',
-    DELEGATED = 'DELEGATED'
+    DELEGATED = 'DELEGATED',
+}
+
+export enum ATTENDEE_STATUS_API {
+    NEEDS_ACTION,
+    TENTATIVE,
+    ACCEPTED,
+    DECLINED,
 }
 
 export const MAX_LENGTHS = {
@@ -73,7 +80,7 @@ export const MAX_LENGTHS = {
     CALENDAR_DESCRIPTION: 255,
     TITLE: 255,
     EVENT_DESCRIPTION: 3000,
-    LOCATION: 255
+    LOCATION: 255,
 };
 
 export const MINIMUM_DATE = new Date(1970, 0, 1);
@@ -92,7 +99,7 @@ export enum FREQUENCY {
     MONTHLY = 'MONTHLY',
     YEARLY = 'YEARLY',
     CUSTOM = 'CUSTOM',
-    OTHER = 'OTHER'
+    OTHER = 'OTHER',
 }
 
 export const FREQUENCY_INTERVALS_MAX = {
@@ -102,30 +109,30 @@ export const FREQUENCY_INTERVALS_MAX = {
     [FREQUENCY.MONTHLY]: 1000 - 1,
     [FREQUENCY.YEARLY]: 100 - 1,
     [FREQUENCY.CUSTOM]: 1000 - 1,
-    [FREQUENCY.OTHER]: 1
+    [FREQUENCY.OTHER]: 1,
 };
 export const FREQUENCY_COUNT_MAX = 50 - 1;
 
 export enum DAILY_TYPE {
-    ALL_DAYS = 0
+    ALL_DAYS = 0,
 }
 
 export enum WEEKLY_TYPE {
-    ON_DAYS = 0
+    ON_DAYS = 0,
 }
 
 export enum MONTHLY_TYPE {
     ON_MONTH_DAY = 0,
     ON_NTH_DAY = 1,
-    ON_MINUS_NTH_DAY = -1
+    ON_MINUS_NTH_DAY = -1,
 }
 
 export enum YEARLY_TYPE {
-    BY_MONTH_ON_MONTH_DAY = 0
+    BY_MONTH_ON_MONTH_DAY = 0,
 }
 
 export enum END_TYPE {
     NEVER = 'NEVER',
     AFTER_N_TIMES = 'COUNT',
-    UNTIL = 'UNTIL'
+    UNTIL = 'UNTIL',
 }

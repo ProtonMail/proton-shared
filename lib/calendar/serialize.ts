@@ -90,7 +90,11 @@ export const formatData = ({
               ]
             : undefined,
         Attendees: attendeesClearPart
-            ? attendeesClearPart.map(({ token, permissions }) => ({ Token: token, Permissions: permissions }))
+            ? attendeesClearPart.map(({ token, status, permissions }) => ({
+                  Token: token,
+                  Permissions: permissions,
+                  Status: status,
+              }))
             : undefined,
     };
 };
