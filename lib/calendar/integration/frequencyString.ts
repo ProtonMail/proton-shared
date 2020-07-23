@@ -532,9 +532,9 @@ const getCustomYearlyString = (
     }
 };
 
-const getFrequencyString = (
+export const getFrequencyString = (
     frequencyModel: FrequencyModel,
-    { date, weekStartsOn, locale }: GetTimezonedFrequencyStringOptions
+    { date, weekStartsOn, locale }: Pick<GetTimezonedFrequencyStringOptions, 'date' | 'weekStartsOn' | 'locale'>
 ) => {
     const { type, frequency, weekly, monthly } = frequencyModel;
     const startDay = weekly.days[0];
@@ -601,7 +601,7 @@ export const getTimezonedFrequencyString = (
         type,
         frequency,
         weekly: { days },
-        ends: { type: endType }
+        ends: { type: endType },
     } = frequencyModel;
     const { startTzid, currentTzid } = options;
 
