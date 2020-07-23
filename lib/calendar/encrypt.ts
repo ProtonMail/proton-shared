@@ -8,12 +8,8 @@ import {
     signMessage,
     splitMessage,
 } from 'pmcrypto';
-import { CachedKey } from '../interfaces';
-import { VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import getCreationKeys from './integration/getCreationKeys';
 
 import { EncryptPartResult, SignPartResult } from './interface';
-import { createCalendarEvent } from './serialize';
 
 export function signPart(dataToSign: string, signingKey: OpenPGPKey): Promise<SignPartResult>;
 export function signPart(dataToSign: string | undefined, signingKey: OpenPGPKey): Promise<SignPartResult | undefined>;
@@ -83,17 +79,4 @@ export const createSessionKey = async (publicKey: OpenPGPKey) => {
         data: sessionKey,
         algorithm,
     };
-};
-
-export const encryptEvent = async (
-    eventComponent: VcalVeventComponent,
-    addressKeys: CachedKey[],
-    calendarKeys: CachedKey[]
-) => {
-    const data = await createCalendarEvent({
-        eventComponent,
-        isSwitchCalendar: false,
-        ...(await getCreationKeys({ addressKeys, newCalendarKeys: calendarKeys }))
-    });
-    return { data, component: eventComponent };
 };

@@ -81,11 +81,13 @@ export const formatData = ({
               }
             : undefined,
         AttendeesEventContent: attendeesEncryptedPart
-            ? {
-                  Type: ENCRYPTED_AND_SIGNED,
-                  Data: serializeUint8Array(attendeesEncryptedPart.dataPacket),
-                  Signature: getArmoredSignatureString(attendeesEncryptedPart.signature),
-              }
+            ? [
+                  {
+                      Type: ENCRYPTED_AND_SIGNED,
+                      Data: serializeUint8Array(attendeesEncryptedPart.dataPacket),
+                      Signature: getArmoredSignatureString(attendeesEncryptedPart.signature),
+                  },
+              ]
             : undefined,
         Attendees: attendeesClearPart
             ? attendeesClearPart.map(({ token, permissions }) => ({ Token: token, Permissions: permissions }))
