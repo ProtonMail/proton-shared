@@ -1,27 +1,24 @@
 import { PROTON_THEMES, CUSTOM_THEME, DEFAULT_THEME } from './themes';
 import { DARK_MODE_CLASS } from '../constants';
 
-const { protonThemeIdentifiers, protonThemes } = Object.values(PROTON_THEMES).reduce<{
-    protonThemeIdentifiers: string[];
-    protonThemes: { [key: string]: string };
-}>(
-    (acc, { identifier, theme }) => {
-        acc.protonThemeIdentifiers.push(identifier);
-        acc.protonThemes[identifier] = theme;
-        return acc;
-    },
-    { protonThemeIdentifiers: [], protonThemes: {} }
-);
+const protonThemeValues = Object.values(PROTON_THEMES);
+const protonThemeIdentifiers = protonThemeValues.map(({ identifier }) => identifier);
+type Identifiers = typeof protonThemeIdentifiers[number];
+const protonThemes = protonThemeValues.reduce<{ [key in Identifiers]: string }>((acc, { identifier, theme }) => {
+    acc[identifier] = theme;
+    return acc;
+}, {} as any);
+
 const defaultThemeIdentifier = DEFAULT_THEME.identifier;
 
 /**
  * Given a theme, return identifier
  */
-export const getThemeIdentifier = (theme: string) => {
+export const getThemeIdentifier = (theme?: string) => {
     if (!theme) {
         return defaultThemeIdentifier;
     }
-    if (![defaultThemeIdentifier, ...protonThemeIdentifiers].includes(theme)) {
+    if (![defaultThemeIdentifier, ...protonThemeIdentifiers].includes(theme as any)) {
         return CUSTOM_THEME.identifier;
     }
     // for proton themes, the CSS for the theme coincides with the identifier
@@ -63,9 +60,9 @@ export const stripThemeIdentifier = (themeIdentifier: string) => {
 /**
  * Given a theme identifier, return theme
  */
-export const getTheme = (themeIdentifier: string) => {
-    if (protonThemeIdentifiers.includes(themeIdentifier)) {
-        return protonThemes[themeIdentifier];
+export const getTheme = (themeIdentifier?: string) => {
+    if (themeIdentifier && themeIdentifier in protonThemes) {
+        return protonThemes[themeIdentifier as Identifiers];
     }
     return '';
 };
