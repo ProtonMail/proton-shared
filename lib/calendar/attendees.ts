@@ -56,24 +56,22 @@ export const fromInternalAttendee = ({
 export const toInternalAttendee = (
     { attendee: attendees = [] }: Pick<VcalVeventComponent, 'attendee'>,
     clear: Attendee[] = []
-) => {
-    return {
-        attendee: attendees.map((attendee) => {
-            if (!attendee.parameters) {
-                return attendee;
-            }
-            const token = attendee.parameters['x-pm-token'];
-            const extra = clear.find(({ Token }) => Token === token);
-            if (!token || !extra) {
-                return attendee;
-            }
-            return {
-                ...attendee,
-                parameters: {
-                    ...attendee.parameters,
-                    'x-pm-permissions': extra.Permissions,
-                },
-            };
-        }),
-    };
+): VcalAttendeeProperty[] => {
+    return attendees.map((attendee) => {
+        if (!attendee.parameters) {
+            return attendee;
+        }
+        const token = attendee.parameters['x-pm-token'];
+        const extra = clear.find(({ Token }) => Token === token);
+        if (!token || !extra) {
+            return attendee;
+        }
+        return {
+            ...attendee,
+            parameters: {
+                ...attendee.parameters,
+                'x-pm-permissions': extra.Permissions,
+            },
+        };
+    });
 };

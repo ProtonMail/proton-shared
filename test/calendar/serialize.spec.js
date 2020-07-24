@@ -18,7 +18,7 @@ const veventComponent = {
     ],
     uid: { value: '123' },
     dtstamp: {
-        value: { year: 2019, month: 12, day: 11, hours: 12, minutes: 12, seconds: 12, isUTC: true }
+        value: { year: 2019, month: 12, day: 11, hours: 12, minutes: 12, seconds: 12, isUTC: true },
     },
     dtstart: {
         value: { year: 2019, month: 12, day: 11, hours: 12, minutes: 12, seconds: 12, isUTC: true },
@@ -77,14 +77,14 @@ const transformToExternal = (data, publicAddressKey, sharedSessionKey, calendarS
         event: {
             SharedEvents: withAuthor(data.SharedEventContent, 'me'),
             CalendarEvents: withAuthor(data.CalendarEventContent, 'me'),
-            AttendeesEvents: withAuthor([data.AttendeesEventContent], 'me'),
-            Attendees: data.Attendees
+            AttendeesEvents: withAuthor(data.AttendeesEventContent, 'me'),
+            Attendees: data.Attendees,
         },
         publicKeysMap: {
-            me: [publicAddressKey]
+            me: [publicAddressKey],
         },
         sharedSessionKey,
-        calendarSessionKey
+        calendarSessionKey,
     };
 };
 
@@ -112,7 +112,7 @@ describe('calendar encryption', () => {
                     Type: 3,
                     Data: jasmine.stringMatching(/0rIB8pECtS5Mmdeh\+pBh0SN5j5TqWA.*/g),
                     Signature: jasmine.stringMatching(/-----BEGIN PGP SIGNATURE-----.*/g),
-                }
+                },
             ],
             CalendarKeyPacket:
                 'wV4DatuD4HBmK9ESAQdAh5aMHBZCvQYA9q2Gm4j5LJYj0N/ETwHe/+Icmt09yl8w81ByP+wHwvShTNdKZNv7ziSuGkYloQ9Y2hReRQR0Vdacz4LtBa2T3H17aBbI/rBs',
@@ -120,15 +120,15 @@ describe('calendar encryption', () => {
                 {
                     Type: 3,
                     Data: jasmine.stringMatching(/0rAB8pECtS5Mmdeh\+pBh0SN5.*/g),
-                    Signature: jasmine.stringMatching(/-----BEGIN PGP SIGNATURE-----.*/g)
-                }
+                    Signature: jasmine.stringMatching(/-----BEGIN PGP SIGNATURE-----.*/g),
+                },
             ],
             PersonalEventContent: {
                 Type: 2,
                 Data: wrap(
                     'BEGIN:VEVENT\r\nUID:123\r\nDTSTAMP:20191211T121212Z\r\nBEGIN:VALARM\r\nTRIGGER:-PT15H\r\nEND:VALARM\r\nEND:VEVENT'
                 ),
-                Signature: jasmine.stringMatching(/-----BEGIN PGP SIGNATURE-----.*/g)
+                Signature: jasmine.stringMatching(/-----BEGIN PGP SIGNATURE-----.*/g),
             },
             AttendeesEventContent: [
                 {
