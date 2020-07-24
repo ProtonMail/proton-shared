@@ -8,7 +8,7 @@ export enum ATTENDEE_PERMISSIONS {
     SEE = 1,
     INVITE = 2,
     EDIT = 4,
-    DELETE = 8
+    DELETE = 8,
 }
 
 export enum CALENDAR_PERMISSIONS {

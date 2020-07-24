@@ -136,7 +136,7 @@ export enum CalendarEventsQueryType {
     PartDayInsideWindow = 0,
     PartDayBeforeWindow = 1,
     FullDayInsideWindow = 2,
-    FullDayBeforeWindow = 3
+    FullDayBeforeWindow = 3,
 }
 
 interface CalendarEventsQuery extends PaginationParams {

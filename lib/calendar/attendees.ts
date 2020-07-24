@@ -26,14 +26,14 @@ export const fromInternalAttendee = ({
         attendee: {
             parameters: {
                 ...restParameters,
-                'x-pm-token': token
+                'x-pm-token': token,
             },
-            ...rest
+            ...rest,
         },
         clear: {
             permissions: oldPermissions,
-            token
-        }
+            token,
+        },
     };
 };
 
@@ -54,8 +54,8 @@ export const toInternalAttendee = (
             ...attendee,
             parameters: {
                 ...attendee.parameters,
-                'x-pm-permissions': extra.Permissions
-            }
+                'x-pm-permissions': extra.Permissions,
+            },
         };
     });
 };
