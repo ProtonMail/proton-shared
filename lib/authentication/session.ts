@@ -2,6 +2,7 @@ import { decryptMessage, encryptMessage, getMessage } from 'pmcrypto';
 
 import { setItem, getItem } from '../helpers/storage';
 import { deserializeUint8Array } from '../helpers/serialization';
+import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
 
 const getKey = (localID: number) => `S-${localID}`;
 
@@ -53,14 +54,6 @@ export const setPersistedSessionBlob = async (
     setItem(getKey(localID), JSON.stringify(persistedSession));
 };
 
-interface PersistedSessionBlob {
-    keyPassword: string;
-}
-
-interface PersistedSession {
-    UID: string;
-    blob?: string;
-}
 export const getPersistedSession = (localID: number): PersistedSession | undefined => {
     const itemValue = getItem(getKey(localID));
     if (!itemValue) {

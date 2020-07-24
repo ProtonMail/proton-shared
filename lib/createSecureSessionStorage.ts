@@ -1,11 +1,7 @@
 import createStore from './helpers/store';
 import { load, save } from './helpers/secureSessionStorage';
 
-/**
- * @param {Array} keys
- * @return {{set, getState, get, reset, remove}}
- */
-export default (keys = []) => {
+const createSecureSessionStorage = (keys: string[] = []) => {
     const store = createStore(load(keys));
 
     if ('onpagehide' in window) {
@@ -30,3 +26,7 @@ export default (keys = []) => {
 
     return store;
 };
+
+export type SecureSessionStorage = ReturnType<typeof createSecureSessionStorage>;
+
+export default createSecureSessionStorage;

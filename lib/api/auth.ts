@@ -46,7 +46,7 @@ export const setCookies = ({ UID, RefreshToken, State, RedirectURI = 'https://pr
 
 export const getLocalKey = () => ({
     method: 'get',
-    url: '/auth/sessions/local/key',
+    url: 'auth/sessions/local/key',
 });
 
 export const getInfo = (Username?: string) => ({
