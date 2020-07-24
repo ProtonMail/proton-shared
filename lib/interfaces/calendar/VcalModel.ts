@@ -1,4 +1,4 @@
-import { ATTENDEE_PERMISSIONS } from '../../calendar/constants';
+import { ATTENDEE_PERMISSIONS, ICAL_EVENT_STATUS } from '../../calendar/constants';
 
 export enum VcalDays {
     SU,
@@ -148,6 +148,10 @@ export interface VcalOrganizerProperty {
     parameters?: VcalOrganizerPropertyParameters;
 }
 
+export interface VcalStatusProperty {
+    value: ICAL_EVENT_STATUS;
+}
+
 export interface VcalAttendeePropertyParameters extends VcalOrganizerPropertyParameters {
     cutype?: string;
     member?: string;
@@ -193,7 +197,7 @@ export interface VcalVeventComponent {
     class?: VcalStringProperty;
     priority?: VcalStringProperty;
     sequence?: VcalNumberProperty;
-    status?: VcalStringProperty;
+    status?: VcalStatusProperty;
     created?: VcalDateTimeProperty;
     'last-modified'?: VcalDateTimeProperty;
     transp?: VcalStringProperty;

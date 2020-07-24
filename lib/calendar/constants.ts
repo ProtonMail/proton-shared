@@ -47,7 +47,7 @@ export enum ICAL_METHOD {
     COUNTER = 'COUNTER',
 }
 
-export enum EVENT_STATUS {
+export enum ICAL_EVENT_STATUS {
     TENTATIVE = 'TENTATIVE',
     CONFIRMED = 'CONFIRMED',
     CANCELLED = 'CANCELLED',
