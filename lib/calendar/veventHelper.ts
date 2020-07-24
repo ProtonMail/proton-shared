@@ -18,17 +18,10 @@ export const SHARED_SIGNED_FIELDS = [
     'recurrence-id',
     'rrule',
     'exdate',
+    'organizer',
     'sequence',
 ] as const;
-export const SHARED_ENCRYPTED_FIELDS = [
-    'uid',
-    'dtstamp',
-    'created',
-    'description',
-    'summary',
-    'location',
-    'organizer'
-] as const;
+export const SHARED_ENCRYPTED_FIELDS = ['uid', 'dtstamp', 'created', 'description', 'summary', 'location'] as const;
 
 export const CALENDAR_SIGNED_FIELDS = ['uid', 'dtstamp', 'status', 'transp'] as const;
 export const CALENDAR_ENCRYPTED_FIELDS = ['uid', 'dtstamp', 'comment'] as const;
