@@ -255,7 +255,7 @@ export interface DeleteCalendarEventSyncData {
 }
 export interface UpdateCalendarEventSyncData {
     ID: string;
-    Event?: CreateCalendarEventData;
+    Event?: Omit<CreateCalendarEventData, 'SharedKeyPacket'>;
 }
 export interface CreateLinkedCalendarEventsSyncData {
     UID: string;
