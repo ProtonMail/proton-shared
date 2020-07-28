@@ -42,6 +42,6 @@ const createAuthenticationStore = ({ set, get }: Arguments) => {
     };
 };
 
-export type CreateAuthenticationStore = ReturnType<typeof createAuthenticationStore>;
+export type AuthenticationStore = ReturnType<typeof createAuthenticationStore>;
 
 export default createAuthenticationStore;
