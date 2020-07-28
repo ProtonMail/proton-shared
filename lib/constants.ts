@@ -655,3 +655,5 @@ export enum LINK_TYPES {
 // This is a definition coming from webpack. Hide behind typeof for the test env.
 declare const WEBPACK_FEATURE_FLAGS: string;
 export const FEATURE_FLAGS = typeof WEBPACK_FEATURE_FLAGS === 'undefined' ? '' : WEBPACK_FEATURE_FLAGS;
+
+export const isSSOMode = FEATURE_FLAGS.includes('sso');

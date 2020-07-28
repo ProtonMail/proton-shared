@@ -1,7 +1,7 @@
 import { encodeUtf8Base64, decodeUtf8Base64 } from 'pmcrypto';
 
-import { MAILBOX_PASSWORD_KEY, UID_KEY, LOCAL_ID_KEY } from './constants';
-import { PersistedSession } from './authentication/SessionInterface';
+import { MAILBOX_PASSWORD_KEY, UID_KEY, LOCAL_ID_KEY } from '../constants';
+import { PersistedSession } from './SessionInterface';
 
 interface Arguments {
     set: (key: string, value: any) => void;
@@ -24,10 +24,10 @@ const createAuthenticationStore = ({ set, get }: Arguments) => {
     const hasSession = () => !!getUID();
 
     let tmpPersistedSession: PersistedSession;
-    const setPersistedSession = (persistedSession: PersistedSession) => {
+    const setTmpPersistedSession = (persistedSession: PersistedSession) => {
         tmpPersistedSession = persistedSession;
-    }
-    const getPersistedSession = () => tmpPersistedSession;
+    };
+    const getTmpPersistedSession = () => tmpPersistedSession;
 
     return {
         getUID,
@@ -37,11 +37,11 @@ const createAuthenticationStore = ({ set, get }: Arguments) => {
         hasSession,
         setPassword,
         getPassword,
-        setPersistedSession,
-        getPersistedSession,
+        setTmpPersistedSession,
+        getTmpPersistedSession,
     };
 };
 
-export type AuthenticationStore = ReturnType<typeof createAuthenticationStore>;
+export type CreateAuthenticationStore = ReturnType<typeof createAuthenticationStore>;
 
 export default createAuthenticationStore;

@@ -1,5 +1,5 @@
-import createStore from './helpers/store';
-import { load, save } from './helpers/secureSessionStorage';
+import createStore from '../helpers/store';
+import { load, save } from '../helpers/secureSessionStorage';
 
 const createSecureSessionStorage = (keys: string[] = []) => {
     const store = createStore(load(keys));
