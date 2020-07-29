@@ -9,13 +9,22 @@ interface Arguments {
 }
 
 const createAuthenticationStore = ({ set, get }: Arguments) => {
-    const setUID = (UID: string) => set(UID_KEY, UID);
+    const setUID = (UID: string | undefined) => set(UID_KEY, UID);
     const getUID = (): string => get(UID_KEY);
 
-    const setPassword = (password: string) => set(MAILBOX_PASSWORD_KEY, encodeUtf8Base64(password));
+    const setPassword = (password: string | undefined) => {
+        if (password === undefined) {
+            set(MAILBOX_PASSWORD_KEY, password);
+            return;
+        }
+        set(MAILBOX_PASSWORD_KEY, encodeUtf8Base64(password));
+    };
     const getPassword = () => {
         const value = get(MAILBOX_PASSWORD_KEY);
-        return value ? decodeUtf8Base64(value) : undefined;
+        if (value === undefined) {
+            return '';
+        }
+        return decodeUtf8Base64(value);
     };
 
     const setLocalID = (LocalID: number) => set(LOCAL_ID_KEY, LocalID);

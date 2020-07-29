@@ -657,3 +657,5 @@ declare const WEBPACK_FEATURE_FLAGS: string;
 export const FEATURE_FLAGS = typeof WEBPACK_FEATURE_FLAGS === 'undefined' ? '' : WEBPACK_FEATURE_FLAGS;
 
 export const isSSOMode = FEATURE_FLAGS.includes('sso');
+declare const PL_IS_STANDALONE: string;
+export const isStandaloneMode = typeof PL_IS_STANDALONE === 'undefined' ? false : PL_IS_STANDALONE;
