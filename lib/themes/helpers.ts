@@ -1,4 +1,4 @@
-import { PROTON_THEMES, CUSTOM_THEME, DEFAULT_THEME } from './themes';
+import { PROTON_THEMES, CUSTOM_THEME } from './themes';
 import { DARK_MODE_CLASS } from '../constants';
 
 const protonThemeValues = Object.values(PROTON_THEMES);
@@ -9,7 +9,7 @@ const protonThemes = protonThemeValues.reduce<{ [key in Identifiers]: string }>(
     return acc;
 }, {} as any);
 
-const defaultThemeIdentifier = DEFAULT_THEME.identifier;
+const defaultThemeIdentifier = PROTON_THEMES.DEFAULT.identifier;
 
 /**
  * Given a theme, return identifier
