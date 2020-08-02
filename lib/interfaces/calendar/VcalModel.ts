@@ -240,7 +240,8 @@ export type VcalCalendarComponent =
     | VcalVtodoComponent
     | VcalVjournalComponent
     | VcalVfreebusyComponent
-    | VcalVtimezoneComponent;
+    | VcalVtimezoneComponent
+    | VcalVcalendar;
 
 export interface VcalVcalendar {
     component: string;
