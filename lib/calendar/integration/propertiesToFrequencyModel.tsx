@@ -5,7 +5,7 @@ import {
     VcalDateTimeValue,
     VcalDays,
     VcalRruleFreqValue,
-    VcalRruleProperty
+    VcalRruleProperty,
 } from '../../interfaces/calendar/VcalModel';
 import { DAILY_TYPE, END_TYPE, FREQUENCY, MONTHLY_TYPE, WEEKLY_TYPE, YEARLY_TYPE } from '../constants';
 import { DateTimeModel, FrequencyModel } from '../interface';
@@ -86,10 +86,11 @@ export const propertiesToFrequencyModel = (
     rrule: VcalRruleProperty | undefined,
     { date: startDate, tzid: startTzid }: DateTimeModel
 ): FrequencyModel => {
-    const { freq, count, interval, until, bysetpos, byday } = rrule?.value || {};
-    const isSupported = getIsRruleSupported(rrule?.value);
-    const isCustom = isSupported ? getIsRruleCustom(rrule?.value) : false;
-    const type = getType(isSupported, isCustom, freq);
+    const rruleValue = rrule?.value;
+    const { freq, count, interval, until, bysetpos, byday } = rruleValue || {};
+    const isSupported = getIsRruleSupported(rruleValue);
+    const isCustom = isSupported ? getIsRruleCustom(rruleValue) : false;
+    const type = !rrule ? FREQUENCY.ONCE : getType(isSupported, isCustom, freq);
     const frequency = getFrequency(freq);
     const endType = getEndType(count, until);
     const monthType = getMonthType(byday, bysetpos);
@@ -101,22 +102,22 @@ export const propertiesToFrequencyModel = (
         frequency,
         interval: interval || 1, // INTERVAL=1 is ignored when parsing a recurring rule
         daily: {
-            type: DAILY_TYPE.ALL_DAYS
+            type: DAILY_TYPE.ALL_DAYS,
         },
         weekly: {
             type: WEEKLY_TYPE.ON_DAYS,
-            days: weeklyDays
+            days: weeklyDays,
         },
         monthly: {
-            type: monthType
+            type: monthType,
         },
         yearly: {
-            type: YEARLY_TYPE.BY_MONTH_ON_MONTH_DAY
+            type: YEARLY_TYPE.BY_MONTH_ON_MONTH_DAY,
         },
         ends: {
             type: endType,
             count: count || 2,
-            until: untilDate
-        }
+            until: untilDate,
+        },
     };
 };
