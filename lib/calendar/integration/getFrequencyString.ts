@@ -4,11 +4,22 @@ import { WeekStartsOn } from '../../date-fns-utc/interface';
 import { mod } from '../../helpers/math';
 import { END_TYPE, FREQUENCY, MONTHLY_TYPE } from '../constants';
 import { getPositiveSetpos } from '../helper';
-import { FrequencyModel } from '../interface';
+import {
+    VcalDateOrDateTimeProperty,
+    VcalRrulePropertyValue,
+    VcalRruleProperty
+} from '../../interfaces/calendar/VcalModel';
+import { getEndType, getMonthType, getUntilDate, getWeeklyDays } from './rruleProperties';
+import { toUTCDate } from '../../date/timezone';
+import { getIsRruleCustom, getIsRruleSupported } from './rrule';
+import { getPropertyTzid } from '../vcalHelper';
 
+interface RruleEnd {
+    type: END_TYPE,
+    count?: number;
+    until?: Date;
+}
 interface GetTimezonedFrequencyStringOptions {
-    date: Date;
-    startTzid: string;
     currentTzid: string;
     locale: Locale;
     weekStartsOn: WeekStartsOn;
@@ -142,9 +153,12 @@ export const getOnDayString = (date: Date, monthlyType: MONTHLY_TYPE) => {
 };
 
 const getCustomDailyString = (
-    { interval = 1, ends: { type: endType, until, count = 1 } }: FrequencyModel,
-    locale: Locale
+    rruleValue: VcalRrulePropertyValue,
+    { type: endType, count = 1, until }: RruleEnd,
+    locale: Locale,
 ) => {
+    const { interval = 1 } = rruleValue;
+
     if (endType === END_TYPE.NEVER) {
         return c('Daily recurring event, frequency').ngettext(msgid`Daily`, `Every ${interval} days`, interval);
     }
@@ -198,10 +212,12 @@ const getWeekdayString = (weekday: number) => {
 };
 
 const getCustomWeeklyString = (
-    { interval = 1, weekly: { days }, ends: { type: endType, until, count = 1 } }: FrequencyModel,
+    { interval = 1, byday }: VcalRrulePropertyValue,
+    { type: endType, count = 1, until }: RruleEnd,
     weekStartsOn: WeekStartsOn,
     locale: Locale
 ) => {
+    const days = getWeeklyDays(byday);
     // sort weekly days depending on the day the week starts
     const sortedWeekDays = days.slice().sort((a: number, b: number) => {
         // shift days. Get a positive modulus
@@ -467,11 +483,14 @@ const getCustomWeeklyString = (
 };
 
 const getCustomMonthlyString = (
-    { interval = 1, monthly, ends: { type: endType, until, count = 1 } }: FrequencyModel,
+    rruleValue: VcalRrulePropertyValue,
+    { type: endType, count = 1, until }: RruleEnd,
+    monthlyType: MONTHLY_TYPE,
     date: Date,
     locale: Locale
 ) => {
-    const onDayString = date ? getOnDayString(date, monthly.type) : '';
+    const { interval = 1 } = rruleValue;
+    const onDayString = date ? getOnDayString(date, monthlyType) : '';
     if (endType === END_TYPE.NEVER) {
         return c('Monthly recurring event, frequency').ngettext(
             msgid`Monthly ${onDayString}`,
@@ -503,12 +522,14 @@ const getCustomMonthlyString = (
 };
 
 const getCustomYearlyString = (
-    { interval = 1, ends: { type: endType, until, count = 1 } }: FrequencyModel,
+    { interval = 1 }: VcalRrulePropertyValue,
+    { type: endType, count = 1, until }: RruleEnd,
     locale: Locale
 ) => {
     if (endType === END_TYPE.NEVER) {
         return c('Yearly recurring event, frequency').ngettext(msgid`Yearly`, `Every ${interval} years`, interval);
     }
+
     if (endType === END_TYPE.AFTER_N_TIMES) {
         return interval === 1
             ? c('Yearly recurring event, frequency').ngettext(
@@ -522,6 +543,7 @@ const getCustomYearlyString = (
                   count
               );
     }
+
     if (endType === END_TYPE.UNTIL && until) {
         const dateString = format(until, 'd MMM yyyy', { locale });
         return c('Yearly recurring event, frequency').ngettext(
@@ -533,20 +555,49 @@ const getCustomYearlyString = (
 };
 
 export const getFrequencyString = (
-    frequencyModel: FrequencyModel,
-    { date, weekStartsOn, locale }: Pick<GetTimezonedFrequencyStringOptions, 'date' | 'weekStartsOn' | 'locale'>
+    rruleValue: VcalRrulePropertyValue,
+    dtstart: VcalDateOrDateTimeProperty,
+    { weekStartsOn, locale }: Pick<GetTimezonedFrequencyStringOptions, 'weekStartsOn' | 'locale'>
 ) => {
-    const { type, frequency, weekly, monthly } = frequencyModel;
-    const startDay = weekly.days[0];
+    const { freq, count, until } = rruleValue;
 
-    if (type === FREQUENCY.OTHER) {
-        const frequencyString = frequency.toLowerCase();
+    const isCustom = getIsRruleCustom(rruleValue);
+    const isSupported = getIsRruleSupported(rruleValue);
+    const localStart = toUTCDate(dtstart.value);
+    const startDay = localStart.getUTCDay();
+    const end = {
+        type: getEndType(count, until),
+        count,
+        until: getUntilDate(until)
+    };
+
+    if (!isSupported) {
+        if (!freq) {
+            return c('Info').t`Custom`;
+        }
+        const frequencyString = freq.toLowerCase();
         return c('Info').t`Custom ${frequencyString}`;
     }
-    if (type === FREQUENCY.DAILY) {
+    if (isCustom) {
+        if (freq === FREQUENCY.DAILY) {
+            return getCustomDailyString(rruleValue, end, locale);
+        }
+        if (freq === FREQUENCY.WEEKLY) {
+            return getCustomWeeklyString(rruleValue, end, weekStartsOn, locale);
+        }
+        if (freq === FREQUENCY.MONTHLY) {
+            const { byday, bysetpos } = rruleValue;
+            const monthType = getMonthType(byday, bysetpos);
+            return getCustomMonthlyString(rruleValue, end, monthType, localStart, locale);
+        }
+        if (freq === FREQUENCY.YEARLY) {
+            return getCustomYearlyString(rruleValue, end, locale);
+        }
+    }
+    if (freq === FREQUENCY.DAILY) {
         return c('Info').t`Daily`;
     }
-    if (type === FREQUENCY.WEEKLY) {
+    if (freq === FREQUENCY.WEEKLY) {
         if (startDay === 0) {
             return c('Weekly recurring event, frequency').t`Weekly on Sunday`;
         }
@@ -569,69 +620,61 @@ export const getFrequencyString = (
             return c('Weekly recurring event, frequency').t`Weekly on Saturday`;
         }
     }
-    if (type === FREQUENCY.MONTHLY) {
-        const onDayString = date ? getOnDayString(date, monthly.type) : '';
+    if (freq === FREQUENCY.MONTHLY) {
+        const { byday, bysetpos } = rruleValue;
+        const monthType = getMonthType(byday, bysetpos);
+        const onDayString = getOnDayString(localStart, monthType);
         return c('Info').t`Monthly ${onDayString}`;
     }
-    if (type === FREQUENCY.YEARLY) {
+    if (freq === FREQUENCY.YEARLY) {
         return c('Info').t`Yearly`;
-    }
-    if (type === FREQUENCY.CUSTOM) {
-        if (frequency === FREQUENCY.DAILY) {
-            return getCustomDailyString(frequencyModel, locale);
-        }
-        if (frequency === FREQUENCY.WEEKLY) {
-            return getCustomWeeklyString(frequencyModel, weekStartsOn, locale);
-        }
-        if (frequency === FREQUENCY.MONTHLY) {
-            return getCustomMonthlyString(frequencyModel, date, locale);
-        }
-        if (frequency === FREQUENCY.YEARLY) {
-            return getCustomYearlyString(frequencyModel, locale);
-        }
     }
     return '';
 };
 
 export const getTimezonedFrequencyString = (
-    frequencyModel: FrequencyModel,
+    rrule: VcalRruleProperty | undefined,
+    dtstart: VcalDateOrDateTimeProperty,
     options: GetTimezonedFrequencyStringOptions
 ) => {
-    const {
-        type,
-        frequency,
-        weekly: { days },
-        ends: { type: endType },
-    } = frequencyModel;
-    const { startTzid, currentTzid } = options;
+    if (!rrule) {
+        return '';
+    }
+    const { value: rruleValue } = rrule;
+    const startTzid = getPropertyTzid(dtstart);
+    const { currentTzid } = options;
 
     if (!startTzid || startTzid === currentTzid) {
-        return getFrequencyString(frequencyModel, options);
+        return getFrequencyString(rruleValue, dtstart, options);
     }
 
     const isTimezoneStringNeeded = (() => {
-        if (type === FREQUENCY.ONCE) {
+        const { freq, count, until, byday } = rruleValue;
+
+        const isCustom = getIsRruleCustom(rruleValue);
+        const endType = getEndType(count, until);
+
+        if (!freq) {
             return false;
         }
-        if ([FREQUENCY.DAILY, FREQUENCY.YEARLY].includes(frequency)) {
-            return type === FREQUENCY.CUSTOM && endType === END_TYPE.UNTIL;
+        if ([FREQUENCY.DAILY, FREQUENCY.YEARLY].includes(freq as FREQUENCY)) {
+            return isCustom && endType === END_TYPE.UNTIL;
         }
-        if (frequency === FREQUENCY.WEEKLY) {
-            const isStandardWeekly = type === FREQUENCY.WEEKLY;
-            const hasCustomUntil = type === FREQUENCY.CUSTOM && endType === END_TYPE.UNTIL;
-            const hasDays = isStandardWeekly || days.length !== 7;
-
-            return isStandardWeekly || hasCustomUntil || hasDays;
+        if (freq === FREQUENCY.WEEKLY) {
+            const days = getWeeklyDays(byday);
+            const hasCustomUntil = isCustom && endType === END_TYPE.UNTIL;
+            const hasDays = days.length !== 7;
+            return hasCustomUntil || hasDays;
         }
         // if (frequency === FREQUENCY.YEARLY) {
         //     return true;
         // }
-        if (frequency === FREQUENCY.MONTHLY) {
+        if (freq === FREQUENCY.MONTHLY) {
             return true;
         }
         return false;
     })();
 
     const timezoneString = isTimezoneStringNeeded ? ` (${startTzid})` : '';
-    return getFrequencyString(frequencyModel, options) + timezoneString;
+    return getFrequencyString(rruleValue, dtstart, options) + timezoneString;
 };
