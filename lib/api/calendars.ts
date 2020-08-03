@@ -159,7 +159,6 @@ export const getEvent = (calendarID: string, eventID: string) => ({
 export interface GetEventByUIDArguments extends Partial<PaginationParams> {
     UID: string;
     RecurrenceID?: number;
-    GroupID?: string;
 }
 export const getEventByUID = (params: GetEventByUIDArguments) => ({
     url: `${CALENDAR_V1}/events`,
