@@ -10,7 +10,7 @@ import { APP_NAMES, isSSOMode } from '../constants';
 import { Api, User as tsUser } from '../interfaces';
 import { LocalKeyResponse } from './interface';
 import { getUser } from '../api/user';
-import { PersistentSessionInvalid } from './error';
+import { InvalidPersistentSessionError } from './error';
 import { getRandomString } from '../helpers/string';
 
 export const getValidatedApp = (app = ''): APP_NAMES | undefined => {
@@ -38,11 +38,11 @@ export const getLocalIDFromPathname = (pathname: string) => {
 
 export const getDecryptedPersistedSessionBlob = async (ClientKey: string, persistedSessionBlobString: string) => {
     const blob = await getDecryptedBlob(ClientKey, persistedSessionBlobString).catch(() => {
-        throw new PersistentSessionInvalid();
+        throw new InvalidPersistentSessionError();
     });
     const persistedSessionBlob = getPersistedSessionBlob(blob);
     if (!persistedSessionBlob) {
-        throw new PersistentSessionInvalid();
+        throw new InvalidPersistentSessionError();
     }
     return persistedSessionBlob;
 };
@@ -54,7 +54,7 @@ export const resumeSession = async (api: Api, localID: number) => {
     // Persistent session is invalid, redirect to re-fork this session
     if (!persistedSession || !persistedUID) {
         removePersistedSession(localID);
-        throw new PersistentSessionInvalid();
+        throw new InvalidPersistentSessionError();
     }
 
     // Persistent session to be validated
@@ -69,7 +69,7 @@ export const resumeSession = async (api: Api, localID: number) => {
         } catch (e) {
             if (e.name === 'InvalidSession') {
                 removePersistedSession(localID);
-                throw new PersistentSessionInvalid();
+                throw new InvalidPersistentSessionError();
             }
             throw e;
         }
@@ -82,7 +82,7 @@ export const resumeSession = async (api: Api, localID: number) => {
     } catch (e) {
         if (e.name === 'InvalidSession') {
             removePersistedSession(localID);
-            throw new PersistentSessionInvalid();
+            throw new InvalidPersistentSessionError();
         }
         throw e;
     }
