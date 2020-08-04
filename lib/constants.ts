@@ -22,17 +22,61 @@ export const EMAIL_PLACEHOLDER = 'john.doe@domain.com';
 export const USERNAME_PLACEHOLDER = 'john.doe';
 export const PASSWORD_PLACEHOLDER = '*********';
 
-export enum APPS {
-    PROTONACCOUNT = 'proton-account',
-    PROTONMAIL = 'proton-mail',
-    PROTONMAIL_SETTINGS = 'proton-mail-settings',
-    PROTONCONTACTS = 'proton-contacts',
-    PROTONDRIVE = 'proton-drive',
-    PROTONCALENDAR = 'proton-calendar',
-    PROTONWALLET = 'proton-wallet',
-    PROTONVPN_SETTINGS = 'proton-vpn-settings',
-    PROTONADMIN = 'proton-admin',
-}
+export const APPS  = {
+    PROTONACCOUNT: 'proton-account',
+    PROTONMAIL: 'proton-mail',
+    PROTONMAIL_SETTINGS: 'proton-mail-settings',
+    PROTONCONTACTS: 'proton-contacts',
+    PROTONDRIVE: 'proton-drive',
+    PROTONCALENDAR: 'proton-calendar',
+    PROTONVPN_SETTINGS: 'proton-vpn-settings',
+    PROTONADMIN: 'proton-admin',
+} as const;
+export const APPS_CONFIGURATION = {
+    [APPS.PROTONACCOUNT]: {
+        publicPath: '',
+        subdomain: 'account',
+        clientID: 'Web',
+    },
+    [APPS.PROTONMAIL]: {
+        publicPath: '',
+        subdomain: 'mail',
+        clientID: 'WebMail',
+    },
+    [APPS.PROTONMAIL_SETTINGS]: {
+        publicPath: '/settings',
+        subdomain: 'settings',
+        clientID: 'WebMailSettings',
+    },
+    [APPS.PROTONCONTACTS]: {
+        publicPath: '/contacts',
+        subdomain: 'contacts',
+        clientID: 'WebContacts',
+    },
+    [APPS.PROTONDRIVE]: {
+        publicPath: '/drive',
+        subdomain: 'drive',
+        clientID: 'WebDrive',
+    },
+    [APPS.PROTONCALENDAR]: {
+        publicPath: '/calendar',
+        subdomain: 'calendar',
+        clientID: 'WebCalendar',
+    },
+    [APPS.PROTONVPN_SETTINGS]: {
+        publicPath: '',
+        subdomain: '',
+        clientID: 'WebVPNSettings',
+    },
+    [APPS.PROTONADMIN]: {
+        publicPath: '',
+        subdomain: '',
+        clientID: 'WebAdmin',
+    }
+} as const;
+export type APP_KEYS = keyof typeof APPS;
+export type APP_NAMES = typeof APPS[APP_KEYS]
+
 export enum API_CODES {
     GLOBAL_SUCCESS = 1001,
     SINGLE_SUCCESS = 1000,
@@ -558,19 +602,24 @@ export enum INVITE_TYPES {
 }
 
 export enum CLIENT_IDS {
+    // Old apps
+    Web = 'Web',
+    Admin = 'Web Admin',
+    // New apps
     WebMail = 'Web Mail',
     WebMailSettings = 'Web Mail Settings',
     WebCalendar = 'Web Calendar',
     WebContacts = 'Web Contacts',
     WebVPNSettings = 'Web VPN Settings',
     WebDrive = 'Web Drive',
-    Admin = 'Web Admin',
+    WebAdmin = 'Web Admin',
 }
+export type CLIENT_ID_KEYS = keyof typeof CLIENT_IDS;
 
-export enum CLIENT_TYPES {
-    MAIL = 1,
-    VPN = 2,
-}
+export const CLIENT_TYPES = {
+    MAIL: 1,
+    VPN: 2,
+} as const;
 
 export enum TOKEN_TYPES {
     EMAIL = 'email',
@@ -652,10 +701,14 @@ export enum LINK_TYPES {
     PHONE = 'phone',
 }
 
-// This is a definition coming from webpack. Hide behind typeof for the test env.
 declare const WEBPACK_FEATURE_FLAGS: string;
+// This is a definition coming from webpack. Hide behind typeof for the test env.
 export const FEATURE_FLAGS = typeof WEBPACK_FEATURE_FLAGS === 'undefined' ? '' : WEBPACK_FEATURE_FLAGS;
 
-export const isSSOMode = FEATURE_FLAGS.includes('sso');
-declare const PL_IS_STANDALONE: string;
-export const isStandaloneMode = typeof PL_IS_STANDALONE === 'undefined' ? false : PL_IS_STANDALONE;
+declare const WEBPACK_APP_MODE: string;
+export const APP_MODE = typeof WEBPACK_APP_MODE === 'undefined' ? '' : WEBPACK_APP_MODE;
+export const isSSOMode = APP_MODE === 'sso';
+export const isStandaloneMode = APP_MODE === 'standalone';
+
+declare const WEBPACK_PUBLIC_PATH: string;
+export const PUBLIC_PATH = typeof WEBPACK_PUBLIC_PATH === 'undefined' ? '' : WEBPACK_PUBLIC_PATH;

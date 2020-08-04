@@ -1,3 +1,5 @@
+import { CLIENT_ID_KEYS } from '../constants';
+
 export const PASSWORD_WRONG_ERROR = 8002;
 
 export const auth = (data: any) => ({
@@ -47,6 +49,11 @@ export const setCookies = ({ UID, RefreshToken, State, RedirectURI = 'https://pr
 export const getLocalKey = () => ({
     method: 'get',
     url: 'auth/sessions/local/key',
+});
+export const forkSession = (data: { Payload?: string; ChildClientID: CLIENT_ID_KEYS; Independent: 0 | 1; Selector?: string }) => ({
+    method: 'post',
+    url: 'auth/sessions/forks',
+    data
 });
 
 export const getInfo = (Username?: string) => ({

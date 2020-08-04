@@ -1,6 +1,6 @@
 import { decryptMessage, encryptMessage, getMessage } from 'pmcrypto';
 
-import { setItem, getItem } from '../helpers/storage';
+import { setItem, getItem, removeItem } from '../helpers/storage';
 import { deserializeUint8Array } from '../helpers/serialization';
 import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
 
@@ -38,6 +38,35 @@ export const setPersistedSession = (localID: number, data: { UID: string }) => {
     };
     setItem(getKey(localID), JSON.stringify(persistedSession));
 };
+
+export const removePersistedSession = (localID: number) => {
+    removeItem(getKey(localID));
+}
+
+interface ForkEncryptedBlob {
+    keyPassword: string;
+}
+export const getForkEncryptedBlob = async (
+    key: string,
+    data: ForkEncryptedBlob
+) => {
+    return getEncryptedBlob(key, JSON.stringify(data));
+}
+
+export const getForkDecryptedBlob = async (
+    key: string,
+    data: string
+): Promise<ForkEncryptedBlob | undefined> => {
+    try {
+        const string = await getDecryptedBlob(key, data);
+        const parsedValue = JSON.parse(string);
+        return {
+            keyPassword: parsedValue.keyPassword || '',
+        };
+    } catch (e) {
+        return undefined;
+    }
+}
 
 export const setPersistedSessionBlob = async (
     localID: number,

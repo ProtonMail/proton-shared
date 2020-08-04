@@ -29,6 +29,10 @@ export interface AuthResponse {
     '2FA': TwoFaResponse;
 }
 
+export interface ForkResponse {
+    Selector: string;
+}
+
 export type AuthVersion = 0 | 1 | 2 | 3 | 4;
 
 export interface InfoResponse {
