@@ -4,8 +4,11 @@ import { setItem, getItem, removeItem } from '../helpers/storage';
 import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
 import { deserializeUint8Array } from '../helpers/serialization';
 import { InvalidPersistentSessionError } from './error';
+import isTruthy from '../helpers/isTruthy';
+import { getValidatedLocalID } from './validation';
 
-const getKey = (localID: number) => `S-${localID}`;
+const STORAGE_PREFIX = 'ps-';
+const getKey = (localID: number) => `${STORAGE_PREFIX}${localID}`;
 
 export const getSessionKey = (data: Uint8Array) => {
     return {
@@ -34,12 +37,9 @@ export const getDecryptedBlob = async (sessionKey: SessionKey, blob: string) => 
 interface ForkEncryptedBlob {
     keyPassword: string;
 }
-export const getForkEncryptedBlob = async (
-    sessionKey: SessionKey,
-    data: ForkEncryptedBlob
-) => {
+export const getForkEncryptedBlob = async (sessionKey: SessionKey, data: ForkEncryptedBlob) => {
     return getEncryptedBlob(sessionKey, JSON.stringify(data));
-}
+};
 
 export const getForkDecryptedBlob = async (
     sessionKey: SessionKey,
@@ -54,11 +54,11 @@ export const getForkDecryptedBlob = async (
     } catch (e) {
         return undefined;
     }
-}
+};
 
 export const removePersistedSession = (localID: number) => {
     removeItem(getKey(localID));
-}
+};
 
 export const getPersistedSession = (localID: number): PersistedSession | undefined => {
     const itemValue = getItem(getKey(localID));
@@ -76,6 +76,27 @@ export const getPersistedSession = (localID: number): PersistedSession | undefin
     }
 };
 
+export const getPersistedSessions = () => {
+    const localStorageKeys = Object.keys(localStorage);
+    return localStorageKeys
+        .filter((key) => key.startsWith(STORAGE_PREFIX))
+        .map((key) => {
+            const localID = getValidatedLocalID(key.slice(STORAGE_PREFIX.length));
+            if (!localID) {
+                return;
+            }
+            const result = getPersistedSession(localID);
+            if (!result) {
+                return;
+            }
+            return {
+                ...result,
+                localID,
+            };
+        })
+        .filter(isTruthy);
+};
+
 export const getPersistedSessionBlob = (blob: string): PersistedSessionBlob | undefined => {
     try {
         const parsedValue = JSON.parse(blob);
@@ -87,7 +108,10 @@ export const getPersistedSessionBlob = (blob: string): PersistedSessionBlob | un
     }
 };
 
-export const getDecryptedPersistedSessionBlob = async (ClientKey: string, persistedSessionBlobString: string): Promise<PersistedSessionBlob> => {
+export const getDecryptedPersistedSessionBlob = async (
+    ClientKey: string,
+    persistedSessionBlobString: string
+): Promise<PersistedSessionBlob> => {
     const sessionKey = getSessionKey(deserializeUint8Array(ClientKey));
     const blob = await getDecryptedBlob(sessionKey, persistedSessionBlobString).catch(() => {
         throw new InvalidPersistentSessionError('Failed to decrypt persisted blob');
@@ -102,7 +126,7 @@ export const getDecryptedPersistedSessionBlob = async (ClientKey: string, persis
 export const getEncryptedPersistedSessionBlob = async (ClientKey: string, blob: PersistedSessionBlob) => {
     const sessionKey = getSessionKey(deserializeUint8Array(ClientKey));
     return getEncryptedBlob(sessionKey, JSON.stringify(blob));
-}
+};
 
 export const setPersistedSessionWithBlob = async (
     localID: number,
@@ -121,5 +145,3 @@ export const setPersistedSession = (localID: number, data: { UID: string }) => {
     };
     setItem(getKey(localID), JSON.stringify(persistedSession));
 };
-
-

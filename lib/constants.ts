@@ -22,7 +22,7 @@ export const EMAIL_PLACEHOLDER = 'john.doe@domain.com';
 export const USERNAME_PLACEHOLDER = 'john.doe';
 export const PASSWORD_PLACEHOLDER = '*********';
 
-export const APPS  = {
+export const APPS = {
     PROTONACCOUNT: 'proton-account',
     PROTONMAIL: 'proton-mail',
     PROTONMAIL_SETTINGS: 'proton-mail-settings',
@@ -36,46 +36,54 @@ export const APPS_CONFIGURATION = {
     [APPS.PROTONACCOUNT]: {
         publicPath: '',
         subdomain: 'account',
+        name: 'ProtonAccount',
         clientID: 'Web',
     },
     [APPS.PROTONMAIL]: {
         publicPath: '',
         subdomain: 'mail',
+        name: 'ProtonMail',
         clientID: 'WebMail',
     },
     [APPS.PROTONMAIL_SETTINGS]: {
         publicPath: '/settings',
         subdomain: 'settings',
+        name: 'ProtonMailSettings',
         clientID: 'WebMailSettings',
     },
     [APPS.PROTONCONTACTS]: {
         publicPath: '/contacts',
         subdomain: 'contacts',
+        name: 'ProtonContacts',
         clientID: 'WebContacts',
     },
     [APPS.PROTONDRIVE]: {
         publicPath: '/drive',
         subdomain: 'drive',
+        name: 'ProtonDrive',
         clientID: 'WebDrive',
     },
     [APPS.PROTONCALENDAR]: {
         publicPath: '/calendar',
         subdomain: 'calendar',
+        name: 'ProtonCalendar',
         clientID: 'WebCalendar',
     },
     [APPS.PROTONVPN_SETTINGS]: {
         publicPath: '',
         subdomain: '',
+        name: 'ProtonVPN',
         clientID: 'WebVPNSettings',
     },
     [APPS.PROTONADMIN]: {
         publicPath: '',
         subdomain: '',
+        name: '',
         clientID: 'WebAdmin',
-    }
+    },
 } as const;
 export type APP_KEYS = keyof typeof APPS;
-export type APP_NAMES = typeof APPS[APP_KEYS]
+export type APP_NAMES = typeof APPS[APP_KEYS];
 
 export enum API_CODES {
     GLOBAL_SUCCESS = 1001,

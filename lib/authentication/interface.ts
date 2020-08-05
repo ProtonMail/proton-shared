@@ -43,6 +43,14 @@ export interface PullForkResponse {
     UserID: string;
 }
 
+export interface LocalSessionResponse {
+    Username?: string;
+    DisplayName: string;
+    LocalID: number;
+    UserID: string;
+    PrimaryEmail?: string;
+}
+
 export type AuthVersion = 0 | 1 | 2 | 3 | 4;
 
 export interface InfoResponse {
