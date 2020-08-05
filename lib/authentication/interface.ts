@@ -29,8 +29,18 @@ export interface AuthResponse {
     '2FA': TwoFaResponse;
 }
 
-export interface ForkResponse {
+export interface PushForkResponse {
     Selector: string;
+}
+
+export interface PullForkResponse {
+    Payload: string;
+    LocalID: number;
+    UID: string;
+    RefreshToken: string;
+    ExpiresIn: number;
+    TokenType: string;
+    UserID: string;
 }
 
 export type AuthVersion = 0 | 1 | 2 | 3 | 4;

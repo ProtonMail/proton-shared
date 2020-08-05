@@ -1,9 +1,9 @@
 import { withAuthHeaders, withUIDHeaders } from '../fetch/headers';
 import { getLocalKey, setCookies } from '../api/auth';
 import {
-    getDecryptedBlob,
+    getDecryptedPersistedSessionBlob,
     getPersistedSession,
-    getPersistedSessionBlob, removePersistedSession, setPersistedSession, setPersistedSessionBlob
+    removePersistedSession, setPersistedSession, setPersistedSessionWithBlob
 } from './session';
 import { FORKABLE_APPS } from './constants';
 import { APP_NAMES, isSSOMode } from '../constants';
@@ -11,7 +11,11 @@ import { Api, User as tsUser } from '../interfaces';
 import { LocalKeyResponse } from './interface';
 import { getUser } from '../api/user';
 import { InvalidPersistentSessionError } from './error';
-import { getRandomString } from '../helpers/string';
+import {
+    binaryStringToArray,
+    decodeBase64URL,
+    getRandomString
+} from '../helpers/string';
 
 export const getValidatedApp = (app = ''): APP_NAMES | undefined => {
     if (app in FORKABLE_APPS) {
@@ -29,22 +33,19 @@ export const getValidatedLocalID = (localID = '') => {
     }
 }
 
+export const getValidatedSessionKey = (str: string) => {
+    try {
+        return binaryStringToArray(decodeBase64URL(str));
+    } catch (e) {
+        return undefined;
+    }
+}
+
 export const getLocalIDPath = (u?: number) => u === undefined ? undefined : `u${u}`;
 
 export const getLocalIDFromPathname = (pathname: string) => {
     const maybeLocalID = pathname.match(/\/u(\d{0,6})\//);
     return getValidatedLocalID(maybeLocalID?.[1]);
-};
-
-export const getDecryptedPersistedSessionBlob = async (ClientKey: string, persistedSessionBlobString: string) => {
-    const blob = await getDecryptedBlob(ClientKey, persistedSessionBlobString).catch(() => {
-        throw new InvalidPersistentSessionError();
-    });
-    const persistedSessionBlob = getPersistedSessionBlob(blob);
-    if (!persistedSessionBlob) {
-        throw new InvalidPersistentSessionError();
-    }
-    return persistedSessionBlob;
 };
 
 export const resumeSession = async (api: Api, localID: number) => {
@@ -54,7 +55,7 @@ export const resumeSession = async (api: Api, localID: number) => {
     // Persistent session is invalid, redirect to re-fork this session
     if (!persistedSession || !persistedUID) {
         removePersistedSession(localID);
-        throw new InvalidPersistentSessionError();
+        throw new InvalidPersistentSessionError('Missing persisted session or UID');
     }
 
     // Persistent session to be validated
@@ -69,7 +70,7 @@ export const resumeSession = async (api: Api, localID: number) => {
         } catch (e) {
             if (e.name === 'InvalidSession') {
                 removePersistedSession(localID);
-                throw new InvalidPersistentSessionError();
+                throw new InvalidPersistentSessionError('Session invalid');
             }
             throw e;
         }
@@ -82,7 +83,7 @@ export const resumeSession = async (api: Api, localID: number) => {
     } catch (e) {
         if (e.name === 'InvalidSession') {
             removePersistedSession(localID);
-            throw new InvalidPersistentSessionError();
+            throw new InvalidPersistentSessionError('Session invalid');
         }
         throw e;
     }
@@ -96,11 +97,11 @@ interface PersistLoginArgs {
     UID: string;
     LocalID: number;
 }
-export const persistLogin = async ({ api, keyPassword, UID, LocalID, AccessToken, RefreshToken }: PersistLoginArgs) => {
+export const persistSession = async ({ api, keyPassword, UID, LocalID, AccessToken, RefreshToken }: PersistLoginArgs) => {
     if (isSSOMode) {
         if (keyPassword) {
             const { ClientKey } = await api<LocalKeyResponse>(withAuthHeaders(UID, AccessToken, getLocalKey()));
-            await setPersistedSessionBlob(LocalID, { UID, clientKey: ClientKey, keyPassword });
+            await setPersistedSessionWithBlob(LocalID, { UID, clientKey: ClientKey, keyPassword });
         } else {
             setPersistedSession(LocalID, { UID });
         }

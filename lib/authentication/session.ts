@@ -1,20 +1,20 @@
-import { decryptMessage, encryptMessage, getMessage } from 'pmcrypto';
+import { decryptMessage, encryptMessage, getMessage, SessionKey } from 'pmcrypto';
 
 import { setItem, getItem, removeItem } from '../helpers/storage';
-import { deserializeUint8Array } from '../helpers/serialization';
 import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
+import { deserializeUint8Array } from '../helpers/serialization';
+import { InvalidPersistentSessionError } from './error';
 
 const getKey = (localID: number) => `S-${localID}`;
 
-const getLocalSessionKey = (LocalKey: string) => {
+export const getSessionKey = (data: Uint8Array) => {
     return {
-        data: deserializeUint8Array(LocalKey),
+        data,
         algorithm: 'aes256',
     };
 };
 
-export const getEncryptedBlob = async (clientKey: string, data: string) => {
-    const sessionKey = getLocalSessionKey(clientKey);
+export const getEncryptedBlob = async (sessionKey: SessionKey, data: string) => {
     const { data: blob } = await encryptMessage({
         data,
         sessionKey,
@@ -23,8 +23,7 @@ export const getEncryptedBlob = async (clientKey: string, data: string) => {
     return blob;
 };
 
-export const getDecryptedBlob = async (clientKey: string, blob: string) => {
-    const sessionKey = getLocalSessionKey(clientKey);
+export const getDecryptedBlob = async (sessionKey: SessionKey, blob: string) => {
     const { data: result } = await decryptMessage({
         message: await getMessage(blob),
         sessionKeys: [sessionKey],
@@ -32,33 +31,22 @@ export const getDecryptedBlob = async (clientKey: string, blob: string) => {
     return result;
 };
 
-export const setPersistedSession = (localID: number, data: { UID: string }) => {
-    const persistedSession: PersistedSession = {
-        UID: data.UID,
-    };
-    setItem(getKey(localID), JSON.stringify(persistedSession));
-};
-
-export const removePersistedSession = (localID: number) => {
-    removeItem(getKey(localID));
-}
-
 interface ForkEncryptedBlob {
     keyPassword: string;
 }
 export const getForkEncryptedBlob = async (
-    key: string,
+    sessionKey: SessionKey,
     data: ForkEncryptedBlob
 ) => {
-    return getEncryptedBlob(key, JSON.stringify(data));
+    return getEncryptedBlob(sessionKey, JSON.stringify(data));
 }
 
 export const getForkDecryptedBlob = async (
-    key: string,
+    sessionKey: SessionKey,
     data: string
 ): Promise<ForkEncryptedBlob | undefined> => {
     try {
-        const string = await getDecryptedBlob(key, data);
+        const string = await getDecryptedBlob(sessionKey, data);
         const parsedValue = JSON.parse(string);
         return {
             keyPassword: parsedValue.keyPassword || '',
@@ -68,20 +56,9 @@ export const getForkDecryptedBlob = async (
     }
 }
 
-export const setPersistedSessionBlob = async (
-    localID: number,
-    data: { UID: string; clientKey: string; keyPassword: string }
-) => {
-    const persistedSessionBlob: PersistedSessionBlob = {
-        keyPassword: data.keyPassword,
-    };
-    const blob = await getEncryptedBlob(data.clientKey, JSON.stringify(persistedSessionBlob));
-    const persistedSession: PersistedSession = {
-        UID: data.UID,
-        blob,
-    };
-    setItem(getKey(localID), JSON.stringify(persistedSession));
-};
+export const removePersistedSession = (localID: number) => {
+    removeItem(getKey(localID));
+}
 
 export const getPersistedSession = (localID: number): PersistedSession | undefined => {
     const itemValue = getItem(getKey(localID));
@@ -109,3 +86,40 @@ export const getPersistedSessionBlob = (blob: string): PersistedSessionBlob | un
         return undefined;
     }
 };
+
+export const getDecryptedPersistedSessionBlob = async (ClientKey: string, persistedSessionBlobString: string): Promise<PersistedSessionBlob> => {
+    const sessionKey = getSessionKey(deserializeUint8Array(ClientKey));
+    const blob = await getDecryptedBlob(sessionKey, persistedSessionBlobString).catch(() => {
+        throw new InvalidPersistentSessionError('Failed to decrypt persisted blob');
+    });
+    const persistedSessionBlob = getPersistedSessionBlob(blob);
+    if (!persistedSessionBlob) {
+        throw new InvalidPersistentSessionError('Failed to parse persisted blob');
+    }
+    return persistedSessionBlob;
+};
+
+export const getEncryptedPersistedSessionBlob = async (ClientKey: string, blob: PersistedSessionBlob) => {
+    const sessionKey = getSessionKey(deserializeUint8Array(ClientKey));
+    return getEncryptedBlob(sessionKey, JSON.stringify(blob));
+}
+
+export const setPersistedSessionWithBlob = async (
+    localID: number,
+    data: { UID: string; clientKey: string; keyPassword: string }
+) => {
+    const persistedSession: PersistedSession = {
+        UID: data.UID,
+        blob: await getEncryptedPersistedSessionBlob(data.clientKey, { keyPassword: data.keyPassword }),
+    };
+    setItem(getKey(localID), JSON.stringify(persistedSession));
+};
+
+export const setPersistedSession = (localID: number, data: { UID: string }) => {
+    const persistedSession: PersistedSession = {
+        UID: data.UID,
+    };
+    setItem(getKey(localID), JSON.stringify(persistedSession));
+};
+
+

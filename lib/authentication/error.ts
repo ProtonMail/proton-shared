@@ -1,20 +1,20 @@
 export class InvalidPersistentSessionError extends Error {
-    constructor() {
-        super('Persistent session invalid');
+    constructor(message?: string) {
+        super(['Invalid persistent session', message].filter(Boolean).join(':'));
         Object.setPrototypeOf(this, InvalidPersistentSessionError.prototype);
     }
 }
 
-export class InvalidAuthorizeError extends Error {
-    constructor() {
-        super('Authorize invalid');
-        Object.setPrototypeOf(this, InvalidAuthorizeError.prototype);
+export class InvalidForkProduceError extends Error {
+    constructor(message?: string) {
+        super(['Invalid fork production', message].filter(Boolean).join(':'));
+        Object.setPrototypeOf(this, InvalidForkProduceError.prototype);
     }
 }
 
-export class InvalidForkError extends Error {
-    constructor() {
-        super('Fork invalid');
-        Object.setPrototypeOf(this, InvalidForkError.prototype);
+export class InvalidForkConsumeError extends Error {
+    constructor(message?: string) {
+        super(['Invalid fork consumption', message].filter(Boolean).join(':'));
+        Object.setPrototypeOf(this, InvalidForkConsumeError.prototype);
     }
 }
