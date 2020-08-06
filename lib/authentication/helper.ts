@@ -15,6 +15,7 @@ import { getUser } from '../api/user';
 import { InvalidPersistentSessionError } from './error';
 import { getRandomString } from '../helpers/string';
 import { getValidatedLocalID } from './validation';
+import { getIs401Error } from '../api/helpers/apiErrorHelper';
 
 export const getLocalIDPath = (u?: number) => (u === undefined ? undefined : `u${u}`);
 
@@ -47,7 +48,7 @@ export const resumeSession = async (api: Api, localID: number) => {
             const { keyPassword } = await getDecryptedPersistedSessionBlob(ClientKey, persistedSessionBlobString);
             return { UID: persistedUID, LocalID: localID, keyPassword };
         } catch (e) {
-            if (e.name === 'InvalidSession') {
+            if (getIs401Error(e)) {
                 removePersistedSession(localID);
                 throw new InvalidPersistentSessionError('Session invalid');
             }
@@ -60,7 +61,7 @@ export const resumeSession = async (api: Api, localID: number) => {
         const { User } = await api<{ User: tsUser }>(withUIDHeaders(persistedUID, getUser()));
         return { UID: persistedUID, LocalID: localID, User };
     } catch (e) {
-        if (e.name === 'InvalidSession') {
+        if (getIs401Error(e)) {
             removePersistedSession(localID);
             throw new InvalidPersistentSessionError('Session invalid');
         }
@@ -105,7 +106,7 @@ export const getActiveSessions = async (api: Api) => {
             );
             return Sessions;
         } catch (e) {
-            if (e instanceof InvalidPersistentSessionError || e.name === 'InvalidSession') {
+            if (e instanceof InvalidPersistentSessionError || getIs401Error(e)) {
                 // Session expired, try another session
                 continue;
             }

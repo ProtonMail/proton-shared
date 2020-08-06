@@ -28,12 +28,19 @@ export const getApiError = (e?: any) => {
     };
 };
 
+export const getIs401Error = (e: any) => {
+    if (!e) {
+        return false;
+    }
+    return e.name === 'InactiveSession' || e.status === 401;
+};
+
 export const getApiErrorMessage = (e: Error) => {
     const { message, code } = getApiError(e);
     if (code === API_CUSTOM_ERROR_CODES.APP_VERSION_BAD) {
         return message || c('Info').t`Application upgrade required`;
     }
-    if (e.name === 'InactiveSession') {
+    if (getIs401Error(e)) {
         return message || c('Info').t`Session timed out.`;
     }
     if (e.name === 'OfflineError') {
