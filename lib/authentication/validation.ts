@@ -1,10 +1,9 @@
-import { APP_NAMES } from '../constants';
-import { FORKABLE_APPS } from './constants';
+import { APP_NAMES, FORKABLE_APPS } from '../constants';
 import { binaryStringToArray, decodeBase64URL } from '../helpers/string';
 
 export const getValidatedApp = (app = ''): APP_NAMES | undefined => {
-    if (app in FORKABLE_APPS) {
-        return FORKABLE_APPS[app as keyof typeof FORKABLE_APPS];
+    if (FORKABLE_APPS.has(app as any)) {
+        return app as APP_NAMES;
     }
 };
 

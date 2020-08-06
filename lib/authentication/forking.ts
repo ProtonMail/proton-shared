@@ -1,15 +1,16 @@
 import getRandomValues from 'get-random-values';
 import { APP_NAMES, APPS, APPS_CONFIGURATION } from '../constants';
-import { arrayToBinaryString, encodeBase64URL } from '../helpers/string';
+import { arrayToBinaryString, encodeBase64URL, stripLeadingAndTrailingSlash } from '../helpers/string';
 import { replaceUrl } from '../helpers/browser';
 import { getAppHref } from '../apps/helper';
 import { getValidatedApp, getValidatedLocalID, getValidatedSessionKey } from './validation';
 import { getForkDecryptedBlob, getForkEncryptedBlob, getSessionKey } from './session';
-import { PullForkResponse, PushForkResponse } from './interface';
+import { PullForkResponse, PushForkResponse, RefreshSessionResponse } from './interface';
 import { pushForkSession, pullForkSession, setRefreshCookies } from '../api/auth';
 import { Api } from '../interfaces';
 import { InvalidForkConsumeError } from './error';
 import { withUIDHeaders } from '../fetch/headers';
+import { stripLocalIDFromPathname } from './helper';
 
 interface ForkState {
     sessionKey: string;
@@ -49,7 +50,7 @@ export const getProduceForkParameters = (): Partial<ProduceForkParametersFull> =
     const state = searchParams.get('state') || '';
     const localID = searchParams.get('u') || '';
 
-    const hashParams = new URLSearchParams(window.location.hash);
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
     const sessionKey = hashParams.get('sk') || '';
 
     return {
@@ -105,7 +106,7 @@ const getForkStateData = (data?: string | null): ForkState | undefined => {
 };
 
 export const getConsumeForkParameters = () => {
-    const hashParams = new URLSearchParams(window.location.hash);
+    const hashParams = new URLSearchParams(window.location.hash.slice(1));
     const selector = hashParams.get('selector') || '';
     const state = hashParams.get('state') || '';
 
@@ -113,6 +114,15 @@ export const getConsumeForkParameters = () => {
         state: state.slice(0, 100),
         selector,
     };
+};
+
+const getStrippedPathnameFromURL = (url: string) => {
+    try {
+        const { pathname } = new URL(url);
+        return stripLeadingAndTrailingSlash(stripLocalIDFromPathname(pathname));
+    } catch (e) {
+        return '';
+    }
 };
 
 interface ConsumeForkArguments {
@@ -143,11 +153,16 @@ export const consumeFork = async ({ selector, api, state }: ConsumeForkArguments
         }
     }
 
-    await api(withUIDHeaders(UID, setRefreshCookies({ RefreshToken })));
+    const { AccessToken: newAccessToken, RefreshToken: newRefreshToken } = await api<RefreshSessionResponse>(
+        withUIDHeaders(UID, setRefreshCookies({ RefreshToken }))
+    );
 
     return {
         UID,
         LocalID,
         keyPassword,
+        AccessToken: newAccessToken,
+        RefreshToken: newRefreshToken,
+        pathname: getStrippedPathnameFromURL(url),
     };
 };

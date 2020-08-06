@@ -34,7 +34,7 @@ export const getApiErrorMessage = (e: Error) => {
         return message || c('Info').t`Application upgrade required`;
     }
     if (e.name === 'InactiveSession') {
-        return message || c('Info').t`Session is inactive`;
+        return message || c('Info').t`Session timed out.`;
     }
     if (e.name === 'OfflineError') {
         return c('Error').t`Servers are unreachable.`;

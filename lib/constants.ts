@@ -84,6 +84,12 @@ export const APPS_CONFIGURATION = {
 } as const;
 export type APP_KEYS = keyof typeof APPS;
 export type APP_NAMES = typeof APPS[APP_KEYS];
+export const FORKABLE_APPS = new Set([
+    APPS.PROTONMAIL,
+    APPS.PROTONMAIL_SETTINGS,
+    APPS.PROTONDRIVE,
+    APPS.PROTONCALENDAR,
+]);
 
 export enum API_CODES {
     GLOBAL_SUCCESS = 1001,

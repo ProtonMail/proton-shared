@@ -1,8 +1,8 @@
-import { decryptMessage, encryptMessage, getMessage, SessionKey } from 'pmcrypto';
+import { decryptMessage, encryptMessage, getMessage, SessionKey, splitMessage } from 'pmcrypto';
 
 import { setItem, getItem, removeItem } from '../helpers/storage';
 import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
-import { deserializeUint8Array } from '../helpers/serialization';
+import { deserializeUint8Array, serializeUint8Array } from '../helpers/serialization';
 import { InvalidPersistentSessionError } from './error';
 import isTruthy from '../helpers/isTruthy';
 import { getValidatedLocalID } from './validation';
@@ -18,17 +18,19 @@ export const getSessionKey = (data: Uint8Array) => {
 };
 
 export const getEncryptedBlob = async (sessionKey: SessionKey, data: string) => {
-    const { data: blob } = await encryptMessage({
+    const { message } = await encryptMessage({
         data,
         sessionKey,
-        armor: true,
+        armor: false,
+        detached: true,
     });
-    return blob;
+    const { encrypted } = await splitMessage(message);
+    return serializeUint8Array(encrypted[0]);
 };
 
 export const getDecryptedBlob = async (sessionKey: SessionKey, blob: string) => {
     const { data: result } = await decryptMessage({
-        message: await getMessage(blob),
+        message: await getMessage(deserializeUint8Array(blob)),
         sessionKeys: [sessionKey],
     });
     return result;
@@ -82,7 +84,7 @@ export const getPersistedSessions = () => {
         .filter((key) => key.startsWith(STORAGE_PREFIX))
         .map((key) => {
             const localID = getValidatedLocalID(key.slice(STORAGE_PREFIX.length));
-            if (!localID) {
+            if (localID === undefined) {
                 return;
             }
             const result = getPersistedSession(localID);

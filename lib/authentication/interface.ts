@@ -43,6 +43,15 @@ export interface PullForkResponse {
     UserID: string;
 }
 
+export interface RefreshSessionResponse {
+    AccessToken: string;
+    ExpiresIn: number;
+    TokenType: string;
+    Scope: string;
+    UID: string;
+    RefreshToken: string;
+}
+
 export interface LocalSessionResponse {
     Username?: string;
     DisplayName: string;

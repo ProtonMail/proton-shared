@@ -19,8 +19,12 @@ import { getValidatedLocalID } from './validation';
 export const getLocalIDPath = (u?: number) => (u === undefined ? undefined : `u${u}`);
 
 export const getLocalIDFromPathname = (pathname: string) => {
-    const maybeLocalID = pathname.match(/\/u(\d{0,6})\//);
+    const maybeLocalID = pathname.match(/\/u(\d{0,6})\/?/);
     return getValidatedLocalID(maybeLocalID?.[1]);
+};
+
+export const stripLocalIDFromPathname = (pathname: string) => {
+    return pathname.replace(/\/u(\d{0,6})\/?/, '');
 };
 
 export const resumeSession = async (api: Api, localID: number) => {
@@ -101,7 +105,7 @@ export const getActiveSessions = async (api: Api) => {
             );
             return Sessions;
         } catch (e) {
-            if (e instanceof InvalidPersistentSessionError) {
+            if (e instanceof InvalidPersistentSessionError || e.name === 'InvalidSession') {
                 // Session expired, try another session
                 continue;
             }
