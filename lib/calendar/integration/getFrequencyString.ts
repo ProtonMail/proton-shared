@@ -9,7 +9,7 @@ import {
     VcalRrulePropertyValue,
     VcalRruleProperty,
 } from '../../interfaces/calendar/VcalModel';
-import { getEndType, getMonthType, getUntilDate, getWeeklyDays } from './rruleProperties';
+import { getEndType, getMonthType, getUntilDate, getWeeklyDays, getSafeWeeklyDays } from './rruleProperties';
 import { toUTCDate } from '../../date/timezone';
 import { getIsRruleCustom, getIsRruleSupported } from './rrule';
 import { getPropertyTzid } from '../vcalHelper';
@@ -215,9 +215,10 @@ const getCustomWeeklyString = (
     { interval = 1, byday }: VcalRrulePropertyValue,
     { type: endType, count = 1, until }: RruleEnd,
     weekStartsOn: WeekStartsOn,
-    locale: Locale
+    locale: Locale,
+    startDate: Date
 ) => {
-    const days = getWeeklyDays(byday);
+    const days = getSafeWeeklyDays(startDate, byday);
     // sort weekly days depending on the day the week starts
     const sortedWeekDays = days.slice().sort((a: number, b: number) => {
         // shift days. Get a positive modulus
@@ -583,7 +584,7 @@ export const getFrequencyString = (
             return getCustomDailyString(rruleValue, end, locale);
         }
         if (freq === FREQUENCY.WEEKLY) {
-            return getCustomWeeklyString(rruleValue, end, weekStartsOn, locale);
+            return getCustomWeeklyString(rruleValue, end, weekStartsOn, locale, localStart);
         }
         if (freq === FREQUENCY.MONTHLY) {
             const { byday, bysetpos } = rruleValue;
