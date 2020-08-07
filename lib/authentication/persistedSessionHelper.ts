@@ -1,5 +1,7 @@
 import { withAuthHeaders, withUIDHeaders } from '../fetch/headers';
 import { getLocalKey, getLocalSessions, setCookies } from '../api/auth';
+import { getUser } from '../api/user';
+import { getIs401Error } from '../api/helpers/apiErrorHelper';
 import {
     getDecryptedPersistedSessionBlob,
     getPersistedSession,
@@ -7,41 +9,12 @@ import {
     removePersistedSession,
     setPersistedSession,
     setPersistedSessionWithBlob,
-} from './session';
-import { isSSOMode, PUBLIC_PATH } from '../constants';
+} from './persistedSessionStorage';
+import { isSSOMode } from '../constants';
 import { Api, User as tsUser } from '../interfaces';
 import { LocalKeyResponse, LocalSessionResponse } from './interface';
-import { getUser } from '../api/user';
 import { InvalidPersistentSessionError } from './error';
-import { getRandomString, stripLeadingAndTrailingSlash } from '../helpers/string';
-import { getValidatedLocalID } from './validation';
-import { getIs401Error } from '../api/helpers/apiErrorHelper';
-
-export const getLocalIDPath = (u?: number) => (u === undefined ? undefined : `u${u}`);
-
-export const getLocalIDFromPathname = (pathname: string) => {
-    const maybeLocalID = pathname.match(/\/u(\d{0,6})\/?/);
-    return getValidatedLocalID(maybeLocalID?.[1]);
-};
-
-export const getBasename = (localID?: number) => {
-    const publicPathBase = stripLeadingAndTrailingSlash(PUBLIC_PATH);
-    if (!isSSOMode || localID === undefined) {
-        return publicPathBase ? `/${publicPathBase}` : undefined;
-    }
-    const localIDPathBase = getLocalIDPath(localID);
-    const joined = [publicPathBase, localIDPathBase].filter(Boolean).join('/');
-    return joined ? `/${joined}` : undefined;
-};
-
-export const stripLocalBasenameFromPathname = (pathname: string) => {
-    const localID = getLocalIDFromPathname(pathname);
-    const basename = getBasename(localID);
-    if (basename) {
-        return pathname.slice(basename.length);
-    }
-    return pathname;
-};
+import { getRandomString } from '../helpers/string';
 
 export type ResumedSessionResult = {
     UID: string;

@@ -1,62 +1,13 @@
-import { decryptMessage, encryptMessage, getMessage, SessionKey, splitMessage } from 'pmcrypto';
-
 import { setItem, getItem, removeItem } from '../helpers/storage';
-import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
-import { deserializeUint8Array, serializeUint8Array } from '../helpers/serialization';
-import { InvalidPersistentSessionError } from './error';
+import { deserializeUint8Array } from '../helpers/serialization';
 import isTruthy from '../helpers/isTruthy';
-import { getValidatedLocalID } from './validation';
+import { PersistedSession, PersistedSessionBlob } from './SessionInterface';
+import { getValidatedLocalID } from './sessionForkValidation';
+import { InvalidPersistentSessionError } from './error';
+import { getDecryptedBlob, getEncryptedBlob, getSessionKey } from './sessionBlobCryptoHelper';
 
 const STORAGE_PREFIX = 'ps-';
 const getKey = (localID: number) => `${STORAGE_PREFIX}${localID}`;
-
-export const getSessionKey = (data: Uint8Array) => {
-    return {
-        data,
-        algorithm: 'aes256',
-    };
-};
-
-export const getEncryptedBlob = async (sessionKey: SessionKey, data: string) => {
-    const { message } = await encryptMessage({
-        data,
-        sessionKey,
-        armor: false,
-        detached: true,
-    });
-    const { encrypted } = await splitMessage(message);
-    return serializeUint8Array(encrypted[0]);
-};
-
-export const getDecryptedBlob = async (sessionKey: SessionKey, blob: string) => {
-    const { data: result } = await decryptMessage({
-        message: await getMessage(deserializeUint8Array(blob)),
-        sessionKeys: [sessionKey],
-    });
-    return result;
-};
-
-interface ForkEncryptedBlob {
-    keyPassword: string;
-}
-export const getForkEncryptedBlob = async (sessionKey: SessionKey, data: ForkEncryptedBlob) => {
-    return getEncryptedBlob(sessionKey, JSON.stringify(data));
-};
-
-export const getForkDecryptedBlob = async (
-    sessionKey: SessionKey,
-    data: string
-): Promise<ForkEncryptedBlob | undefined> => {
-    try {
-        const string = await getDecryptedBlob(sessionKey, data);
-        const parsedValue = JSON.parse(string);
-        return {
-            keyPassword: parsedValue.keyPassword || '',
-        };
-    } catch (e) {
-        return undefined;
-    }
-};
 
 export const removePersistedSession = (localID: number) => {
     removeItem(getKey(localID));

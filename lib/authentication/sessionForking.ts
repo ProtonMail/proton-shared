@@ -3,14 +3,15 @@ import { APP_NAMES, APPS, APPS_CONFIGURATION, SSO_AUTHORIZE_PATH, SSO_FORK_PATH 
 import { arrayToBinaryString, encodeBase64URL, stripLeadingAndTrailingSlash } from '../helpers/string';
 import { replaceUrl } from '../helpers/browser';
 import { getAppHref } from '../apps/helper';
-import { getValidatedApp, getValidatedLocalID, getValidatedSessionKey } from './validation';
-import { getForkDecryptedBlob, getForkEncryptedBlob, getSessionKey } from './session';
+import { getValidatedApp, getValidatedLocalID, getValidatedSessionKey } from './sessionForkValidation';
+import { getSessionKey } from './sessionBlobCryptoHelper';
+import { getForkDecryptedBlob, getForkEncryptedBlob } from './sessionForkBlob';
+import { InvalidForkConsumeError } from './error';
+import { stripLocalBasenameFromPathname } from './pathnameHelper';
 import { PullForkResponse, PushForkResponse, RefreshSessionResponse } from './interface';
 import { pushForkSession, pullForkSession, setRefreshCookies } from '../api/auth';
 import { Api } from '../interfaces';
-import { InvalidForkConsumeError } from './error';
 import { withUIDHeaders } from '../fetch/headers';
-import { stripLocalBasenameFromPathname } from './helper';
 
 interface ForkState {
     sessionKey: string;

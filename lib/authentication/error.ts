@@ -1,3 +1,4 @@
+// eslint-disable-next-line max-classes-per-file
 export class InvalidPersistentSessionError extends Error {
     constructor(message?: string) {
         super(['Invalid persistent session', message].filter(Boolean).join(':'));
