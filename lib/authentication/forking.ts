@@ -1,5 +1,5 @@
 import getRandomValues from 'get-random-values';
-import { APP_NAMES, APPS, APPS_CONFIGURATION } from '../constants';
+import { APP_NAMES, APPS, APPS_CONFIGURATION, SSO_AUTHORIZE_PATH, SSO_FORK_PATH } from '../constants';
 import { arrayToBinaryString, encodeBase64URL, stripLeadingAndTrailingSlash } from '../helpers/string';
 import { replaceUrl } from '../helpers/browser';
 import { getAppHref } from '../apps/helper';
@@ -10,7 +10,7 @@ import { pushForkSession, pullForkSession, setRefreshCookies } from '../api/auth
 import { Api } from '../interfaces';
 import { InvalidForkConsumeError } from './error';
 import { withUIDHeaders } from '../fetch/headers';
-import { stripLocalIDFromPathname } from './helper';
+import { stripLocalBasenameFromPathname } from './helper';
 
 interface ForkState {
     sessionKey: string;
@@ -33,7 +33,9 @@ export const requestFork = (fromApp: APP_NAMES, localID?: number) => {
     const forkStateData: ForkState = { sessionKey, url: window.location.href };
     sessionStorage.setItem(`f${state}`, JSON.stringify(forkStateData));
 
-    return replaceUrl(getAppHref(`/authorize?${searchParams.toString()}#${hashParams.toString()}`, APPS.PROTONACCOUNT));
+    return replaceUrl(
+        getAppHref(`${SSO_AUTHORIZE_PATH}?${searchParams.toString()}#${hashParams.toString()}`, APPS.PROTONACCOUNT)
+    );
 };
 
 export interface ProduceForkParameters {
@@ -87,7 +89,7 @@ export const produceFork = async ({ api, UID, sessionKey, keyPassword, state, ap
     toConsumeParams.append('selector', Selector);
     toConsumeParams.append('state', state);
 
-    return replaceUrl(getAppHref(`/fork#${toConsumeParams.toString()}`, app));
+    return replaceUrl(getAppHref(`${SSO_FORK_PATH}#${toConsumeParams.toString()}`, app));
 };
 
 const getForkStateData = (data?: string | null): ForkState | undefined => {
@@ -119,7 +121,7 @@ export const getConsumeForkParameters = () => {
 const getStrippedPathnameFromURL = (url: string) => {
     try {
         const { pathname } = new URL(url);
-        return stripLeadingAndTrailingSlash(stripLocalIDFromPathname(pathname));
+        return stripLeadingAndTrailingSlash(stripLocalBasenameFromPathname(pathname));
     } catch (e) {
         return '';
     }

@@ -8,12 +8,12 @@ import {
     setPersistedSession,
     setPersistedSessionWithBlob,
 } from './session';
-import { isSSOMode } from '../constants';
+import { isSSOMode, PUBLIC_PATH } from '../constants';
 import { Api, User as tsUser } from '../interfaces';
 import { LocalKeyResponse, LocalSessionResponse } from './interface';
 import { getUser } from '../api/user';
 import { InvalidPersistentSessionError } from './error';
-import { getRandomString } from '../helpers/string';
+import { getRandomString, stripLeadingAndTrailingSlash } from '../helpers/string';
 import { getValidatedLocalID } from './validation';
 import { getIs401Error } from '../api/helpers/apiErrorHelper';
 
@@ -24,11 +24,32 @@ export const getLocalIDFromPathname = (pathname: string) => {
     return getValidatedLocalID(maybeLocalID?.[1]);
 };
 
-export const stripLocalIDFromPathname = (pathname: string) => {
-    return pathname.replace(/\/u(\d{0,6})\/?/, '');
+export const getBasename = (localID?: number) => {
+    const publicPathBase = stripLeadingAndTrailingSlash(PUBLIC_PATH);
+    if (!isSSOMode || localID === undefined) {
+        return publicPathBase ? `/${publicPathBase}` : undefined;
+    }
+    const localIDPathBase = getLocalIDPath(localID);
+    const joined = [publicPathBase, localIDPathBase].filter(Boolean).join('/');
+    return joined ? `/${joined}` : undefined;
 };
 
-export const resumeSession = async (api: Api, localID: number) => {
+export const stripLocalBasenameFromPathname = (pathname: string) => {
+    const localID = getLocalIDFromPathname(pathname);
+    const basename = getBasename(localID);
+    if (basename) {
+        return pathname.slice(basename.length);
+    }
+    return pathname;
+};
+
+export type ResumedSessionResult = {
+    UID: string;
+    LocalID: number;
+    keyPassword?: string;
+    User?: tsUser;
+};
+export const resumeSession = async (api: Api, localID: number): Promise<ResumedSessionResult> => {
     const persistedSession = getPersistedSession(localID);
     const persistedUID = persistedSession?.UID;
 
@@ -96,7 +117,8 @@ export const persistSession = async ({
     await api(withAuthHeaders(UID, AccessToken, setCookies({ UID, RefreshToken, State: getRandomString(24) })));
 };
 
-export const getActiveSessions = async (api: Api) => {
+export type GetActiveSessionsResult = { session?: ResumedSessionResult; sessions: LocalSessionResponse[] };
+export const getActiveSessions = async (api: Api): Promise<GetActiveSessionsResult> => {
     const persistedSessions = getPersistedSessions();
     for (const persistedSession of persistedSessions) {
         try {
@@ -104,7 +126,14 @@ export const getActiveSessions = async (api: Api) => {
             const { Sessions = [] } = await api<{ Sessions: LocalSessionResponse[] }>(
                 withUIDHeaders(validatedSession.UID, getLocalSessions())
             );
-            return Sessions;
+            // The returned sessions have to exist in localstorage to be able to activate
+            const maybeActiveSessions = Sessions.filter(({ LocalID }) => {
+                return persistedSessions.some(({ localID }) => localID === LocalID);
+            });
+            return {
+                session: validatedSession,
+                sessions: maybeActiveSessions,
+            };
         } catch (e) {
             if (e instanceof InvalidPersistentSessionError || getIs401Error(e)) {
                 // Session expired, try another session
@@ -114,5 +143,8 @@ export const getActiveSessions = async (api: Api) => {
             throw e;
         }
     }
-    return [];
+    return {
+        session: undefined,
+        sessions: [],
+    };
 };
