@@ -98,9 +98,15 @@ export const FORKABLE_APPS = new Set([
     APPS.PROTONDRIVE,
     APPS.PROTONCALENDAR,
 ]);
-export const SSO_AUTHORIZE_PATH = '/authorize';
-export const SSO_SWITCH_PATH = '/switch';
-export const SSO_FORK_PATH = '/fork';
+export const SSO_PATHS = {
+    AUTHORIZE: '/authorize',
+    FORK: '/fork',
+    SWITCH: '/switch',
+    LOGIN: '/login',
+    RESET_PASSWORD: '/reset-password',
+    FORGOT_USERNAME: '/forgot-username',
+    SIGNUP: '/signup',
+} as const;
 
 export enum API_CODES {
     GLOBAL_SUCCESS = 1001,

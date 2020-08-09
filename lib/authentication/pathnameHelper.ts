@@ -27,3 +27,12 @@ export const stripLocalBasenameFromPathname = (pathname: string) => {
     }
     return pathname;
 };
+
+export const getStrippedPathnameFromURL = (url: string) => {
+    try {
+        const { pathname } = new URL(url);
+        return stripLeadingAndTrailingSlash(stripLocalBasenameFromPathname(pathname));
+    } catch (e) {
+        return '';
+    }
+};

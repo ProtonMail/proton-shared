@@ -1,23 +1,29 @@
 import getRandomValues from 'get-random-values';
-import { APP_NAMES, APPS, APPS_CONFIGURATION, SSO_AUTHORIZE_PATH, SSO_FORK_PATH } from '../constants';
-import { arrayToBinaryString, encodeBase64URL, stripLeadingAndTrailingSlash } from '../helpers/string';
+import { APP_NAMES, APPS, APPS_CONFIGURATION, SSO_PATHS } from '../constants';
+import { arrayToBinaryString, encodeBase64URL } from '../helpers/string';
 import { replaceUrl } from '../helpers/browser';
 import { getAppHref } from '../apps/helper';
-import { getValidatedApp, getValidatedLocalID, getValidatedSessionKey } from './sessionForkValidation';
+import {
+    getValidatedApp,
+    getValidatedLocalID,
+    getValidatedSessionKey,
+    getValidatedForkType,
+} from './sessionForkValidation';
 import { getSessionKey } from './sessionBlobCryptoHelper';
 import { getForkDecryptedBlob, getForkEncryptedBlob } from './sessionForkBlob';
 import { InvalidForkConsumeError } from './error';
-import { stripLocalBasenameFromPathname } from './pathnameHelper';
+import { getStrippedPathnameFromURL } from './pathnameHelper';
 import { PullForkResponse, PushForkResponse, RefreshSessionResponse } from './interface';
 import { pushForkSession, pullForkSession, setRefreshCookies } from '../api/auth';
 import { Api } from '../interfaces';
 import { withUIDHeaders } from '../fetch/headers';
+import { FORK_TYPE } from './ForkInterface';
 
 interface ForkState {
     sessionKey: string;
     url: string;
 }
-export const requestFork = (fromApp: APP_NAMES, localID?: number) => {
+export const requestFork = (fromApp: APP_NAMES, localID?: number, type?: FORK_TYPE) => {
     const sessionKey = encodeBase64URL(arrayToBinaryString(getRandomValues(new Uint8Array(32))));
     const state = encodeBase64URL(arrayToBinaryString(getRandomValues(new Uint8Array(32))));
 
@@ -27,6 +33,9 @@ export const requestFork = (fromApp: APP_NAMES, localID?: number) => {
     if (localID !== undefined) {
         searchParams.append('u', `${localID}`);
     }
+    if (type !== undefined) {
+        searchParams.append('t', type);
+    }
 
     const hashParams = new URLSearchParams();
     hashParams.append('sk', sessionKey);
@@ -35,7 +44,7 @@ export const requestFork = (fromApp: APP_NAMES, localID?: number) => {
     sessionStorage.setItem(`f${state}`, JSON.stringify(forkStateData));
 
     return replaceUrl(
-        getAppHref(`${SSO_AUTHORIZE_PATH}?${searchParams.toString()}#${hashParams.toString()}`, APPS.PROTONACCOUNT)
+        getAppHref(`${SSO_PATHS.AUTHORIZE}?${searchParams.toString()}#${hashParams.toString()}`, APPS.PROTONACCOUNT)
     );
 };
 
@@ -43,6 +52,7 @@ export interface ProduceForkParameters {
     state: string;
     app: APP_NAMES;
     sessionKey: Uint8Array;
+    type?: FORK_TYPE;
 }
 export interface ProduceForkParametersFull extends ProduceForkParameters {
     localID: number;
@@ -52,6 +62,7 @@ export const getProduceForkParameters = (): Partial<ProduceForkParametersFull> =
     const app = searchParams.get('app') || '';
     const state = searchParams.get('state') || '';
     const localID = searchParams.get('u') || '';
+    const type = searchParams.get('t') || '';
 
     const hashParams = new URLSearchParams(window.location.hash.slice(1));
     const sessionKey = hashParams.get('sk') || '';
@@ -61,6 +72,7 @@ export const getProduceForkParameters = (): Partial<ProduceForkParametersFull> =
         localID: getValidatedLocalID(localID),
         app: getValidatedApp(app),
         sessionKey: getValidatedSessionKey(sessionKey),
+        type: getValidatedForkType(type),
     };
 };
 
@@ -90,7 +102,7 @@ export const produceFork = async ({ api, UID, sessionKey, keyPassword, state, ap
     toConsumeParams.append('selector', Selector);
     toConsumeParams.append('state', state);
 
-    return replaceUrl(getAppHref(`${SSO_FORK_PATH}#${toConsumeParams.toString()}`, app));
+    return replaceUrl(getAppHref(`${SSO_PATHS.FORK}#${toConsumeParams.toString()}`, app));
 };
 
 const getForkStateData = (data?: string | null): ForkState | undefined => {
@@ -117,15 +129,6 @@ export const getConsumeForkParameters = () => {
         state: state.slice(0, 100),
         selector,
     };
-};
-
-const getStrippedPathnameFromURL = (url: string) => {
-    try {
-        const { pathname } = new URL(url);
-        return stripLeadingAndTrailingSlash(stripLocalBasenameFromPathname(pathname));
-    } catch (e) {
-        return '';
-    }
 };
 
 interface ConsumeForkArguments {
