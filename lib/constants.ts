@@ -44,7 +44,8 @@ export const APPS_CONFIGURATION = {
         publicPath: '',
         subdomain: 'mail',
         name: 'ProtonMail',
-        clientID: 'WebMail',
+        // TODO clientID
+        clientID: 'Web',
         icon: 'protonmail',
     },
     [APPS.PROTONMAIL_SETTINGS]: {
@@ -92,12 +93,6 @@ export const APPS_CONFIGURATION = {
 } as const;
 export type APP_KEYS = keyof typeof APPS;
 export type APP_NAMES = typeof APPS[APP_KEYS];
-export const FORKABLE_APPS = new Set([
-    APPS.PROTONMAIL,
-    APPS.PROTONMAIL_SETTINGS,
-    APPS.PROTONDRIVE,
-    APPS.PROTONCALENDAR,
-]);
 export const SSO_PATHS = {
     AUTHORIZE: '/authorize',
     FORK: '/fork',
@@ -758,3 +753,13 @@ export const OPENPGP =
     typeof WEBPACK_OPENPGP === 'undefined'
         ? { main: DUMMY_FILE, compat: DUMMY_FILE, elliptic: DUMMY_FILE, worker: DUMMY_FILE }
         : WEBPACK_OPENPGP;
+
+export const FORKABLE_APPS = new Set(
+    [
+        APPS.PROTONMAIL,
+        APPS.PROTONMAIL_SETTINGS,
+        APPS.PROTONCONTACTS,
+        FEATURE_FLAGS.includes('drive') && APPS.PROTONDRIVE,
+        APPS.PROTONCALENDAR,
+    ].filter(Boolean)
+);
