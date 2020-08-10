@@ -10,7 +10,6 @@ import {
     VcalRruleProperty,
 } from '../../interfaces/calendar/VcalModel';
 import { getEndType, getMonthType, getUntilDate, getWeeklyDays, getSafeWeeklyDays } from './rruleProperties';
-import { toUTCDate } from '../../date/timezone';
 import { getIsRruleCustom, getIsRruleSupported } from './rrule';
 import { getPropertyTzid } from '../vcalHelper';
 
@@ -215,8 +214,8 @@ const getCustomWeeklyString = (
     { interval = 1, byday }: VcalRrulePropertyValue,
     { type: endType, count = 1, until }: RruleEnd,
     weekStartsOn: WeekStartsOn,
-    locale: Locale,
-    startDate: Date
+    startDate: Date,
+    locale: Locale
 ) => {
     const days = getSafeWeeklyDays(startDate, byday);
     // sort weekly days depending on the day the week starts
@@ -561,11 +560,11 @@ export const getFrequencyString = (
     { weekStartsOn, locale }: Pick<GetTimezonedFrequencyStringOptions, 'weekStartsOn' | 'locale'>
 ) => {
     const { freq, count, until } = rruleValue;
+    const { year, month, day } = dtstart.value;
 
     const isCustom = getIsRruleCustom(rruleValue);
     const isSupported = getIsRruleSupported(rruleValue);
-    const localStart = toUTCDate(dtstart.value);
-    const startDay = localStart.getUTCDay();
+    const localStart = new Date(year, month - 1, day, 0);
     const end = {
         type: getEndType(count, until),
         count,
@@ -584,7 +583,7 @@ export const getFrequencyString = (
             return getCustomDailyString(rruleValue, end, locale);
         }
         if (freq === FREQUENCY.WEEKLY) {
-            return getCustomWeeklyString(rruleValue, end, weekStartsOn, locale, localStart);
+            return getCustomWeeklyString(rruleValue, end, weekStartsOn, localStart, locale);
         }
         if (freq === FREQUENCY.MONTHLY) {
             const { byday, bysetpos } = rruleValue;
@@ -599,25 +598,25 @@ export const getFrequencyString = (
         return c('Info').t`Daily`;
     }
     if (freq === FREQUENCY.WEEKLY) {
-        if (startDay === 0) {
+        if (day === 0) {
             return c('Weekly recurring event, frequency').t`Weekly on Sunday`;
         }
-        if (startDay === 1) {
+        if (day === 1) {
             return c('Weekly recurring event, frequency').t`Weekly on Monday`;
         }
-        if (startDay === 2) {
+        if (day === 2) {
             return c('Weekly recurring event, frequency').t`Weekly on Tuesday`;
         }
-        if (startDay === 3) {
+        if (day === 3) {
             return c('Weekly recurring event, frequency').t`Weekly on Wednesday`;
         }
-        if (startDay === 4) {
+        if (day === 4) {
             return c('Weekly recurring event, frequency').t`Weekly on Thursday`;
         }
-        if (startDay === 5) {
+        if (day === 5) {
             return c('Weekly recurring event, frequency').t`Weekly on Friday`;
         }
-        if (startDay === 6) {
+        if (day === 6) {
             return c('Weekly recurring event, frequency').t`Weekly on Saturday`;
         }
     }
