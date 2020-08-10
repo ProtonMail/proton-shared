@@ -11,13 +11,14 @@ import {
 } from './sessionForkValidation';
 import { getSessionKey } from './sessionBlobCryptoHelper';
 import { getForkDecryptedBlob, getForkEncryptedBlob } from './sessionForkBlob';
-import { InvalidForkConsumeError } from './error';
+import { InvalidForkConsumeError, InvalidPersistentSessionError } from './error';
 import { getStrippedPathnameFromURL } from './pathnameHelper';
 import { PullForkResponse, PushForkResponse, RefreshSessionResponse } from './interface';
 import { pushForkSession, pullForkSession, setRefreshCookies } from '../api/auth';
 import { Api } from '../interfaces';
 import { withUIDHeaders } from '../fetch/headers';
 import { FORK_TYPE } from './ForkInterface';
+import { resumeSession } from './persistedSessionHelper';
 
 interface ForkState {
     sessionKey: string;
@@ -146,7 +147,22 @@ export const consumeFork = async ({ selector, api, state }: ConsumeForkArguments
     if (!sessionKey || !url) {
         throw new InvalidForkConsumeError('Missing session key or url');
     }
+    const pathname = getStrippedPathnameFromURL(url);
     const { UID, RefreshToken, Payload, LocalID } = await api<PullForkResponse>(pullForkSession(selector));
+
+    try {
+        // Resume and use old session if it exists
+        const validatedSession = await resumeSession(api, LocalID);
+        return {
+            ...validatedSession,
+            pathname,
+        };
+    } catch (e) {
+        // If existing session is invalid. Fall through to continue using the new fork.
+        if (!(e instanceof InvalidPersistentSessionError)) {
+            throw e;
+        }
+    }
 
     let keyPassword: string | undefined;
 
@@ -169,6 +185,6 @@ export const consumeFork = async ({ selector, api, state }: ConsumeForkArguments
         keyPassword,
         AccessToken: newAccessToken,
         RefreshToken: newRefreshToken,
-        pathname: getStrippedPathnameFromURL(url),
+        pathname,
     };
 };

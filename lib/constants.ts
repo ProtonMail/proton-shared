@@ -743,3 +743,18 @@ export const isStandaloneMode = APP_MODE === 'standalone';
 
 declare const WEBPACK_PUBLIC_PATH: string;
 export const PUBLIC_PATH = typeof WEBPACK_PUBLIC_PATH === 'undefined' ? '' : WEBPACK_PUBLIC_PATH;
+
+interface OpenPGPFile {
+    filepath: string;
+    integrity?: string;
+}
+
+const DUMMY_FILE = {
+    filepath: '/',
+};
+
+declare const WEBPACK_OPENPGP: { main: OpenPGPFile; compat: OpenPGPFile; elliptic: OpenPGPFile; worker: OpenPGPFile };
+export const OPENPGP =
+    typeof WEBPACK_OPENPGP === 'undefined'
+        ? { main: DUMMY_FILE, compat: DUMMY_FILE, elliptic: DUMMY_FILE, worker: DUMMY_FILE }
+        : WEBPACK_OPENPGP;

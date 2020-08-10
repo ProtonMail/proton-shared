@@ -38,9 +38,12 @@ export const resumeSession = async (api: Api, localID: number): Promise<ResumedS
     // User with password
     if (persistedSessionBlobString) {
         try {
-            const { ClientKey } = await api<LocalKeyResponse>(withUIDHeaders(persistedUID, getLocalKey()));
+            const [{ ClientKey }, { User }] = await Promise.all([
+                api<LocalKeyResponse>(withUIDHeaders(persistedUID, getLocalKey())),
+                api<{ User: tsUser }>(withUIDHeaders(persistedUID, getUser())),
+            ]);
             const { keyPassword } = await getDecryptedPersistedSessionBlob(ClientKey, persistedSessionBlobString);
-            return { UID: persistedUID, LocalID: localID, keyPassword };
+            return { UID: persistedUID, LocalID: localID, keyPassword, User };
         } catch (e) {
             if (getIs401Error(e)) {
                 removePersistedSession(localID);
