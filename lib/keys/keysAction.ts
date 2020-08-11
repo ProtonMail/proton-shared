@@ -11,10 +11,17 @@ export const findKeyById = (keys: KeyAction[], targetID: string) => {
 export interface AddKeyArguments {
     ID: string;
     fingerprint: string;
+    sha256Fingerprints: string[];
     flags: number;
     keys: KeyAction[];
 }
-export const addKeyAction = ({ keys, ID: newKeyID, fingerprint, flags }: AddKeyArguments): KeyAction[] => {
+export const addKeyAction = ({
+    keys,
+    ID: newKeyID,
+    fingerprint,
+    sha256Fingerprints,
+    flags,
+}: AddKeyArguments): KeyAction[] => {
     const keysLength = keys.length;
 
     if (findKeyByFingerprint(keys, fingerprint) || findKeyById(keys, newKeyID)) {
@@ -29,6 +36,7 @@ export const addKeyAction = ({ keys, ID: newKeyID, fingerprint, flags }: AddKeyA
         primary: isNewPrimary,
         flags,
         fingerprint,
+        sha256Fingerprints,
     };
 
     if (isNewPrimary) {

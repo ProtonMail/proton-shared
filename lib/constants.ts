@@ -528,10 +528,8 @@ export const ENCRYPTION_CONFIGS = {
 };
 
 export enum KEY_FLAG {
-    ENCRYPTED_AND_SIGNED = 3,
-    ENCRYPTED = 2,
-    SIGNED = 1,
-    CLEAR_TEXT = 0,
+    ENCRYPT = 2,
+    VERIFY = 1,
 }
 
 export enum USER_STATUS {
