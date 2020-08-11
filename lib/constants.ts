@@ -310,12 +310,6 @@ export enum RECIPIENT_TYPES {
     TYPE_NO_RECEIVE = 3,
 }
 
-export enum KEY_FLAGS {
-    DISABLED = 0,
-    ENABLE_VERIFICATION = 1,
-    ENABLE_ENCRYPTION = 2,
-}
-
 export enum SHOW_IMAGES {
     NONE = 0,
     REMOTE = 1,

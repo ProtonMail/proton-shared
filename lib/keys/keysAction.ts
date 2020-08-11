@@ -71,7 +71,7 @@ export const reactivateKeyAction = ({ keys, ID: targetID, fingerprint, flags }: 
 };
 
 export const removeKeyAction = ({ keys, ID }: { keys: KeyAction[]; ID: string }) => {
-    const oldKey = getAndAssertOldKey(keys, ID);
+    const oldKey = findKeyById(keys, ID);
     return keys.filter((key) => key !== oldKey);
 };
 
@@ -88,7 +88,7 @@ export const setPrimaryKeyAction = ({ keys, ID }: { keys: KeyAction[]; ID: strin
 };
 
 export const setFlagsKeyAction = ({ keys, ID, flags }: { keys: KeyAction[]; ID: string; flags: number }) => {
-    const oldKey = getAndAssertOldKey(keys, ID);
+    const oldKey = findKeyById(keys, ID);
     return keys.map((key) => {
         if (key === oldKey) {
             return {

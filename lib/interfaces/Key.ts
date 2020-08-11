@@ -3,7 +3,7 @@ import { OpenPGPKey } from 'pmcrypto';
 export interface Key {
     ID: string;
     Primary: number;
-    Flags: number;
+    Flags?: number; // undefined for user keys
     Fingerprint: string;
     Fingerprints: string[];
     PublicKey: string; // armored key
