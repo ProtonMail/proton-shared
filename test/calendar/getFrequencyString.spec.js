@@ -81,16 +81,12 @@ describe('getTimezonedFrequencyString should produce the expected string for wee
     const getWeeklyRrule = (rrule) => getRrule({ ...rrule, freq: FREQUENCY.WEEKLY });
 
     it('should get a standard weekly recurring event', () => {
-        const rrule = getWeeklyRrule({
-            byday: ['MO'],
-        });
+        const rrule = getWeeklyRrule();
         expect(getTimezonedFrequencyString(rrule, dummyStart, options)).toEqual('Weekly on Monday');
     });
 
     it('should get a standard weekly recurring event, on a different timezone', () => {
-        const rrule = getWeeklyRrule({
-            byday: ['MO'],
-        });
+        const rrule = getWeeklyRrule();
         expect(getTimezonedFrequencyString(rrule, dummyStart, otherTzOptions)).toEqual(
             'Weekly on Monday (Europe/Athens)'
         );

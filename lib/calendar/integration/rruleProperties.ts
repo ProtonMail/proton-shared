@@ -51,9 +51,3 @@ export const getWeeklyDays = (byday?: string | string[]) => {
     // Ensure the start date is included in the list
     return unique(bydayArraySafe);
 };
-
-export const getSafeWeeklyDays = (startDate: Date, byday?: string | string[]) => {
-    const DEFAULT = [startDate.getDay()];
-    const days = getWeeklyDays(byday);
-    return unique([...DEFAULT].concat(days));
-};
