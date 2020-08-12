@@ -1,4 +1,3 @@
-import { getSHA256Fingerprints } from 'pmcrypto';
 import { generateAddressKey } from './keys';
 import { DEFAULT_ENCRYPTION_CONFIG, ENCRYPTION_CONFIGS } from '../constants';
 import getSignedKeyList from './getSignedKeyList';
@@ -28,8 +27,7 @@ export const getResetAddressesKeys = async ({
             const { ID: AddressID, Keys = [] } = address;
 
             const newPrimary = {
-                fingerprint: privateKey.getFingerprint(),
-                sha256Fingerprints: await getSHA256Fingerprints(privateKey),
+                privateKey,
                 primary: 1,
                 flags: getKeyFlagsAddress(address, Keys),
             };

@@ -1,96 +1,89 @@
-import { KeyAction } from '../interfaces';
-
-export const findKeyByFingerprint = (keys: KeyAction[], targetFingerprint: string) => {
-    return keys.find(({ fingerprint }) => fingerprint === targetFingerprint);
-};
-
-export const findKeyById = (keys: KeyAction[], targetID: string) => {
-    return keys.find(({ ID }) => ID === targetID);
-};
+import { OpenPGPKey } from 'pmcrypto';
+import { CachedKey, KeyAction } from '../interfaces';
 
 export interface AddKeyArguments {
     ID: string;
-    fingerprint: string;
-    sha256Fingerprints: string[];
     flags: number;
-    keys: KeyAction[];
+    parsedKeys: CachedKey[];
+    actionableKeys: KeyAction[];
+    privateKey: OpenPGPKey;
 }
 export const addKeyAction = ({
-    keys,
+    parsedKeys,
+    actionableKeys,
     ID: newKeyID,
-    fingerprint,
-    sha256Fingerprints,
+    privateKey,
     flags,
 }: AddKeyArguments): KeyAction[] => {
-    const keysLength = keys.length;
-
-    if (findKeyByFingerprint(keys, fingerprint) || findKeyById(keys, newKeyID)) {
+    if (parsedKeys.find(({ Key: { ID } }) => ID === newKeyID)) {
         throw new Error('Key already exists');
     }
 
-    // Can not be a boolean, needs to be 1 or 0
-    const isNewPrimary = !keysLength ? 1 : 0;
-
-    const newKey = {
+    const newKey: KeyAction = {
         ID: newKeyID,
-        primary: isNewPrimary,
+        primary: !parsedKeys.length ? 1 : 0,
         flags,
-        fingerprint,
-        sha256Fingerprints,
+        privateKey,
     };
 
-    if (isNewPrimary) {
-        return [newKey];
-    }
-
-    return [...keys, newKey];
+    return [...actionableKeys, newKey];
 };
 
-const getAndAssertOldKey = (keys: KeyAction[], ID: string) => {
-    const oldKey = findKeyById(keys, ID);
+export const reactivateKeyAction = ({
+    parsedKeys,
+    actionableKeys,
+    ID: targetID,
+    privateKey,
+    flags,
+}: AddKeyArguments): KeyAction[] => {
+    const oldKey = parsedKeys.find(({ Key: { ID } }) => ID === targetID);
     if (!oldKey) {
-        throw new Error('Key does not exists');
+        throw new Error('Key not found');
     }
-    return oldKey;
-};
-
-export const reactivateKeyAction = ({ keys, ID: targetID, fingerprint, flags }: AddKeyArguments): KeyAction[] => {
-    const oldKey = getAndAssertOldKey(keys, targetID);
-    if (oldKey.fingerprint !== fingerprint) {
-        throw new Error('Fingerprint does not match');
+    if (actionableKeys.find(({ ID }) => ID === targetID)) {
+        throw new Error('Key already active');
     }
-    return keys.map((keyContainer) => {
-        if (keyContainer === oldKey) {
-            return {
-                ...oldKey,
-                flags,
-            };
-        }
-        return keyContainer;
-    });
+
+    const newKey: KeyAction = {
+        ID: oldKey.Key.ID,
+        primary: !parsedKeys.length ? 1 : 0,
+        flags,
+        privateKey,
+    };
+
+    return [...actionableKeys, newKey];
 };
 
-export const removeKeyAction = ({ keys, ID }: { keys: KeyAction[]; ID: string }) => {
-    const oldKey = findKeyById(keys, ID);
-    return keys.filter((key) => key !== oldKey);
+export const removeKeyAction = ({ actionableKeys, ID }: { actionableKeys: KeyAction[]; ID: string }) => {
+    return actionableKeys.filter((key) => key.ID !== ID);
 };
 
-export const setPrimaryKeyAction = ({ keys, ID }: { keys: KeyAction[]; ID: string }) => {
-    getAndAssertOldKey(keys, ID);
-    return keys
+export const setPrimaryKeyAction = ({ actionableKeys, ID: targetID }: { actionableKeys: KeyAction[]; ID: string }) => {
+    // Ensure it exists, can only set primary if it's decrypted
+    if (!actionableKeys.find(({ ID }) => ID === targetID)) {
+        throw new Error('Key not found');
+    }
+    return actionableKeys
         .map((key) => {
             return {
                 ...key,
-                primary: key.ID === ID ? 1 : 0,
+                primary: key.ID === targetID ? 1 : 0,
             };
         })
         .sort((a, b) => b.primary - a.primary);
 };
 
-export const setFlagsKeyAction = ({ keys, ID, flags }: { keys: KeyAction[]; ID: string; flags: number }) => {
-    const oldKey = findKeyById(keys, ID);
-    return keys.map((key) => {
-        if (key === oldKey) {
+export const setFlagsKeyAction = ({
+    actionableKeys,
+    ID,
+    flags,
+}: {
+    actionableKeys: KeyAction[];
+    ID: string;
+    flags: number;
+}): KeyAction[] => {
+    return actionableKeys.map((key) => {
+        if (key.ID === ID) {
             return {
                 ...key,
                 flags,

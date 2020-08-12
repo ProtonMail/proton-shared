@@ -1,7 +1,8 @@
+import { OpenPGPKey } from 'pmcrypto';
+
 export interface KeyAction {
-    primary: number;
+    privateKey: OpenPGPKey;
+    primary: 1 | 0;
     flags: number;
     ID: string;
-    fingerprint: string;
-    sha256Fingerprints: string[];
 }

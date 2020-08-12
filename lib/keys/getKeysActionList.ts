@@ -1,21 +1,16 @@
-import { getSHA256Fingerprints, OpenPGPKey } from 'pmcrypto';
+import { OpenPGPKey } from 'pmcrypto';
 import { CachedKey, KeyAction } from '../interfaces';
 
 export default async (keys: CachedKey[] = []): Promise<KeyAction[]> => {
-    const promises = keys
+    return keys
         .filter((k): k is CachedKey & { privateKey: OpenPGPKey } => !!k.privateKey)
-        .map(async ({ privateKey, Key: { ID, Primary, Flags } }) => {
-            // Undefined for user keys
-            if (Flags === undefined) {
-                throw new Error('Flags not set');
-            }
+        .map(({ privateKey, Key: { ID, Primary, Flags } }) => {
             return {
                 primary: Primary,
-                fingerprint: privateKey.getFingerprint(),
-                sha256Fingerprints: await getSHA256Fingerprints(privateKey),
-                flags: Flags,
+                // Flags is undefined for user keys, so dummy set those flags to 0
+                flags: Flags || 0,
+                privateKey,
                 ID,
             };
         });
-    return Promise.all(promises);
 };

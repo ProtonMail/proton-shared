@@ -2,7 +2,7 @@ import { OpenPGPKey } from 'pmcrypto';
 
 export interface Key {
     ID: string;
-    Primary: number;
+    Primary: 1 | 0;
     Flags?: number; // undefined for user keys
     Fingerprint: string;
     Fingerprints: string[];
