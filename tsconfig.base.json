@@ -13,7 +13,7 @@
         "noEmit": true,
         "jsx": "preserve",
         "allowJs": true,
-        "maxNodeModuleJsDepth": 3
+        "maxNodeModuleJsDepth": 6
     },
     "exclude": ["node_modules", "dist"]
 }
