@@ -3,6 +3,8 @@
  * see also https://en.wikipedia.org/wiki/Email_address#Local-part
  */
 import isTruthy from './isTruthy';
+import { MAJOR_DOMAINS } from '../constants';
+import { Recipient } from '../interfaces';
 
 export const validateLocalPart = (localPart: string) => {
     const match = localPart.match(/(^\(.+?\))?([^()]*)(\(.+?\)$)?/);
@@ -179,4 +181,15 @@ export const addPlusAlias = (email = '', plus = '') => {
     const domain = email.substring(atIndex, email.length);
 
     return `${name}+${plus}${domain}`;
+};
+
+export const majorDomainsMatcher = (inputValue: string) => {
+    const [localPart, domainPart] = getEmailParts(inputValue);
+    if (!localPart || typeof domainPart !== 'string') {
+        return [];
+    }
+    return MAJOR_DOMAINS.map((domain) => {
+        const email = `${localPart}@${domain}`;
+        return { Address: email, Name: email } as Recipient;
+    });
 };
