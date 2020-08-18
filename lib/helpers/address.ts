@@ -26,14 +26,3 @@ export const contactToRecipient = (contact: Partial<ContactEmail> = {}, groupPat
     ContactID: contact.ContactID,
     Group: groupPath,
 });
-
-export const majorDomainsMatcher = (inputValue: string) => {
-    const [localPart, domainPart] = inputValue.split('@');
-    if (!localPart || typeof domainPart !== 'string') {
-        return [];
-    }
-    return MAJOR_DOMAINS.map((domain) => {
-        const email = `${localPart}@${domain}`;
-        return { Address: email, Name: email } as Recipient;
-    });
-};
