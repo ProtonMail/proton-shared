@@ -566,8 +566,8 @@ export const getFrequencyString = (
 
     const isCustom = getIsRruleCustom(rruleValue);
     const isSupported = getIsRruleSupported(rruleValue);
-    const fakeStartUtcDate = toUTCDate(dtstart.value);
-    const startDay = fakeStartUtcDate.getUTCDay();
+    const startFakeUtcDate = toUTCDate(dtstart.value);
+    const startDay = startFakeUtcDate.getUTCDay();
     const end = {
         type: getEndType(count, until),
         count,
@@ -586,12 +586,12 @@ export const getFrequencyString = (
             return getCustomDailyString(rruleValue, end, locale);
         }
         if (freq === FREQUENCY.WEEKLY) {
-            return getCustomWeeklyString(rruleValue, end, weekStartsOn, fakeStartUtcDate, locale);
+            return getCustomWeeklyString(rruleValue, end, weekStartsOn, startFakeUtcDate, locale);
         }
         if (freq === FREQUENCY.MONTHLY) {
             const { byday, bysetpos } = rruleValue;
             const monthType = getMonthType(byday, bysetpos);
-            return getCustomMonthlyString(rruleValue, end, monthType, fakeStartUtcDate, locale);
+            return getCustomMonthlyString(rruleValue, end, monthType, startFakeUtcDate, locale);
         }
         if (freq === FREQUENCY.YEARLY) {
             return getCustomYearlyString(rruleValue, end, locale);
@@ -626,7 +626,7 @@ export const getFrequencyString = (
     if (freq === FREQUENCY.MONTHLY) {
         const { byday, bysetpos } = rruleValue;
         const monthType = getMonthType(byday, bysetpos);
-        const onDayString = getOnDayString(fakeStartUtcDate, monthType);
+        const onDayString = getOnDayString(startFakeUtcDate, monthType);
         return c('Info').t`Monthly ${onDayString}`;
     }
     if (freq === FREQUENCY.YEARLY) {
