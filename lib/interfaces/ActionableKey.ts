@@ -1,6 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
 
-export interface KeyAction {
+export interface ActionableKey {
     privateKey: OpenPGPKey;
     primary: 1 | 0;
     flags: number;

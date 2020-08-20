@@ -1,11 +1,11 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { CachedKey, KeyAction } from '../interfaces';
+import { CachedKey, ActionableKey } from '../interfaces';
 
 export interface AddKeyArguments {
     ID: string;
     flags: number;
     parsedKeys: CachedKey[];
-    actionableKeys: KeyAction[];
+    actionableKeys: ActionableKey[];
     privateKey: OpenPGPKey;
 }
 export const addKeyAction = ({
@@ -14,12 +14,12 @@ export const addKeyAction = ({
     ID: newKeyID,
     privateKey,
     flags,
-}: AddKeyArguments): KeyAction[] => {
+}: AddKeyArguments): ActionableKey[] => {
     if (parsedKeys.find(({ Key: { ID } }) => ID === newKeyID)) {
         throw new Error('Key already exists');
     }
 
-    const newKey: KeyAction = {
+    const newKey: ActionableKey = {
         ID: newKeyID,
         primary: !parsedKeys.length ? 1 : 0,
         flags,
@@ -35,7 +35,7 @@ export const reactivateKeyAction = ({
     ID: targetID,
     privateKey,
     flags,
-}: AddKeyArguments): KeyAction[] => {
+}: AddKeyArguments): ActionableKey[] => {
     const oldKey = parsedKeys.find(({ Key: { ID } }) => ID === targetID);
     if (!oldKey) {
         throw new Error('Key not found');
@@ -44,7 +44,7 @@ export const reactivateKeyAction = ({
         throw new Error('Key already active');
     }
 
-    const newKey: KeyAction = {
+    const newKey: ActionableKey = {
         ID: oldKey.Key.ID,
         primary: !parsedKeys.length ? 1 : 0,
         flags,
@@ -54,11 +54,17 @@ export const reactivateKeyAction = ({
     return [...actionableKeys, newKey];
 };
 
-export const removeKeyAction = ({ actionableKeys, ID }: { actionableKeys: KeyAction[]; ID: string }) => {
+export const removeKeyAction = ({ actionableKeys, ID }: { actionableKeys: ActionableKey[]; ID: string }) => {
     return actionableKeys.filter((key) => key.ID !== ID);
 };
 
-export const setPrimaryKeyAction = ({ actionableKeys, ID: targetID }: { actionableKeys: KeyAction[]; ID: string }) => {
+export const setPrimaryKeyAction = ({
+    actionableKeys,
+    ID: targetID,
+}: {
+    actionableKeys: ActionableKey[];
+    ID: string;
+}) => {
     // Ensure it exists, can only set primary if it's decrypted
     if (!actionableKeys.find(({ ID }) => ID === targetID)) {
         throw new Error('Key not found');
@@ -78,10 +84,10 @@ export const setFlagsKeyAction = ({
     ID,
     flags,
 }: {
-    actionableKeys: KeyAction[];
+    actionableKeys: ActionableKey[];
     ID: string;
     flags: number;
-}): KeyAction[] => {
+}): ActionableKey[] => {
     return actionableKeys.map((key) => {
         if (key.ID === ID) {
             return {

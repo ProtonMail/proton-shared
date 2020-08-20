@@ -1,8 +1,8 @@
-import { generateAddressKey } from './keys';
 import { DEFAULT_ENCRYPTION_CONFIG, ENCRYPTION_CONFIGS } from '../constants';
-import getSignedKeyList from './getSignedKeyList';
 import { Address, EncryptionConfig } from '../interfaces';
-import { getKeyFlagsAddress } from './keyFlags';
+import { generateAddressKey } from './keys';
+import getSignedKeyList from './getSignedKeyList';
+import { getDefaultKeyFlagsAddress } from './keyFlags';
 
 /**
  * Generates a new key for each address, encrypted with the new passphrase.
@@ -16,20 +16,19 @@ export const getResetAddressesKeys = async ({
     passphrase: string;
     encryptionConfig?: EncryptionConfig;
 }) => {
-    const newAddressesKeys = await Promise.all(
-        addresses.map(({ Email }) => {
-            return generateAddressKey({ email: Email, passphrase, encryptionConfig });
-        })
-    );
     return Promise.all(
-        addresses.map(async (address, i) => {
-            const { privateKey, privateKeyArmored } = newAddressesKeys[i];
-            const { ID: AddressID, Keys = [] } = address;
+        addresses.map(async (address) => {
+            const { ID: AddressID, Keys = [], Email } = address;
+            const { privateKey, privateKeyArmored } = await generateAddressKey({
+                email: Email,
+                passphrase,
+                encryptionConfig,
+            });
 
             const newPrimary = {
                 privateKey,
                 primary: 1,
-                flags: getKeyFlagsAddress(address, Keys),
+                flags: getDefaultKeyFlagsAddress(address, Keys),
             };
 
             const signedKeyList = await getSignedKeyList([newPrimary], privateKey);

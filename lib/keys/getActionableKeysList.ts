@@ -1,7 +1,7 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { CachedKey, KeyAction } from '../interfaces';
+import { CachedKey, ActionableKey } from '../interfaces';
 
-export default async (keys: CachedKey[] = []): Promise<KeyAction[]> => {
+export default async (keys: CachedKey[] = []): Promise<ActionableKey[]> => {
     return keys
         .filter((k): k is CachedKey & { privateKey: OpenPGPKey } => !!k.privateKey)
         .map(({ privateKey, Key: { ID, Primary, Flags } }) => {
