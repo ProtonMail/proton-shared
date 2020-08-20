@@ -13,6 +13,7 @@ import {
 import { getEndType, getMonthType, getUntilDate, getWeeklyDays } from './rruleProperties';
 import { getIsRruleCustom, getIsRruleSupported } from './rrule';
 import { getPropertyTzid } from '../vcalHelper';
+import { toUTCDate } from '../../date/timezone';
 
 interface RruleEnd {
     type: END_TYPE;
@@ -28,8 +29,8 @@ interface GetTimezonedFrequencyStringOptions {
 // we need to expand all possible cases so there will be quite a bit of duplicated code
 
 export const getOnDayString = (date: Date, monthlyType: MONTHLY_TYPE) => {
-    const monthday = date.getDate();
-    const day = date.getDay();
+    const dayOfMonth = date.getUTCDate();
+    const day = date.getUTCDay();
 
     if (monthlyType === MONTHLY_TYPE.ON_NTH_DAY) {
         const setPos = getPositiveSetpos(date);
@@ -149,7 +150,7 @@ export const getOnDayString = (date: Date, monthlyType: MONTHLY_TYPE) => {
             return c('Monthly recurring event, repeats on').t`on the last Saturday`;
         }
     }
-    return c('Monthly recurring event, repeats on').t`on day ${monthday}`;
+    return c('Monthly recurring event, repeats on').t`on day ${dayOfMonth}`;
 };
 
 const getCustomDailyString = (
@@ -219,7 +220,7 @@ const getCustomWeeklyString = (
     locale: Locale
 ) => {
     const days = getWeeklyDays(byday);
-    const safeDays = unique([...days, startDate.getDay()]);
+    const safeDays = unique([...days, startDate.getUTCDay()]);
     // sort weekly days depending on the day the week starts
     const sortedWeekDays = safeDays.slice().sort((a: number, b: number) => {
         // shift days. Get a positive modulus
@@ -562,12 +563,11 @@ export const getFrequencyString = (
     { weekStartsOn, locale }: Pick<GetTimezonedFrequencyStringOptions, 'weekStartsOn' | 'locale'>
 ) => {
     const { freq, count, until } = rruleValue;
-    const { year, month, day } = dtstart.value;
 
     const isCustom = getIsRruleCustom(rruleValue);
     const isSupported = getIsRruleSupported(rruleValue);
-    const localStart = new Date(year, month - 1, day);
-    const startDay = localStart.getDay();
+    const fakeStartUtcDate = toUTCDate(dtstart.value);
+    const startDay = fakeStartUtcDate.getUTCDay();
     const end = {
         type: getEndType(count, until),
         count,
@@ -586,12 +586,12 @@ export const getFrequencyString = (
             return getCustomDailyString(rruleValue, end, locale);
         }
         if (freq === FREQUENCY.WEEKLY) {
-            return getCustomWeeklyString(rruleValue, end, weekStartsOn, localStart, locale);
+            return getCustomWeeklyString(rruleValue, end, weekStartsOn, fakeStartUtcDate, locale);
         }
         if (freq === FREQUENCY.MONTHLY) {
             const { byday, bysetpos } = rruleValue;
             const monthType = getMonthType(byday, bysetpos);
-            return getCustomMonthlyString(rruleValue, end, monthType, localStart, locale);
+            return getCustomMonthlyString(rruleValue, end, monthType, fakeStartUtcDate, locale);
         }
         if (freq === FREQUENCY.YEARLY) {
             return getCustomYearlyString(rruleValue, end, locale);
@@ -626,7 +626,7 @@ export const getFrequencyString = (
     if (freq === FREQUENCY.MONTHLY) {
         const { byday, bysetpos } = rruleValue;
         const monthType = getMonthType(byday, bysetpos);
-        const onDayString = getOnDayString(localStart, monthType);
+        const onDayString = getOnDayString(fakeStartUtcDate, monthType);
         return c('Info').t`Monthly ${onDayString}`;
     }
     if (freq === FREQUENCY.YEARLY) {
