@@ -522,7 +522,9 @@ export const ENCRYPTION_CONFIGS = {
 };
 
 export enum KEY_FLAG {
+    // Key can be used to encrypt
     ENCRYPT = 2,
+    // Key can be used to verify signatures
     VERIFY = 1,
 }
 
