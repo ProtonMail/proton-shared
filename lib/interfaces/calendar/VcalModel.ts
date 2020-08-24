@@ -235,12 +235,17 @@ export interface VcalVtimezoneComponent {
     tzid: VcalStringProperty;
 }
 
+export interface VcalXOrIanaComponent {
+    component: string;
+}
+
 export type VcalCalendarComponent =
     | VcalVeventComponent
     | VcalVtodoComponent
     | VcalVjournalComponent
     | VcalVfreebusyComponent
     | VcalVtimezoneComponent
+    | VcalXOrIanaComponent
     | VcalVcalendar;
 
 export interface VcalVcalendar {

@@ -13,6 +13,7 @@ import {
     VcalVjournalComponent,
     VcalVtimezoneComponent,
     VcalVtodoComponent,
+    VcalXOrIanaComponent,
 } from '../interfaces/calendar/VcalModel';
 
 export const getIsPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
@@ -68,6 +69,11 @@ export const getIsTimezoneComponent = (
     vcalComponent: VcalCalendarComponent
 ): vcalComponent is VcalVtimezoneComponent => {
     return vcalComponent.component.toLowerCase() === 'vtimezone';
+};
+
+export const getIsXOrIanaComponent = (vcalComponent: VcalCalendarComponent): vcalComponent is VcalXOrIanaComponent => {
+    const name = vcalComponent.component.toLowerCase();
+    return !['vcalendar', 'vevent', 'vtodo', 'vjournal', 'vfreebusy', 'vtimezone'].includes(name);
 };
 
 export const getHasUid = (
