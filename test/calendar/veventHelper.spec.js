@@ -7,7 +7,7 @@ const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR } = CALENDAR_CARD_TYPE;
 export const toCRLF = (str) => str.replace(/\n/g, '\r\n');
 
 describe('veventHelper', () => {
-    it('should split shared parts', () => {
+    it('should split shared parts', async () => {
         const y = parse(`BEGIN:VEVENT
 UID:abc
 DTSTART;TZID=Europe/Zurich:20200311T100000
@@ -18,7 +18,7 @@ SEQUENCE:2
 LOCATION:asd
 END:VEVENT
 `);
-        const result = getVeventParts(y);
+        const result = await getVeventParts(y);
 
         expect(result).toEqual({
             sharedPart: {
@@ -39,15 +39,15 @@ DESCRIPTION:bca
 SUMMARY:dcf
 LOCATION:asd
 END:VEVENT
-END:VCALENDAR`)
+END:VCALENDAR`),
             },
             calendarPart: { [SIGNED]: undefined, [ENCRYPTED_AND_SIGNED]: undefined },
             personalPart: { [SIGNED]: undefined, [ENCRYPTED_AND_SIGNED]: undefined },
-            attendeesPart: { [CLEAR]: [], [SIGNED]: undefined, [ENCRYPTED_AND_SIGNED]: undefined }
+            attendeesPart: { [CLEAR]: [], [SIGNED]: undefined, [ENCRYPTED_AND_SIGNED]: undefined },
         });
     });
 
-    it('should split shared, calendar, and personal parts', () => {
+    it('should split shared, calendar, and personal parts', async () => {
         const y = parse(`BEGIN:VEVENT
 UID:abc
 DTSTART;TZID=Europe/Zurich:20200311T100000
@@ -67,7 +67,7 @@ DESCRIPTION:asd
 END:VALARM
 END:VEVENT
 `);
-        const result = getVeventParts(y);
+        const result = await getVeventParts(y);
         expect(result).toEqual({
             sharedPart: {
                 [SIGNED]: toCRLF(`BEGIN:VCALENDAR
@@ -87,7 +87,7 @@ DESCRIPTION:bca
 SUMMARY:dcf
 LOCATION:asd
 END:VEVENT
-END:VCALENDAR`)
+END:VCALENDAR`),
             },
             calendarPart: {
                 [SIGNED]: toCRLF(`BEGIN:VCALENDAR
@@ -104,7 +104,7 @@ BEGIN:VEVENT
 UID:abc
 COMMENT:my comment
 END:VEVENT
-END:VCALENDAR`)
+END:VCALENDAR`),
             },
             personalPart: {
                 [SIGNED]: toCRLF(`BEGIN:VCALENDAR
@@ -119,9 +119,9 @@ DESCRIPTION:asd
 END:VALARM
 END:VEVENT
 END:VCALENDAR`),
-                [ENCRYPTED_AND_SIGNED]: undefined
+                [ENCRYPTED_AND_SIGNED]: undefined,
             },
-            attendeesPart: { [CLEAR]: [], [SIGNED]: undefined, [ENCRYPTED_AND_SIGNED]: undefined }
+            attendeesPart: { [CLEAR]: [], [SIGNED]: undefined, [ENCRYPTED_AND_SIGNED]: undefined },
         });
     });
 });

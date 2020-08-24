@@ -130,7 +130,7 @@ export const createCalendarEvent = async ({
     calendarSessionKey: oldCalendarSessionKey,
     isSwitchCalendar = false,
 }: CreateCalendarEventArguments) => {
-    const { sharedPart, calendarPart, personalPart, attendeesPart } = getParts(eventComponent);
+    const { sharedPart, calendarPart, personalPart, attendeesPart } = await getParts(eventComponent);
 
     // If there is no encrypted calendar part, a calendar session key does not need to be created.
     const shouldCreateCalendarKey = !!calendarPart[ENCRYPTED_AND_SIGNED];

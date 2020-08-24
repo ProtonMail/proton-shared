@@ -1,13 +1,14 @@
-import getRandomValues from 'get-random-values';
-import { serializeUint8Array } from '../helpers/serialization';
+import { binaryStringToArray, unsafeSHA1, arrayToHexString } from 'pmcrypto';
 import { Attendee } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import { ATTENDEE_PERMISSIONS, ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS } from './constants';
+import { ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS, ATTENDEE_PERMISSIONS } from './constants';
+import { normalizeEmailForToken } from './calendar';
 
-const generateAttendeeToken = () => {
-    // we need a random base64 string with 40 characters
-    const value = getRandomValues(new Uint8Array(30));
-    return serializeUint8Array(value);
+export const generateAttendeeToken = async (email: string, uid: string) => {
+    const uidEmail = uid + normalizeEmailForToken(email);
+    const byteArray = binaryStringToArray(uidEmail);
+    const hash = await unsafeSHA1(byteArray);
+    return arrayToHexString(hash);
 };
 
 const toApiPartstat = (partstat?: string) => {
@@ -40,16 +41,22 @@ const toIcsPartstat = (partstat?: ATTENDEE_STATUS_API) => {
  * Internally permissions are stored as x-pm-permissions in the vevent,
  * but stripped for the api.
  */
-export const fromInternalAttendee = ({
-    parameters: {
-        'x-pm-permissions': oldPermissions = ATTENDEE_PERMISSIONS.SEE,
-        'x-pm-token': oldToken = '',
-        partstat,
-        ...restParameters
-    } = {},
-    ...rest
-}: VcalAttendeeProperty) => {
-    const token = oldToken || generateAttendeeToken();
+export const fromInternalAttendee = async (
+    {
+        parameters: {
+            'x-pm-permissions': oldPermissions = ATTENDEE_PERMISSIONS.SEE_AND_INVITE,
+            'x-pm-token': oldToken = '',
+            partstat,
+            ...restParameters
+        } = {},
+        ...rest
+    }: VcalAttendeeProperty,
+    component: VcalVeventComponent
+) => {
+    if (restParameters.cn === undefined) {
+        throw new Error('Attendee information error');
+    }
+    const token = oldToken || (await generateAttendeeToken(restParameters.cn, component.uid.value));
     return {
         attendee: {
             parameters: {

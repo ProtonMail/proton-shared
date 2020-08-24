@@ -1,6 +1,7 @@
 import { hasBit } from '../helpers/bitset';
 import { CALENDAR_FLAGS } from './constants';
 import { Calendar } from '../interfaces/calendar';
+import { getEmailParts } from '../helpers/email';
 
 export const getIsCalendarActive = ({ Flags } = { Flags: 0 }) => {
     return hasBit(Flags, CALENDAR_FLAGS.ACTIVE);
@@ -25,4 +26,23 @@ export const getDefaultCalendar = (calendars: Calendar[] = [], defaultCalendarID
         return;
     }
     return calendars.find(({ ID }) => ID === defaultCalendarID) || calendars[0];
+};
+
+export const normalizeEmailForToken = (email: string) => {
+    let output = email;
+    // Filter out any bad characters: remove all characters except letters, digits and !#$%&'*+-=?^_`{|}~@.[]
+    output =
+        output
+            .toLowerCase()
+            .match(/([a-z0-9!#$%&'*+-=?^_`{|}~@[\]])/g)
+            ?.join('') || '';
+    // eslint-disable-next-line prefer-const
+    let [localPart, domainPart] = getEmailParts(output);
+    // Throw out the + and everything after it
+    [localPart] = localPart.split('+');
+    localPart = localPart
+        .split('')
+        .filter((char) => !'._-'.includes(char))
+        .join('');
+    return `${localPart}@${domainPart}`;
 };
