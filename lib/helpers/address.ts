@@ -1,4 +1,4 @@
-import { ADDRESS_STATUS, ADDRESS_TYPE, RECEIVE_ADDRESS, SEND_ADDRESS, MAJOR_DOMAINS } from '../constants';
+import { ADDRESS_STATUS, ADDRESS_TYPE, RECEIVE_ADDRESS, SEND_ADDRESS } from '../constants';
 import { Address, Recipient } from '../interfaces';
 import { ContactEmail } from '../interfaces/contacts';
 

@@ -61,7 +61,7 @@ export const getEmailParts = (email: string): string[] => {
  */
 export const validateEmailAddress = (email: string) => {
     const [localPart, domain] = getEmailParts(email);
-    if (!domain) {
+    if (!localPart || !domain) {
         return false;
     }
     return validateLocalPart(localPart) && validateDomain(domain);
@@ -84,7 +84,7 @@ export const normalizeInternalEmail = (email: string) => {
  * See documentation at https://confluence.protontech.ch/display/MAILFE/Email+normalization for more information
  */
 export const normalizeExternalEmail = (email: string) => {
-    return email.toLowerCase();
+    return email.toLowerCase().trim();
 };
 
 /**
