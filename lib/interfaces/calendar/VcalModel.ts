@@ -153,6 +153,7 @@ export interface VcalStatusProperty {
 }
 
 export interface VcalAttendeePropertyParameters extends VcalOrganizerPropertyParameters {
+    cn?: string;
     cutype?: string;
     member?: string;
     role?: string;
