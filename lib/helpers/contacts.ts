@@ -144,6 +144,7 @@ export const getTypeLabels = () => ({
     yomi: c('Contact type label').t`Yomi`,
     other: c('Contact type label').t`Other`,
     fax: c('Contact type label').t`Fax`,
+    // translator: https://en.wikipedia.org/wiki/Pager
     pager: c('Contact type label').t`Pager`,
 });
 
