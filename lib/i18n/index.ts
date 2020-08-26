@@ -7,21 +7,25 @@ import { enUSLocale } from './dateFnLocales';
  * 2) It's more similar to how ttag works
  */
 export let dateLocale = enUSLocale;
+export let defaultDateLocale = enUSLocale;
 export let dateLocaleCode = 'en_US';
-export let longDateLocaleCode = 'en_US';
 export let localeCode = 'en_US';
 export let languageCode = 'en';
 
 export const setLocales = ({
-    dateLocale: newDateLocale = dateLocale,
-    dateLocaleCode: newDateLocaleCode = dateLocaleCode,
-    longDateLocaleCode: newLongDateLocaleCode = longDateLocaleCode,
     localeCode: newLocaleCode = localeCode,
     languageCode: newLanguageCode = languageCode,
 }) => {
-    dateLocale = newDateLocale;
-    dateLocaleCode = newDateLocaleCode;
-    longDateLocaleCode = newLongDateLocaleCode;
     localeCode = newLocaleCode;
     languageCode = newLanguageCode;
+};
+
+export const setDateLocales = ({
+    defaultDateLocale: newDefaultDateLocale = defaultDateLocale,
+    dateLocale: newDateLocale = dateLocale,
+    dateLocaleCode: newDateLocaleCode = dateLocaleCode,
+}) => {
+    defaultDateLocale = newDefaultDateLocale;
+    dateLocale = newDateLocale;
+    dateLocaleCode = newDateLocaleCode;
 };
