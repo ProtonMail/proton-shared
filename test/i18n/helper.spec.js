@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import cnLocale from 'date-fns/locale/zh-CN';
 
 import { getClosestLocaleMatch } from '../../lib/i18n/helper';
-import { loadDateFnTimeFormat } from '../../lib/i18n/dateFnLocale';
+import { getDateFnLocaleWithTimeFormat } from '../../lib/i18n/dateFnLocale';
 import { loadDateLocale, loadLocale } from '../../lib/i18n/loadLocale';
 import { SETTINGS_TIME_FORMAT } from '../../lib/interfaces';
 
@@ -43,30 +43,40 @@ describe('Load date locales', () => {
         expect(format(zero, 'iiii', { locale: dateFnLocale })).toBe('samedi');
     });
 
+    it('should use long date format from browser and other format from locale in american english', async () => {
+        const dateFnLocale = await loadDateLocale('en_US', 'en_US');
+        expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('01/01/2000, 12:00 AM');
+    });
+
+    it('should use long date format from browser and other format from locale english', async () => {
+        const dateFnLocale = await loadDateLocale('en_US', 'en_GB');
+        expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('01/01/2000, 00:00');
+    });
+
     it('should use long date format from browser and other format from locale', async () => {
-        const dateFnLocale = await loadDateLocale('en_US', { TimeFormat: SETTINGS_TIME_FORMAT.H24 });
+        const dateFnLocale = await loadDateLocale('en_US', 'en_US', { TimeFormat: SETTINGS_TIME_FORMAT.H24 });
         expect(format(zero, 'Pp', { locale: dateFnLocale })).toBe('01/01/2000, 00:00');
     });
 
     it('should override time format and date format with 12 hour format', async () => {
-        const dateFnLocale = await loadDateLocale('en_US', { TimeFormat: SETTINGS_TIME_FORMAT.H24 });
-        expect(format(zero, 'p', { locale: loadDateFnTimeFormat(dateFnLocale, true) })).toBe('12:00 AM');
+        const dateFnLocale = await loadDateLocale('en_US', 'en_US', { TimeFormat: SETTINGS_TIME_FORMAT.H24 });
+        expect(format(zero, 'p', { locale: getDateFnLocaleWithTimeFormat(dateFnLocale, true) })).toBe('12:00 AM');
 
         expect(
             format(zero, 'p', {
-                locale: loadDateFnTimeFormat(dateFnLocale, false),
+                locale: getDateFnLocaleWithTimeFormat(dateFnLocale, false),
             })
         ).toBe('00:00');
 
         expect(
             format(zero, 'p', {
-                locale: loadDateFnTimeFormat(cnLocale, false),
+                locale: getDateFnLocaleWithTimeFormat(cnLocale, false),
             })
         ).toBe('00:00');
 
         expect(
             format(zero, 'p', {
-                locale: loadDateFnTimeFormat(cnLocale, true),
+                locale: getDateFnLocaleWithTimeFormat(cnLocale, true),
             })
         ).toBe('上午 12:00');
     });

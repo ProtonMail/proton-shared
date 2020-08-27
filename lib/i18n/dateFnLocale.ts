@@ -1,6 +1,19 @@
 import { Locale } from 'date-fns';
-import { enGBLocale, enUSLocale } from './dateFnLocales';
+import { enGBLocale, enUSLocale, faIRLocale } from './dateFnLocales';
 import { SETTINGS_DATE_FORMAT, SETTINGS_TIME_FORMAT, SETTINGS_WEEK_START } from '../interfaces';
+
+export const getDateFnLocaleWithLongFormat = (a: Locale, b: Locale): Locale => {
+    /*
+     * By default we use the same date-time locale as the user has selected in the app in order
+     * to get the correct translations for days, months, year, etc. However, we override
+     * the long date and time format to get 12 or 24 hour time and the correct date format depending
+     * on what is selected in the browser for the "system settings" option.
+     */
+    return {
+        ...a,
+        formatLong: b.formatLong,
+    };
+};
 
 export interface Options {
     TimeFormat: SETTINGS_TIME_FORMAT;
@@ -8,8 +21,28 @@ export interface Options {
     WeekStart: SETTINGS_WEEK_START;
 }
 
-export const loadDateFnTimeFormat = (dateLocale: Locale, displayAMPM = false): Locale => {
-    const isAMPMLocale = dateLocale.formatLong?.time().includes('a');
+export const getIsLocaleAMPM = (locale: Locale) => locale.formatLong?.time().includes('a');
+
+export const getDateFnLocaleWithDateFormat = (locale: Locale, dateFormat: SETTINGS_DATE_FORMAT): Locale => {
+    const date = (dateFormat === SETTINGS_DATE_FORMAT.DDMMYYYY
+        ? enGBLocale
+        : dateFormat === SETTINGS_DATE_FORMAT.MMDDYYYY
+        ? enUSLocale
+        : faIRLocale
+    ).formatLong?.date;
+
+    return {
+        ...locale,
+        formatLong: {
+            ...locale.formatLong,
+            // @ts-ignore
+            date,
+        },
+    };
+};
+
+export const getDateFnLocaleWithTimeFormat = (dateLocale: Locale, displayAMPM = false): Locale => {
+    const isAMPMLocale = getIsLocaleAMPM(dateLocale);
     if ((displayAMPM && isAMPMLocale) || (!displayAMPM && !isAMPMLocale)) {
         return dateLocale;
     }
@@ -40,13 +73,11 @@ export const getDateFnLocaleWithSettings = (
 
     if (TimeFormat !== SETTINGS_TIME_FORMAT.LOCALE_DEFAULT) {
         const displayAMPM = TimeFormat === SETTINGS_TIME_FORMAT.H12;
-        copy = loadDateFnTimeFormat(locale, displayAMPM);
+        copy = getDateFnLocaleWithTimeFormat(locale, displayAMPM);
     }
 
     if (DateFormat !== SETTINGS_DATE_FORMAT.LOCALE_DEFAULT) {
-        /*
-            TODO: Override with the date locale. It's left as TODO since currently this doesn't have any visible impact.
-         */
+        copy = getDateFnLocaleWithDateFormat(copy, DateFormat);
     }
 
     if (WeekStart !== SETTINGS_WEEK_START.LOCALE_DEFAULT && WeekStart >= 1 && WeekStart <= 7) {
