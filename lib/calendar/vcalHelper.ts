@@ -73,6 +73,10 @@ export const getIsTimezoneComponent = (
     return vcalComponent.component.toLowerCase() === 'vtimezone';
 };
 
+export const getIsAlarmComponent = (vcalComponent: VcalCalendarComponent): vcalComponent is VcalVtimezoneComponent => {
+    return vcalComponent.component.toLowerCase() === 'valarm';
+};
+
 export const getIsXOrIanaComponent = (vcalComponent: VcalCalendarComponent): vcalComponent is VcalXOrIanaComponent => {
     const name = vcalComponent.component.toLowerCase();
     return !['vcalendar', 'vevent', 'vtodo', 'vjournal', 'vfreebusy', 'vtimezone'].includes(name);
