@@ -52,6 +52,7 @@
         "lodash": "^4.17.11",
         "pm-srp": "github:ProtonMail/pm-srp.git#semver:^1.0.0",
         "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:~6.3.0",
+        "mutex-browser": "github:ProtonMail/mutex-browser#semver:^1.0.0",
         "push.js": "^1.0.12",
         "sieve.js": "github:ProtonMail/sieve.js#master",
         "timezone-support": "github:ProtonMail/timezone-support#bundle",
