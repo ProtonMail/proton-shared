@@ -21,7 +21,7 @@ export const sendMessageToTabs = (type: string, data: any) => {
     removeItem(CROSS_TAB_EVENT_KEY);
 };
 
-export const isSelf = (otherId: string) => otherId === id;
+export const getIsSelf = (otherId: string) => otherId === id;
 
 export const getMessage = (event: StorageEvent) => {
     if (event.key !== CROSS_TAB_EVENT_KEY || !event.newValue) {
