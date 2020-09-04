@@ -93,14 +93,14 @@ export const getUserPart = (veventProperties: VcalVeventComponent) => {
     };
 };
 
-export const getAttendeesPart = async (veventProperties: VcalVeventComponent) => {
+export const getAttendeesPart = (veventProperties: VcalVeventComponent) => {
     const formattedAttendees: { [CLEAR]: AttendeeClearPartResult[]; attendee: AttendeePart[] } = {
         [CLEAR]: [],
         attendee: [],
     };
     if (Array.isArray(veventProperties.attendee)) {
         for (const attendee of veventProperties.attendee) {
-            const { clear, attendee: newAttendee } = await fromInternalAttendee(attendee, veventProperties);
+            const { clear, attendee: newAttendee } = fromInternalAttendee(attendee);
             formattedAttendees[CLEAR].push(clear);
             formattedAttendees.attendee.push(newAttendee);
         }
@@ -149,13 +149,13 @@ const toResultOptimized = (
 /**
  * Split the internal vevent component into the parts expected by the API.
  */
-export const getVeventParts = async ({ components, ...properties }: VcalVeventComponent) => {
+export const getVeventParts = ({ components, ...properties }: VcalVeventComponent) => {
     const restProperties = omit(properties, TAKEN_KEYS);
 
     const sharedPart = getSharedPart(properties);
     const calendarPart = getCalendarPart(properties);
     const personalPart = getUserPart(properties);
-    const attendeesPart = await getAttendeesPart(properties);
+    const attendeesPart = getAttendeesPart(properties);
 
     return {
         sharedPart: {

@@ -18,7 +18,7 @@ SEQUENCE:2
 LOCATION:asd
 END:VEVENT
 `);
-        const result = await getVeventParts(y);
+        const result = getVeventParts(y);
 
         expect(result).toEqual({
             sharedPart: {
@@ -67,7 +67,7 @@ DESCRIPTION:asd
 END:VALARM
 END:VEVENT
 `);
-        const result = await getVeventParts(y);
+        const result = getVeventParts(y);
         expect(result).toEqual({
             sharedPart: {
                 [SIGNED]: toCRLF(`BEGIN:VCALENDAR
