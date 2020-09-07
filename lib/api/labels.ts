@@ -59,6 +59,12 @@ export const deleteLabel = (labelID: string) => ({
     url: `v4/labels/${labelID}`,
 });
 
+export const checkLabelAvailability = (params: { Name: string; Type: LABEL_TYPE; ParentID?: string }) => ({
+    method: 'get',
+    url: 'v4/labels/available',
+    params,
+});
+
 export const getLabels = () => get(MESSAGE_LABEL);
 export const getFolders = () => get(MESSAGE_FOLDER);
 export const getContactGroup = () => get(CONTACT_GROUP);
