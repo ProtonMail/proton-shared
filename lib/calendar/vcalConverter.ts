@@ -11,7 +11,7 @@ import {
 } from '../interfaces/calendar/VcalModel';
 import { mod } from '../helpers/math';
 import { getIsPropertyAllDay, getPropertyTzid } from './vcalHelper';
-import { getEmailTo } from '../helpers/email';
+import { getEmailTo, buildMailTo } from '../helpers/email';
 
 export const dateToProperty = ({
     year = 1,
@@ -135,14 +135,14 @@ export const getUntilProperty = (
     return { ...utcEndOfDay, isUTC: true };
 };
 
-export const mailtoToEmail = ({ value, parameters }: { value?: string; parameters?: { cn?: string } }) => {
+export const extractEmailAddress = ({ value, parameters }: { value?: string; parameters?: { cn?: string } }) => {
     const email = value || parameters?.cn;
     return email && getEmailTo(email);
 };
 
-export const emailToMailto = (email: string) => {
+export const buildVcalAttendee = (email: string) => {
     return {
-        value: `mailto:${email}`,
+        value: buildMailTo(email),
         parameters: {
             cn: email,
         },
