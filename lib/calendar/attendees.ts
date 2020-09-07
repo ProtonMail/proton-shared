@@ -4,6 +4,7 @@ import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calenda
 import { ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS, ATTENDEE_PERMISSIONS } from './constants';
 import { getCanonicalAddresses } from '../api/addresses';
 import { Api } from '../interfaces';
+import isTruthy from '../helpers/isTruthy';
 
 export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
     const uidEmail = `${uid}${normalizedEmail}`;
@@ -104,13 +105,15 @@ export const withAttendeeTokens = async ({
     uid: string;
     api: Api;
 }) => {
-    const attendeeEmails = attendees.map(({ parameters }) => parameters?.cn).filter(Boolean) as string[];
-    if (attendeeEmails.length !== attendees.length) {
-        throw new Error('Attendies error: cn property missing');
+    const attendeeEmails = attendees.map(({ parameters }) => parameters?.cn).filter(isTruthy);
+    const missingCn = attendeeEmails.length !== attendees.length;
+    if (missingCn) {
+        throw new Error('Attendees error: cn property missing');
     }
     if (uid && attendeeEmails.length) {
         const { Responses, Code } = await api<GetCanonicalAddressesResponse>(getCanonicalAddresses(attendeeEmails));
-        if (Code !== 1000) {
+        const unexpectedResponse = Responses.some(({ Response }) => Response.Code !== 1000);
+        if (Code !== 1001 || unexpectedResponse) {
             throw new Error('Canonize operation failed');
         }
         const emailMap = Object.fromEntries(
