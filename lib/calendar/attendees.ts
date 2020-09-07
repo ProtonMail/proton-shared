@@ -104,9 +104,15 @@ export const withAttendeeTokens = async ({
     uid: string;
     api: Api;
 }) => {
-    const attendeeEmails = attendees.map(({ parameters }) => parameters?.cn!);
+    const attendeeEmails = attendees.map(({ parameters }) => parameters?.cn).filter(Boolean) as string[];
+    if (attendeeEmails.length !== attendees.length) {
+        throw new Error('Attendies error: cn property missing');
+    }
     if (uid && attendeeEmails.length) {
-        const { Responses } = await api<GetCanonicalAddressesResponse>(getCanonicalAddresses(attendeeEmails));
+        const { Responses, Code } = await api<GetCanonicalAddressesResponse>(getCanonicalAddresses(attendeeEmails));
+        if (Code !== 1000) {
+            throw new Error('Canonize operation failed');
+        }
         const emailMap = Object.fromEntries(
             Responses.map(({ Email, Response: { CanonicalEmail } }) => [Email, CanonicalEmail])
         );
