@@ -7,7 +7,7 @@ const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR } = CALENDAR_CARD_TYPE;
 export const toCRLF = (str) => str.replace(/\n/g, '\r\n');
 
 describe('veventHelper', () => {
-    it('should split shared parts', async () => {
+    it('should split shared parts', () => {
         const y = parse(`BEGIN:VEVENT
 UID:abc
 DTSTART;TZID=Europe/Zurich:20200311T100000
@@ -47,7 +47,7 @@ END:VCALENDAR`),
         });
     });
 
-    it('should split shared, calendar, and personal parts', async () => {
+    it('should split shared, calendar, and personal parts', () => {
         const y = parse(`BEGIN:VEVENT
 UID:abc
 DTSTART;TZID=Europe/Zurich:20200311T100000
