@@ -1,6 +1,7 @@
 import { CYCLE, PLAN_TYPES, PLANS, ADDON_NAMES } from '../constants';
 
-type Currency = 'EUR' | 'CHF' | 'USD';
+export type Currency = 'EUR' | 'CHF' | 'USD';
+export type Cycle = 1 | 12 | 24;
 
 export interface Pricing {
     [CYCLE.MONTHLY]: number;
