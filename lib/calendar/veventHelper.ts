@@ -93,7 +93,12 @@ export const getUserPart = (veventProperties: VcalVeventComponent) => {
     };
 };
 
-export const getAttendeesPart = (veventProperties: VcalVeventComponent) => {
+export const getAttendeesPart = (
+    veventProperties: VcalVeventComponent
+): {
+    [CLEAR]: AttendeeClearPartResult[];
+    [ENCRYPTED_AND_SIGNED]: Partial<VcalVeventComponent>;
+} => {
     const formattedAttendees: { [CLEAR]: AttendeeClearPartResult[]; attendee: AttendeePart[] } = {
         [CLEAR]: [],
         attendee: [],
