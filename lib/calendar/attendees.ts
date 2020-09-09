@@ -1,10 +1,11 @@
 import { binaryStringToArray, unsafeSHA1, arrayToHexString } from 'pmcrypto';
+import { API_CODES } from '../constants';
+import { getEmailTo } from '../helpers/email';
 import { Attendee, GetCanonicalAddressesResponse } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 import { ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS, ATTENDEE_PERMISSIONS } from './constants';
 import { getCanonicalAddresses } from '../api/addresses';
 import { Api } from '../interfaces';
-import isTruthy from '../helpers/isTruthy';
 
 export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
     const uidEmail = `${uid}${normalizedEmail}`;
@@ -52,9 +53,6 @@ export const fromInternalAttendee = ({
     } = {},
     ...rest
 }: VcalAttendeeProperty) => {
-    if (restParameters.cn === undefined) {
-        throw new Error('Attendee information error');
-    }
     return {
         attendee: {
             parameters: {
@@ -96,40 +94,49 @@ export const toInternalAttendee = (
     });
 };
 
-export const withAttendeeTokens = async ({
-    attendees,
-    api,
-    uid,
-}: {
-    attendees: VcalAttendeeProperty[];
-    uid: string;
-    api: Api;
-}) => {
-    const attendeeEmails = attendees.map(({ parameters }) => parameters?.cn).filter(isTruthy);
-    const missingCn = attendeeEmails.length !== attendees.length;
-    if (missingCn) {
-        throw new Error('Attendees error: cn property missing');
+export const withPmAttendees = async (vevent: VcalVeventComponent, api: Api): Promise<VcalVeventComponent> => {
+    const { uid, attendee: vcalAttendee } = vevent;
+    if (!vcalAttendee?.length) {
+        return { ...vevent };
     }
-    if (uid && attendeeEmails.length) {
-        const { Responses, Code } = await api<GetCanonicalAddressesResponse>(getCanonicalAddresses(attendeeEmails));
-        const unexpectedResponse = Responses.some(({ Response }) => Response.Code !== 1000);
-        if (Code !== 1001 || unexpectedResponse) {
-            throw new Error('Canonize operation failed');
-        }
-        const emailMap = Object.fromEntries(
-            Responses.map(({ Email, Response: { CanonicalEmail } }) => [Email, CanonicalEmail])
-        );
-        return Promise.all(
-            attendees.map(async (attendee) => {
-                if (attendee.parameters && attendee.parameters.cn && !attendee.parameters?.['x-pm-token']) {
-                    attendee.parameters['x-pm-token'] = await generateAttendeeToken(
-                        emailMap[attendee.parameters.cn],
-                        uid
-                    );
-                }
-                return attendee;
-            })
-        );
+    const attendeesWithEmail = vcalAttendee.map((attendee) => {
+        const emailAddress = getEmailTo(attendee.value);
+        return {
+            attendee,
+            emailAddress,
+        };
+    });
+    const { Responses, Code } = await api<GetCanonicalAddressesResponse>(
+        getCanonicalAddresses(attendeesWithEmail.map(({ emailAddress }) => emailAddress))
+    );
+    const unexpectedResponse = Responses.some(({ Response }) => Response.Code !== API_CODES.SINGLE_SUCCESS);
+    if (Code !== API_CODES.GLOBAL_SUCCESS || unexpectedResponse) {
+        throw new Error('Canonize operation failed');
     }
-    return [];
+    const pmAttendees = await Promise.all(
+        attendeesWithEmail.map(async ({ attendee: { parameters, ...rest }, emailAddress }) => {
+            const attendeeWithCn = {
+                ...rest,
+                parameters: {
+                    ...parameters,
+                    cn: parameters?.cn || emailAddress,
+                },
+            };
+            if (parameters?.['x-pm-token']) {
+                return { ...attendeeWithCn };
+            }
+            const token = await generateAttendeeToken(emailAddress, uid.value);
+            return {
+                ...attendeeWithCn,
+                parameters: {
+                    ...attendeeWithCn.parameters,
+                    'x-pm-token': token,
+                },
+            };
+        })
+    );
+    return {
+        ...vevent,
+        attendee: pmAttendees,
+    };
 };
