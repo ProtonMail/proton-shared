@@ -1,4 +1,4 @@
-import { MIME_TYPES, MIME_TYPES_MORE, PACKAGE_TYPE, PGP_SCHEMES, PGP_SIGN, CONTACT_MIME_TYPES } from '../../constants';
+import { MIME_TYPES, PACKAGE_TYPE, PGP_SCHEMES, PGP_SIGN, CONTACT_MIME_TYPES } from '../../constants';
 import { ContactPublicKeyModel, MailSettings } from '../../interfaces';
 
 /**
@@ -35,5 +35,5 @@ export const extractDraftMIMEType = (model: ContactPublicKeyModel, mailSettings:
         return MIME_TYPES.PLAINTEXT;
     }
 
-    return mimeType || MIME_TYPES_MORE.AUTOMATIC;
+    return mimeType;
 };
