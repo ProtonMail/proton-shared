@@ -2,7 +2,8 @@ import { binaryStringToArray, unsafeSHA1, arrayToHexString } from 'pmcrypto';
 import { getCanonicalEmailMap } from '../api/helpers/canonicalEmailMap';
 import { getEmailTo } from '../helpers/email';
 import { Attendee } from '../interfaces/calendar';
-import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { SimpleMap } from '../interfaces/utils';
 import { ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS, ATTENDEE_PERMISSIONS } from './constants';
 import { Api } from '../interfaces';
 
@@ -93,8 +94,28 @@ export const toInternalAttendee = (
     });
 };
 
-export const getAttendeeEmail = (attendee: VcalAttendeeProperty) => {
+export const getAttendeeEmail = (attendee: VcalAttendeeProperty | VcalOrganizerProperty) => {
     return getEmailTo(attendee.value);
+};
+
+export const modifyAttendeesPartstat = (
+    attendees: VcalAttendeeProperty[],
+    partstatMap: SimpleMap<ICAL_ATTENDEE_STATUS>
+) => {
+    const emailsToModify = Object.keys(partstatMap);
+    return attendees.map((attendee) => {
+        const email = getAttendeeEmail(attendee);
+        if (!emailsToModify.includes(email)) {
+            return attendee;
+        }
+        return {
+            ...attendee,
+            parameters: {
+                ...attendee.parameters,
+                partstat: partstatMap[email],
+            },
+        };
+    });
 };
 
 export const withPmAttendees = async (vevent: VcalVeventComponent, api: Api): Promise<VcalVeventComponent> => {
