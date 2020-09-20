@@ -1,11 +1,10 @@
 import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
-import { RequireSome } from '../../../proton-mail/src/app/models/utils';
 import { getCanonicalEmailMap } from '../api/helpers/canonicalEmailMap';
 import { buildMailTo, getEmailTo } from '../helpers/email';
 import { Api } from '../interfaces';
 import { Attendee } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import { SimpleMap } from '../interfaces/utils';
+import { RequireSome, SimpleMap } from '../interfaces/utils';
 import { ATTENDEE_PERMISSIONS, ATTENDEE_STATUS_API, ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from './constants';
 
 export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
