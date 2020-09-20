@@ -1,12 +1,12 @@
-import { binaryStringToArray, unsafeSHA1, arrayToHexString } from 'pmcrypto';
-import { getSupportedAttendee } from '../../../proton-mail/src/app/helpers/calendar/invite';
+import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
+import { RequireSome } from '../../../proton-mail/src/app/models/utils';
 import { getCanonicalEmailMap } from '../api/helpers/canonicalEmailMap';
-import { getEmailTo } from '../helpers/email';
+import { buildMailTo, getEmailTo } from '../helpers/email';
+import { Api } from '../interfaces';
 import { Attendee } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 import { SimpleMap } from '../interfaces/utils';
-import { ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS, ATTENDEE_PERMISSIONS } from './constants';
-import { Api } from '../interfaces';
+import { ATTENDEE_PERMISSIONS, ATTENDEE_STATUS_API, ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from './constants';
 
 export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
     const uidEmail = `${uid}${normalizedEmail}`;
@@ -117,6 +117,28 @@ export const modifyAttendeesPartstat = (
             },
         };
     });
+};
+
+export const getSupportedAttendee = (attendee: VcalAttendeeProperty) => {
+    const { parameters: { cn, role, partstat, rsvp } = {} } = attendee;
+    const emailAddress = getAttendeeEmail(attendee);
+    const supportedAttendee: RequireSome<VcalAttendeeProperty, 'parameters'> = {
+        value: buildMailTo(emailAddress),
+        parameters: {
+            cn: cn ?? emailAddress,
+        },
+    };
+    const roleUpperCased = role?.toUpperCase();
+    if (roleUpperCased === ICAL_ATTENDEE_ROLE.REQUIRED || roleUpperCased === ICAL_ATTENDEE_ROLE.OPTIONAL) {
+        supportedAttendee.parameters.role = roleUpperCased;
+    }
+    if (rsvp?.toUpperCase() === 'TRUE') {
+        supportedAttendee.parameters.rsvp = rsvp.toUpperCase();
+    }
+    if (partstat) {
+        supportedAttendee.parameters.partstat = partstat.toUpperCase();
+    }
+    return supportedAttendee;
 };
 
 export const withPmAttendees = async (vevent: VcalVeventComponent, api: Api): Promise<VcalVeventComponent> => {
