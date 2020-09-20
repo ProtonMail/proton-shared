@@ -1,4 +1,5 @@
 import { binaryStringToArray, unsafeSHA1, arrayToHexString } from 'pmcrypto';
+import { getSupportedAttendee } from '../../../proton-mail/src/app/helpers/calendar/invite';
 import { getCanonicalEmailMap } from '../api/helpers/canonicalEmailMap';
 import { getEmailTo } from '../helpers/email';
 import { Attendee } from '../interfaces/calendar';
@@ -136,16 +137,10 @@ export const withPmAttendees = async (vevent: VcalVeventComponent, api: Api): Pr
     const canonicalEmailMap = await getCanonicalEmailMap(emailsWithoutToken, api);
 
     const pmAttendees = await Promise.all(
-        attendeesWithEmail.map(async ({ attendee: { parameters, ...rest }, emailAddress }) => {
-            const attendeeWithCn = {
-                ...rest,
-                parameters: {
-                    ...parameters,
-                    cn: parameters?.cn || emailAddress,
-                },
-            };
-            if (parameters?.['x-pm-token']) {
-                return attendeeWithCn;
+        attendeesWithEmail.map(async ({ attendee, emailAddress }) => {
+            const supportedAttendee = getSupportedAttendee(attendee);
+            if (supportedAttendee.parameters?.['x-pm-token']) {
+                return supportedAttendee;
             }
             const canonicalEmail = canonicalEmailMap[emailAddress];
             if (!canonicalEmail) {
@@ -153,9 +148,9 @@ export const withPmAttendees = async (vevent: VcalVeventComponent, api: Api): Pr
             }
             const token = await generateAttendeeToken(canonicalEmail, uid.value);
             return {
-                ...attendeeWithCn,
+                ...supportedAttendee,
                 parameters: {
-                    ...attendeeWithCn.parameters,
+                    ...supportedAttendee.parameters,
                     'x-pm-token': token,
                 },
             };
