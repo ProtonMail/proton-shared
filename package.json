@@ -38,9 +38,9 @@
         "@mattiasbuelens/web-streams-adapter": "0.1.0-alpha.3",
         "@sentry/browser": "^5.6.2",
         "@types/dompurify": "^2.0.2",
-        "@types/node": "^14.0.18",
+        "@types/node": "^14.11.1",
         "@types/ua-parser-js": "^0.7.33",
-        "@types/webpack-env": "^1.15.2",
+        "@types/webpack-env": "^1.15.3",
         "date-fns": "^2.2.1",
         "dompurify": "^2.0.7",
         "file-saver": "^2.0.2",
@@ -77,7 +77,7 @@
         "require-inject": "^1.4.4",
         "ts-loader": "^6.2.0",
         "ttag": "^1.7.17",
-        "typescript": "^3.9.2",
+        "typescript": "^4.0.3",
         "webpack": "^4.33.0"
     },
     "peerDependencies": {

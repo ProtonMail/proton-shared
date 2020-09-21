@@ -42,7 +42,7 @@ export const APPS_CONFIGURATION = {
     },
     [APPS.PROTONMAIL]: {
         publicPath: '',
-        subdomain: 'mail',
+        subdomain: 'beta',
         name: 'ProtonMail',
         // TODO clientID
         clientID: 'Web',
@@ -50,7 +50,7 @@ export const APPS_CONFIGURATION = {
     },
     [APPS.PROTONMAIL_SETTINGS]: {
         publicPath: '/settings',
-        subdomain: 'mail',
+        subdomain: 'beta',
         name: 'ProtonMail',
         // TODO clientID
         clientID: 'Web',
@@ -494,6 +494,7 @@ export enum COUPON_CODES {
     BUNDLE = 'BUNDLE',
     PMTEAM = 'PMTEAM',
     BLACK_FRIDAY_2018 = 'TWO4ONE2018',
+    LIFETIME = 'LIFETIME',
 }
 
 export const GIFT_CODE_LENGTH = 16;
@@ -507,6 +508,7 @@ export enum PERMISSIONS {
     PAID = 'paid',
     PAID_MAIL = 'paid-mail',
     PAID_VPN = 'paid-vpn',
+    NOT_SUB_USER = 'not-sub-user',
 }
 
 export enum MESSAGE_BUTTONS {
@@ -725,10 +727,10 @@ export const MAJOR_DOMAINS = [
     'protonmail.ch',
     'pm.me',
     'gmail.com',
-    'hotmail.com',
     'live.com',
-    'yahoo.com',
     'outlook.com',
+    'hotmail.com',
+    'yahoo.com',
 ];
 
 export enum LINK_TYPES {
@@ -765,11 +767,7 @@ export const OPENPGP =
         : WEBPACK_OPENPGP;
 
 export const FORKABLE_APPS = new Set(
-    [
-        APPS.PROTONMAIL,
-        APPS.PROTONMAIL_SETTINGS,
-        APPS.PROTONCONTACTS,
-        FEATURE_FLAGS.includes('drive') && APPS.PROTONDRIVE,
-        APPS.PROTONCALENDAR,
-    ].filter(Boolean)
+    [APPS.PROTONMAIL, APPS.PROTONMAIL_SETTINGS, APPS.PROTONCONTACTS, APPS.PROTONDRIVE, APPS.PROTONCALENDAR].filter(
+        Boolean
+    )
 );

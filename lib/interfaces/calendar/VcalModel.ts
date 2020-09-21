@@ -1,4 +1,10 @@
-import { ATTENDEE_PERMISSIONS, ICAL_EVENT_STATUS } from '../../calendar/constants';
+import {
+    ATTENDEE_PERMISSIONS,
+    ICAL_ATTENDEE_ROLE,
+    ICAL_ATTENDEE_RSVP,
+    ICAL_ATTENDEE_STATUS,
+    ICAL_EVENT_STATUS,
+} from '../../calendar/constants';
 
 export enum VcalDays {
     SU,
@@ -149,15 +155,16 @@ export interface VcalOrganizerProperty {
 }
 
 export interface VcalStatusProperty {
-    value: ICAL_EVENT_STATUS;
+    value: ICAL_EVENT_STATUS | string;
 }
 
 export interface VcalAttendeePropertyParameters extends VcalOrganizerPropertyParameters {
+    cn?: string;
     cutype?: string;
     member?: string;
-    role?: string;
-    partstat?: string;
-    rsvp?: string;
+    role?: ICAL_ATTENDEE_ROLE | string;
+    partstat?: ICAL_ATTENDEE_STATUS | string;
+    rsvp?: ICAL_ATTENDEE_RSVP | string;
     'delegated-from'?: string;
     'delegated-to'?: string;
     'x-pm-permissions'?: ATTENDEE_PERMISSIONS;
@@ -169,6 +176,10 @@ export interface VcalAttendeeProperty {
     parameters?: VcalAttendeePropertyParameters;
 }
 
+export interface VcalAttendeePropertyWithCn extends VcalAttendeeProperty {
+    parameters: VcalAttendeePropertyParameters & Required<Pick<VcalAttendeePropertyParameters, 'cn'>>;
+}
+
 export interface VcalAttendeePropertyWithPartstat extends VcalAttendeeProperty {
     parameters: VcalAttendeePropertyParameters & Required<Pick<VcalAttendeePropertyParameters, 'partstat'>>;
 }
@@ -176,6 +187,12 @@ export interface VcalAttendeePropertyWithPartstat extends VcalAttendeeProperty {
 export interface VcalAttendeePropertyWithRole extends VcalAttendeeProperty {
     parameters: VcalAttendeePropertyParameters & Required<Pick<VcalAttendeePropertyParameters, 'role'>>;
 }
+
+export interface VcalAttendeePropertyWithToken extends VcalAttendeeProperty {
+    parameters: VcalAttendeePropertyParameters & Required<Pick<VcalAttendeePropertyParameters, 'x-pm-token'>>;
+}
+
+export type VcalPmAttendee = VcalAttendeePropertyWithCn & VcalAttendeePropertyWithToken;
 
 export interface VcalVeventComponent {
     component: 'vevent';

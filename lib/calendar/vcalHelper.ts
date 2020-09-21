@@ -2,8 +2,10 @@ import { APPS_CONFIGURATION } from '../constants';
 import { ProtonConfig } from '../interfaces';
 import {
     VcalAttendeeProperty,
+    VcalAttendeePropertyWithCn,
     VcalAttendeePropertyWithPartstat,
     VcalAttendeePropertyWithRole,
+    VcalAttendeePropertyWithToken,
     VcalCalendarComponent,
     VcalDateOrDateTimeProperty,
     VcalDateOrDateTimeValue,
@@ -17,6 +19,7 @@ import {
     VcalVtodoComponent,
     VcalXOrIanaComponent,
 } from '../interfaces/calendar/VcalModel';
+import { ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from './constants';
 
 export const getIsPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
     return property.parameters?.type === 'date' ?? false;
@@ -112,6 +115,26 @@ export const getHasAttendee = (
     return !!vevent.attendee;
 };
 
+export const getAttendeeHasCn = (attendee: VcalAttendeeProperty): attendee is VcalAttendeePropertyWithCn => {
+    return !!attendee.parameters?.cn;
+};
+
+export const getAttendeesHaveCn = (
+    vcalAttendee: VcalAttendeeProperty[]
+): vcalAttendee is VcalAttendeePropertyWithCn[] => {
+    return !vcalAttendee.some((vcalAttendee) => !getAttendeeHasCn(vcalAttendee));
+};
+
+export const getAttendeeHasToken = (attendee: VcalAttendeeProperty): attendee is VcalAttendeePropertyWithToken => {
+    return !!attendee.parameters?.['x-pm-token'];
+};
+
+export const getAttendeesHaveToken = (
+    vcalAttendee: VcalAttendeeProperty[]
+): vcalAttendee is VcalAttendeePropertyWithToken[] => {
+    return !vcalAttendee.some((vcalAttendee) => !getAttendeeHasToken(vcalAttendee));
+};
+
 export const getAttendeeHasPartStat = (
     attendee: VcalAttendeeProperty
 ): attendee is VcalAttendeePropertyWithPartstat => {
@@ -127,4 +150,18 @@ export const getProdId = (config: ProtonConfig) => {
     const appName = APPS_CONFIGURATION[APP_NAME].name;
 
     return `-//Proton Technologies//${appName} ${appVersion}//EN`;
+};
+
+export const getAttendeePartstat = (partstat: string) => {
+    if (Object.values(ICAL_ATTENDEE_STATUS).some((icalPartstat) => icalPartstat === partstat)) {
+        return partstat as ICAL_ATTENDEE_STATUS;
+    }
+    return ICAL_ATTENDEE_STATUS.NEEDS_ACTION;
+};
+
+export const getAttendeeRole = (role: string) => {
+    if (Object.values(ICAL_ATTENDEE_ROLE).some((icalRole) => icalRole === role)) {
+        return role as ICAL_ATTENDEE_ROLE;
+    }
+    return ICAL_ATTENDEE_ROLE.REQUIRED;
 };

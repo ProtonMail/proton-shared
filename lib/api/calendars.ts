@@ -250,16 +250,17 @@ export interface DeleteCalendarEventSyncData {
 }
 export interface UpdateCalendarEventSyncData {
     ID: string;
-    Event?: Omit<CreateCalendarEventData, 'SharedKeyPacket'>;
+    Event?: Omit<CreateCalendarEventData, 'SharedKeyPacket' | 'CalendarKeyPacket'>;
 }
 export interface CreateLinkedCalendarEventsSyncData {
     UID: string;
     SharedEventID: string;
     Event: CreateCalendarEventData;
 }
-interface SyncMultipleEventsData {
+export interface SyncMultipleEventsData {
     MemberID: string;
     IsImport?: 0 | 1;
+    IsInvite?: 0 | 1;
     Events: (
         | CreateCalendarEventSyncData
         | CreateLinkedCalendarEventsSyncData

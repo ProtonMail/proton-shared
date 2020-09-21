@@ -1,13 +1,16 @@
-import getRandomValues from 'get-random-values';
-import { serializeUint8Array } from '../helpers/serialization';
+import { binaryStringToArray, unsafeSHA1, arrayToHexString } from 'pmcrypto';
+import { getCanonicalEmailMap } from '../api/helpers/canonicalEmailMap';
+import { getEmailTo } from '../helpers/email';
 import { Attendee } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import { ATTENDEE_PERMISSIONS, ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS } from './constants';
+import { ATTENDEE_STATUS_API, ICAL_ATTENDEE_STATUS, ATTENDEE_PERMISSIONS } from './constants';
+import { Api } from '../interfaces';
 
-const generateAttendeeToken = () => {
-    // we need a random base64 string with 40 characters
-    const value = getRandomValues(new Uint8Array(30));
-    return serializeUint8Array(value);
+export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
+    const uidEmail = `${uid}${normalizedEmail}`;
+    const byteArray = binaryStringToArray(uidEmail);
+    const hash = await unsafeSHA1(byteArray);
+    return arrayToHexString(hash);
 };
 
 const toApiPartstat = (partstat?: string) => {
@@ -42,14 +45,13 @@ const toIcsPartstat = (partstat?: ATTENDEE_STATUS_API) => {
  */
 export const fromInternalAttendee = ({
     parameters: {
-        'x-pm-permissions': oldPermissions = ATTENDEE_PERMISSIONS.SEE,
-        'x-pm-token': oldToken = '',
+        'x-pm-permissions': oldPermissions = ATTENDEE_PERMISSIONS.SEE_AND_INVITE,
+        'x-pm-token': token = '',
         partstat,
         ...restParameters
     } = {},
     ...rest
 }: VcalAttendeeProperty) => {
-    const token = oldToken || generateAttendeeToken();
     return {
         attendee: {
             parameters: {
@@ -89,4 +91,57 @@ export const toInternalAttendee = (
             },
         };
     });
+};
+
+export const getAttendeeEmail = (attendee: VcalAttendeeProperty) => {
+    return getEmailTo(attendee.value);
+};
+
+export const withPmAttendees = async (vevent: VcalVeventComponent, api: Api): Promise<VcalVeventComponent> => {
+    const { uid, attendee: vcalAttendee } = vevent;
+    if (!vcalAttendee?.length) {
+        return { ...vevent };
+    }
+    const attendeesWithEmail = vcalAttendee.map((attendee) => {
+        const emailAddress = getAttendeeEmail(attendee);
+        return {
+            attendee,
+            emailAddress,
+        };
+    });
+    const emailsWithoutToken = attendeesWithEmail
+        .filter(({ attendee }) => !attendee.parameters?.['x-pm-token'])
+        .map(({ emailAddress }) => emailAddress);
+    const canonicalEmailMap = await getCanonicalEmailMap(emailsWithoutToken, api);
+
+    const pmAttendees = await Promise.all(
+        attendeesWithEmail.map(async ({ attendee: { parameters, ...rest }, emailAddress }) => {
+            const attendeeWithCn = {
+                ...rest,
+                parameters: {
+                    ...parameters,
+                    cn: parameters?.cn || emailAddress,
+                },
+            };
+            if (parameters?.['x-pm-token']) {
+                return attendeeWithCn;
+            }
+            const canonicalEmail = canonicalEmailMap[emailAddress];
+            if (!canonicalEmail) {
+                throw new Error('No canonical email provided');
+            }
+            const token = await generateAttendeeToken(canonicalEmail, uid.value);
+            return {
+                ...attendeeWithCn,
+                parameters: {
+                    ...attendeeWithCn.parameters,
+                    'x-pm-token': token,
+                },
+            };
+        })
+    );
+    return {
+        ...vevent,
+        attendee: pmAttendees,
+    };
 };
