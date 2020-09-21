@@ -119,7 +119,9 @@ export const modifyAttendeesPartstat = (
 };
 
 export const getSupportedAttendee = (attendee: VcalAttendeeProperty) => {
-    const { parameters: { cn, role, partstat, rsvp } = {} } = attendee;
+    const {
+        parameters: { cn, role, partstat, rsvp, 'x-pm-token': token, 'x-pm-permissions': permissions } = {},
+    } = attendee;
     const emailAddress = getAttendeeEmail(attendee);
     const supportedAttendee: RequireSome<VcalAttendeeProperty, 'parameters'> = {
         value: buildMailTo(emailAddress),
@@ -136,6 +138,12 @@ export const getSupportedAttendee = (attendee: VcalAttendeeProperty) => {
     }
     if (partstat) {
         supportedAttendee.parameters.partstat = partstat.toUpperCase();
+    }
+    if (token) {
+        supportedAttendee.parameters['x-pm-token'] = token;
+    }
+    if (permissions !== undefined) {
+        supportedAttendee.parameters['x-pm-permissions'] = permissions;
     }
     return supportedAttendee;
 };
