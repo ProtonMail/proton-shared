@@ -120,7 +120,7 @@ export const getKeyVerificationOnlyStatus = (publicKey: OpenPGPKey, config: ApiK
     if (index === -1) {
         return undefined;
     }
-    return !hasBit(config.Keys[index].Flags, KEY_FLAG.FLAG_NOT_COMPROMISED);
+    return !hasBit(config.Keys[index].Flags, KEY_FLAG.FLAG_NOT_OBSOLETE);
 };
 
 /**
