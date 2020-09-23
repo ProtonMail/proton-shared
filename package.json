@@ -20,8 +20,7 @@
     "lint-staged": {
         "(*.ts|*.tsx|*.js)": [
             "prettier --write",
-            "eslint",
-            "git add"
+            "eslint"
         ]
     },
     "repository": {
@@ -71,7 +70,7 @@
         "karma-chrome-launcher": "^2.2.0",
         "karma-jasmine": "^2.0.1",
         "karma-webpack": "^4.0.2",
-        "lint-staged": "^8.2.0",
+        "lint-staged": "^10.4.0",
         "prettier": "^2.0.5",
         "proton-i18n": "github:ProtonMail/proton-i18n#semver:^2.1.4",
         "require-inject": "^1.4.4",
