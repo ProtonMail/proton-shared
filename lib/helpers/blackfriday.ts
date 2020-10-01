@@ -1,17 +1,24 @@
-import { isWithinInterval, isAfter, isBefore } from 'date-fns';
+import { isWithinInterval } from 'date-fns';
 
-import { BLACK_FRIDAY } from '../constants';
-
-const { START, END } = BLACK_FRIDAY;
+import { BLACK_FRIDAY, PRODUCT_PAYER, COUPON_CODES } from '../constants';
+import { Subscription } from '../interfaces';
+import { hasMailPlus, hasMailProfessional, hasVpnBasic, hasVpnPlus } from './subscription';
 
 export const isBlackFridayPeriod = () => {
-    return isWithinInterval(new Date(), { start: START, end: END });
+    return isWithinInterval(new Date(), { start: BLACK_FRIDAY.START, end: BLACK_FRIDAY.END });
 };
 
-export const isAfterBlackFriday = () => {
-    return isAfter(new Date(), END);
+export const isProductPayerPeriod = () => {
+    return isWithinInterval(new Date(), { start: PRODUCT_PAYER.START, end: PRODUCT_PAYER.END });
 };
 
-export const isBeforeBlackFriday = () => {
-    return isBefore(new Date(), START);
+export const isProductPayer = (subscription: Subscription) => {
+    const couponCode = subscription.CouponCode || '';
+    const noBundle = ![COUPON_CODES.BUNDLE, BLACK_FRIDAY.COUPON_CODE].includes(couponCode);
+
+    return (
+        (hasMailPlus(subscription) || hasVpnBasic(subscription) || hasVpnPlus(subscription)) &&
+        !hasMailProfessional(subscription) &&
+        noBundle
+    );
 };
