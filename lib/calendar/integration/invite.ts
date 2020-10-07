@@ -62,31 +62,20 @@ export const getParticipant = (
 
 interface CreateReplyIcsParams {
     prodId: string;
-    attendee: Participant;
+    emailTo: string;
     partstat: ICAL_ATTENDEE_STATUS;
-    organizer: Participant;
-    vevent: Pick<VcalVeventComponent, 'uid' | 'dtstart' | 'dtend' | 'sequence' | 'recurrence-id'>;
+    vevent: Pick<VcalVeventComponent, 'uid' | 'dtstart' | 'dtend' | 'sequence' | 'recurrence-id' | 'organizer'>;
     vtimezone?: VcalVtimezoneComponent;
 }
 
-export const createReplyIcs = ({
-    prodId,
-    attendee,
-    partstat,
-    organizer,
-    vevent,
-    vtimezone,
-}: CreateReplyIcsParams): string => {
-    const attendeeIcs = attendee.vcalComponent;
-    const organizerIcs = organizer.vcalComponent;
+export const createReplyIcs = ({ prodId, emailTo, partstat, vevent, vtimezone }: CreateReplyIcsParams): string => {
     // use current time as dtstamp
     const replyVevent = withDtstamp({
         component: 'vevent',
-        ...pick(vevent, ['uid', 'dtstart', 'dtend', 'sequence', 'recurrence-id']),
-        organizer: organizerIcs,
+        ...pick(vevent, ['uid', 'dtstart', 'dtend', 'sequence', 'recurrence-id', 'organizer']),
         attendee: [
             {
-                value: attendeeIcs.value,
+                value: emailTo,
                 parameters: { partstat },
             },
         ],
@@ -106,9 +95,25 @@ export const createReplyIcs = ({
 };
 
 export const findAttendee = (email: string, attendees: VcalAttendeeProperty[] = []) => {
-    const index = attendees.findIndex((attendee) => cleanEmail(getAttendeeEmail(attendee)) === cleanEmail(email));
+    const cleanedEmail = cleanEmail(email);
+    const index = attendees.findIndex((attendee) => cleanEmail(getAttendeeEmail(attendee)) === cleanedEmail);
     const attendee = index !== -1 ? attendees[index] : undefined;
     return { index, attendee };
+};
+
+export const findUserAttendee = (attendees: VcalAttendeeProperty[] = [], addresses: Address[]) => {
+    const cleanUserEmails = addresses.map(({ Email }) => cleanEmail(Email));
+    return attendees.reduce<{ userAttendee?: VcalAttendeeProperty; userAddress?: Address }>((acc, attendee) => {
+        if (acc.userAttendee && acc.userAddress) {
+            return acc;
+        }
+        const cleanAttendeeEmail = cleanEmail(getAttendeeEmail(attendee));
+        const index = cleanUserEmails.findIndex((email) => email === cleanAttendeeEmail);
+        if (index === -1) {
+            return acc;
+        }
+        return { userAttendee: attendee, userAddress: addresses[index] };
+    }, {});
 };
 
 export const getInvitedEventWithAlarms = (

@@ -1,6 +1,5 @@
 import { ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from '../../calendar/constants';
 import { CachedKey } from '../CachedKey';
-import { RequireSome } from '../utils';
 import { Calendar, CalendarSettings } from './Calendar';
 import { CalendarEvent } from './Event';
 import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from './VcalModel';
@@ -35,6 +34,5 @@ export interface Participant {
 export interface SavedInviteData {
     savedEvent: CalendarEvent;
     savedVevent: VcalVeventComponent;
-    savedAttendee: RequireSome<Participant, 'partstat'>;
-    savedOrganizer: Participant;
+    savedVcalAttendee: VcalAttendeeProperty;
 }

@@ -1,3 +1,4 @@
+import { c } from 'ttag';
 import { MIME_TYPES } from '../constants';
 import { clearBit, hasBit, setBit, toggleBit } from '../helpers/bitset';
 import { identity } from '../helpers/function';
@@ -138,3 +139,16 @@ export const isSentAutoReply = ({ Flags, ParsedHeaders = {} }: Message) => {
         )
     );
 };
+/**
+ * Format the subject to add the prefix only when the subject
+ * doesn't start with it
+ */
+export const formatSubject = (subject = '', prefix = '') => {
+    const hasPrefix = new RegExp(`^${prefix}`, 'i');
+    return hasPrefix.test(subject) ? subject : `${prefix} ${subject}`;
+};
+
+export const DRAFT_ID_PREFIX = 'draft';
+export const ORIGINAL_MESSAGE = `‐‐‐‐‐‐‐ Original Message ‐‐‐‐‐‐‐`;
+export const RE_PREFIX = c('Message').t`Re:`;
+export const FW_PREFIX = c('Message').t`Fw:`;

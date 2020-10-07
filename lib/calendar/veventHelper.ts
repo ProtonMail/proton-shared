@@ -1,12 +1,13 @@
-import { wrap, generateUID, hasMoreThan } from './helper';
-import { serialize } from './vcal';
-import { CALENDAR_CARD_TYPE } from './constants';
-import { fromInternalAttendee } from './attendees';
-import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
-import { omit, pick } from '../helpers/object';
-import { dateTimeToProperty } from './vcalConverter';
 import { fromUTCDate } from '../date/timezone';
+import { omit, pick } from '../helpers/object';
+import { CalendarEvent, CalendarEventSharedData } from '../interfaces/calendar';
+import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { fromInternalAttendee } from './attendees';
+import { CALENDAR_CARD_TYPE } from './constants';
+import { generateUID, hasMoreThan, wrap } from './helper';
 import { AttendeeClearPartResult, AttendeePart } from './interface';
+import { serialize } from './vcal';
+import { dateTimeToProperty } from './vcalConverter';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR } = CALENDAR_CARD_TYPE;
 
@@ -188,4 +189,10 @@ export const getVeventParts = ({ components, ...properties }: VcalVeventComponen
             [CLEAR]: attendeesPart[CLEAR],
         },
     };
+};
+
+export const getHasEventBlobData = (
+    calendarEvent: CalendarEvent | CalendarEventSharedData
+): calendarEvent is CalendarEvent => {
+    return !!(calendarEvent as CalendarEvent).CalendarKeyPacket;
 };

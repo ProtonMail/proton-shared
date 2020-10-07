@@ -2,36 +2,39 @@ import { CreateCalendarEventSyncData, syncMultipleEvents, UpdateCalendarEventSyn
 import { API_CODES } from '../../constants';
 import { pick } from '../../helpers/object';
 import { Api } from '../../interfaces';
-import { CalendarEvent, CalendarWidgetData, Participant, SyncMultipleApiResponse } from '../../interfaces/calendar';
-import { VcalVeventComponent } from '../../interfaces/calendar/VcalModel';
-import { modifyAttendeesPartstat, withPmAttendees } from '../attendees';
+import {
+    CalendarEvent,
+    CalendarEventSharedData,
+    CalendarWidgetData,
+    SyncMultipleApiResponse,
+} from '../../interfaces/calendar';
+import { VcalAttendeeProperty, VcalVeventComponent } from '../../interfaces/calendar/VcalModel';
+import { getAttendeeEmail, modifyAttendeesPartstat, withPmAttendees } from '../attendees';
 import { ICAL_ATTENDEE_STATUS } from '../constants';
 import { createCalendarEvent } from '../serialize';
 import { getHasAttendee } from '../vcalHelper';
+import { getHasEventBlobData } from '../veventHelper';
 import getCreationKeys from './getCreationKeys';
 import { findAttendee, getInvitedEventWithAlarms } from './invite';
 
 export const createCalendarEventFromInvitation = async ({
     vevent,
-    attendee,
-    organizer,
+    vcalAttendee,
     partstat,
     api,
     calendarData,
 }: {
     vevent: VcalVeventComponent;
-    attendee: Participant;
-    organizer: Participant;
+    vcalAttendee: VcalAttendeeProperty;
     partstat: ICAL_ATTENDEE_STATUS;
     calendarData?: CalendarWidgetData;
     api: Api;
 }) => {
     const { calendar, memberID, addressKeys, calendarKeys, calendarSettings } = calendarData || {};
-    if (!attendee.addressID || !calendar || !memberID || !addressKeys || !calendarKeys || !calendarSettings) {
+    if (!calendar || !memberID || !addressKeys || !calendarKeys || !calendarSettings) {
         throw new Error('Missing data for creating calendar event from invitation');
     }
     // save attendee answer
-    const vcalAttendee = attendee.vcalComponent;
     const vcalAttendeeToSave = {
         ...vcalAttendee,
         parameters: {
@@ -39,14 +42,9 @@ export const createCalendarEventFromInvitation = async ({
             partstat,
         },
     };
-    const attendeeToSave = {
-        ...attendee,
-        vcalComponent: vcalAttendeeToSave,
-        partstat,
-    };
     // add alarms to event if necessary
     const veventToSave = getInvitedEventWithAlarms(vevent, partstat, calendarSettings);
-    const { index: attendeeIndex } = findAttendee(attendee.emailAddress, veventToSave.attendee);
+    const { index: attendeeIndex } = findAttendee(getAttendeeEmail(vcalAttendee), veventToSave.attendee);
     if (!veventToSave.attendee || attendeeIndex === undefined || attendeeIndex === -1) {
         throw new Error('Missing data for creating calendar event from invitation');
     }
@@ -75,8 +73,7 @@ export const createCalendarEventFromInvitation = async ({
     return {
         savedEvent: Event,
         savedVevent: veventToSaveWithPmAttendees,
-        savedAttendee: attendeeToSave,
-        savedOrganizer: organizer,
+        savedVcalAttendee: vcalAttendeeToSave,
     };
 };
 
@@ -84,18 +81,16 @@ export const updateCalendarEventFromInvitation = async ({
     veventApi,
     calendarEvent,
     veventIcs,
-    attendee,
-    organizer,
+    vcalAttendee,
     partstat,
     oldPartstat,
     api,
     calendarData,
 }: {
     veventApi: VcalVeventComponent;
-    calendarEvent: CalendarEvent;
+    calendarEvent: CalendarEvent | CalendarEventSharedData;
     veventIcs?: VcalVeventComponent;
-    attendee: Participant;
-    organizer: Participant;
+    vcalAttendee: VcalAttendeeProperty;
     partstat: ICAL_ATTENDEE_STATUS;
     oldPartstat?: ICAL_ATTENDEE_STATUS;
     calendarData?: CalendarWidgetData;
@@ -103,6 +98,7 @@ export const updateCalendarEventFromInvitation = async ({
 }) => {
     const { calendar, memberID, addressKeys, calendarKeys, calendarSettings } = calendarData || {};
     if (
+        !getHasEventBlobData(calendarEvent) ||
         !getHasAttendee(veventApi) ||
         (veventIcs && !getHasAttendee(veventIcs)) ||
         !calendar ||
@@ -113,7 +109,7 @@ export const updateCalendarEventFromInvitation = async ({
     ) {
         throw new Error('Missing data for updating calendar event from invitation');
     }
-    const { vcalComponent: vcalAttendee, emailAddress } = attendee;
+    const emailAddress = getAttendeeEmail(vcalAttendee);
     const veventToUpdate = veventIcs ? { ...veventIcs, ...pick(veventApi, ['components']) } : { ...veventApi };
     const updatedVevent = {
         ...veventToUpdate,
@@ -125,11 +121,6 @@ export const updateCalendarEventFromInvitation = async ({
     const vcalAttendeeToSave = {
         ...vcalAttendee,
         parameters: { ...vcalAttendee.parameters, partstat },
-    };
-    const attendeeToSave = {
-        ...attendee,
-        vcalComponent: vcalAttendeeToSave,
-        partstat,
     };
     // update calendar event
     const creationKeys = await getCreationKeys({
@@ -159,7 +150,6 @@ export const updateCalendarEventFromInvitation = async ({
     return {
         savedEvent: Event,
         savedVevent: veventToSave,
-        savedAttendee: attendeeToSave,
-        savedOrganizer: organizer,
+        savedVcalAttendee: vcalAttendeeToSave,
     };
 };
