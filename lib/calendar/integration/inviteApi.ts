@@ -2,18 +2,12 @@ import { CreateCalendarEventSyncData, syncMultipleEvents, UpdateCalendarEventSyn
 import { API_CODES } from '../../constants';
 import { pick } from '../../helpers/object';
 import { Api } from '../../interfaces';
-import {
-    CalendarEvent,
-    CalendarEventSharedData,
-    CalendarWidgetData,
-    SyncMultipleApiResponse,
-} from '../../interfaces/calendar';
+import { CalendarEvent, CalendarWidgetData, SyncMultipleApiResponse } from '../../interfaces/calendar';
 import { VcalAttendeeProperty, VcalVeventComponent } from '../../interfaces/calendar/VcalModel';
 import { getAttendeeEmail, modifyAttendeesPartstat, withPmAttendees } from '../attendees';
 import { ICAL_ATTENDEE_STATUS } from '../constants';
 import { createCalendarEvent } from '../serialize';
 import { getHasAttendee } from '../vcalHelper';
-import { getHasEventBlobData } from '../veventHelper';
 import getCreationKeys from './getCreationKeys';
 import { findAttendee, getInvitedEventWithAlarms } from './invite';
 
@@ -88,7 +82,7 @@ export const updateCalendarEventFromInvitation = async ({
     calendarData,
 }: {
     veventApi: VcalVeventComponent;
-    calendarEvent: CalendarEvent | CalendarEventSharedData;
+    calendarEvent: CalendarEvent;
     veventIcs?: VcalVeventComponent;
     vcalAttendee: VcalAttendeeProperty;
     partstat: ICAL_ATTENDEE_STATUS;
@@ -98,7 +92,6 @@ export const updateCalendarEventFromInvitation = async ({
 }) => {
     const { calendar, memberID, addressKeys, calendarKeys, calendarSettings } = calendarData || {};
     if (
-        !getHasEventBlobData(calendarEvent) ||
         !getHasAttendee(veventApi) ||
         (veventIcs && !getHasAttendee(veventIcs)) ||
         !calendar ||

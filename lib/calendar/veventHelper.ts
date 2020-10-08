@@ -1,6 +1,5 @@
 import { fromUTCDate } from '../date/timezone';
 import { omit, pick } from '../helpers/object';
-import { CalendarEvent, CalendarEventSharedData } from '../interfaces/calendar';
 import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 import { fromInternalAttendee } from './attendees';
 import { CALENDAR_CARD_TYPE } from './constants';
@@ -189,10 +188,4 @@ export const getVeventParts = ({ components, ...properties }: VcalVeventComponen
             [CLEAR]: attendeesPart[CLEAR],
         },
     };
-};
-
-export const getHasEventBlobData = (
-    calendarEvent: CalendarEvent | CalendarEventSharedData
-): calendarEvent is CalendarEvent => {
-    return !!(calendarEvent as CalendarEvent).CalendarKeyPacket;
 };
