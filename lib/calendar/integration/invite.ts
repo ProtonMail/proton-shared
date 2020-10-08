@@ -119,7 +119,7 @@ export const findUserAttendee = (attendees: VcalAttendeeProperty[] = [], address
 export const getInvitedEventWithAlarms = (
     vevent: VcalVeventComponent,
     partstat: ICAL_ATTENDEE_STATUS,
-    calendarSettings: CalendarSettings,
+    calendarSettings?: CalendarSettings,
     oldPartstat?: ICAL_ATTENDEE_STATUS
 ) => {
     const { components } = vevent;
@@ -141,6 +141,9 @@ export const getInvitedEventWithAlarms = (
     }
 
     // otherwise add calendar alarms
+    if (!calendarSettings) {
+        throw new Error('Cannot retrieve calendar default notifications');
+    }
     const isAllDay = getIsAllDay(vevent);
     const notifications = isAllDay
         ? calendarSettings.DefaultFullDayNotifications
