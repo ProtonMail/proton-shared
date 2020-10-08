@@ -8,6 +8,10 @@ export const isBlackFridayPeriod = () => {
     return isWithinInterval(new Date(), { start: BLACK_FRIDAY.START, end: BLACK_FRIDAY.END });
 };
 
+export const isCyberMonday = () => {
+    return isWithinInterval(new Date(), { start: BLACK_FRIDAY.CYBER_START, end: BLACK_FRIDAY.CYBER_END });
+};
+
 export const isProductPayerPeriod = () => {
     return isWithinInterval(new Date(), { start: PRODUCT_PAYER.START, end: PRODUCT_PAYER.END });
 };
