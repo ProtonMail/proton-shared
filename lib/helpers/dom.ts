@@ -45,6 +45,9 @@ export const isElement = (node: Node | null) => node && node.nodeType === 1;
  */
 export const getElement = (node: Node | null) => (isElement(node) ? (node as Element) : node?.parentElement || null);
 
+/**
+ * From https://stackoverflow.com/a/42543908
+ */
 export const getScrollParent = (element: HTMLElement | null | undefined, includeHidden = false) => {
     if (!element) {
         return document.body;
