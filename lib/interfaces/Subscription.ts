@@ -46,3 +46,19 @@ export interface Subscription {
 export type PlanIDs = {
     [planID: string]: number;
 };
+
+export interface SubscriptionCheckResponse {
+    Amount: number;
+    AmountDue: number;
+    Proration?: number;
+    CouponDiscount?: number;
+    Coupon: null | {
+        Code: string;
+        Description: string;
+    };
+    UnusedCredit?: number;
+    Credit?: number;
+    Currency: Currency;
+    Cycle: Cycle;
+    Gift?: number;
+}
