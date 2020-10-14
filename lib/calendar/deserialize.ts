@@ -1,4 +1,5 @@
 import { OpenPGPKey, SessionKey } from 'pmcrypto';
+import { reduceBooleanArray } from '../helpers/array';
 
 import { SimpleMap } from '../interfaces/utils';
 import { decryptAndVerifyCalendarEvent, getDecryptedSessionKey, verifySignedCard } from './decrypt';
@@ -45,11 +46,20 @@ export const readCalendarEvent = async ({
     sharedSessionKey,
     calendarSessionKey,
 }: ReadCalendarEventArguments) => {
-    const [decryptedSharedEvents, decryptedCalendarEvents, decryptedAttendeesEvents] = await Promise.all([
+    const decryptedEventsResults = await Promise.all([
         Promise.all(SharedEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, sharedSessionKey))),
         Promise.all(CalendarEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, calendarSessionKey))),
         Promise.all(AttendeesEvents.map((e) => decryptAndVerifyCalendarEvent(e, publicKeysMap, sharedSessionKey))),
     ]);
+    const [
+        decryptedSharedEvents,
+        decryptedCalendarEvents,
+        decryptedAttendeesEvents,
+    ] = decryptedEventsResults.map((decryptedEvents) => decryptedEvents.map(({ data }) => data));
+    const isVerifiedArray = decryptedEventsResults
+        .map((decryptedEvents) => decryptedEvents.map(({ isVerified }) => isVerified))
+        .flat();
+    const isVerified = reduceBooleanArray(isVerifiedArray);
 
     const vevent = [...decryptedSharedEvents, ...decryptedCalendarEvents].reduce<VcalVeventComponent>((acc, event) => {
         if (!event) {
@@ -73,22 +83,20 @@ export const readCalendarEvent = async ({
         return acc.concat(toInternalAttendee(parsedComponent, Attendees));
     }, []);
 
-    if (!veventAttendees.length) {
-        return vevent;
-    }
+    const veventWithAttendees = veventAttendees.length ? { ...vevent, attendee: veventAttendees } : vevent;
 
-    return {
-        ...vevent,
-        attendee: veventAttendees,
-    };
+    return { veventComponent: veventWithAttendees, isVerified };
 };
 
 export const readPersonalPart = async (
     { Data, Signature }: CalendarEventData,
     publicKeys: OpenPGPKey | OpenPGPKey[]
 ) => {
-    const result = await verifySignedCard(Data, Signature, publicKeys);
-    return parse(unwrap(result)) as VcalVeventComponent;
+    if (!Signature) {
+        throw new Error('Personal part should always be signed');
+    }
+    const { data, isVerified } = await verifySignedCard(Data, Signature, publicKeys);
+    return { veventComponent: parse(unwrap(data)) as VcalVeventComponent, isVerified };
 };
 
 export const getPersonalPartMap = ({ PersonalEvent = [] }: CalendarEvent) => {

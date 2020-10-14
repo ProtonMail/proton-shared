@@ -172,3 +172,21 @@ export const mergeUint8Arrays = (arrays: Uint8Array[]) => {
 export function areUint8Arrays(arr: any[]): arr is Uint8Array[] {
     return arr.every((el) => el instanceof Uint8Array);
 }
+
+/**
+ * Given an array made of Boolean or undefined values, return
+ * * true if all entries equal true
+ * * false if some entry is false
+ * * undefined otherwise
+ */
+export const reduceBooleanArray = (arr: (boolean | undefined)[]) => {
+    if (!arr.length) {
+        return undefined;
+    }
+    return arr.reduce((acc, bool) => {
+        if (acc === false) {
+            return false;
+        }
+        return bool ? acc : bool;
+    }, true);
+};

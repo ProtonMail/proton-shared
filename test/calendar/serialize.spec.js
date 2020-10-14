@@ -162,12 +162,17 @@ describe('calendar encryption', () => {
         });
 
         const [sharedSessionKey, calendarSessionKey] = await readSessionKeys(data, primaryCalendarKey);
-        const otherVeventComponent = await readCalendarEvent(
+        const { veventComponent: otherVeventComponent, isVerified: isOtherVerified } = await readCalendarEvent(
             transformToExternal(data, publicAddressKey, sharedSessionKey, calendarSessionKey)
         );
-        const { components } = await readPersonalPart(data.PersonalEventContent, publicAddressKey);
+        const {
+            veventComponent: { components },
+            isVerified: isVerifiedPersonal,
+        } = await readPersonalPart(data.PersonalEventContent, publicAddressKey);
 
         expect({ ...otherVeventComponent, components }).toEqual(veventComponent);
+        expect(isOtherVerified).toEqual(true);
+        expect(isVerifiedPersonal).toEqual(true);
     });
 });
 

@@ -1,4 +1,4 @@
-import { unique, uniqueBy, move, replace, groupWith } from '../../lib/helpers/array';
+import { unique, uniqueBy, move, replace, groupWith, reduceBooleanArray } from '../../lib/helpers/array';
 
 describe('array', () => {
     describe('unique', () => {
@@ -66,6 +66,28 @@ describe('array', () => {
 
         it('should group nothing', () => {
             expect(groupWith(() => false, [1, 2, 3])).toEqual([]);
+        });
+    });
+
+    describe('reduceBooleaArray', () => {
+        it('should return undefined for the empty array', () => {
+            expect(reduceBooleanArray([])).toEqual(undefined);
+        });
+
+        it('should return true when all array entries are true', () => {
+            expect(reduceBooleanArray([true, true, true])).toEqual(true);
+        });
+
+        it('should return false if some array entry is false', () => {
+            expect(reduceBooleanArray([true, undefined, false])).toEqual(false);
+            expect(reduceBooleanArray([false, true, true])).toEqual(false);
+            expect(reduceBooleanArray([undefined, false, true])).toEqual(false);
+        });
+
+        it('should return undefined for any other case', () => {
+            expect(reduceBooleanArray([true, undefined, true])).toEqual(undefined);
+            expect(reduceBooleanArray([undefined, true, true])).toEqual(undefined);
+            expect(reduceBooleanArray([true, undefined, undefined])).toEqual(undefined);
         });
     });
 });
