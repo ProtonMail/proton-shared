@@ -316,6 +316,20 @@ export const parse = (vcal = ''): VcalCalendarComponent => {
 };
 
 /**
+ * If a vcalendar ics does not have the proper enclosing, add it
+ */
+export const reformatVcalEnclosing = (vcal = '') => {
+    let sanitized = vcal;
+    if (!sanitized.startsWith('BEGIN:VCALENDAR')) {
+        sanitized = `BEGIN:VCALENDAR\r\n${sanitized}`;
+    }
+    if (!sanitized.endsWith('END:VCALENDAR')) {
+        sanitized = `${sanitized}\r\nEND:VCALENDAR`;
+    }
+    return sanitized;
+};
+
+/**
  * Naively try to reformat badly formatted line breaks in a vcalendar string
  */
 const reformatLineBreaks = (vcal = '') => {
@@ -347,6 +361,11 @@ export const parseWithErrors = (vcal = '', retry = true): VcalCalendarComponent 
         // try to recover from line break errors
         if (e.message.toLowerCase().includes('invalid line (no token ";" or ":")') && retry) {
             const reformattedVcal = reformatLineBreaks(vcal);
+            return parseWithErrors(reformattedVcal, false);
+        }
+        // try to recover from enclosing errors
+        if (e.message.toLowerCase().includes('invalid ical body') && retry) {
+            const reformattedVcal = reformatVcalEnclosing(vcal);
             return parseWithErrors(reformattedVcal, false);
         }
         throw e;
