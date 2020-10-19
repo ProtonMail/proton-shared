@@ -336,13 +336,14 @@ const reformatLineBreaks = (vcal = '') => {
     const crlf = '\r\n';
     const lines = vcal.includes(crlf) ? vcal.split(crlf) : vcal.split('\n');
     return lines.reduce((acc, line) => {
+        // extract the vcal field in this line through a regex
         const fieldMatch = line.match(/(\w+-?\w*)(?::|;)/);
         if (!fieldMatch) {
             return `${acc}\\n${line}`;
         }
         const field = fieldMatch[1].toLowerCase();
         if (PROPERTIES.has(field) || field.startsWith('x-') || ['begin', 'end'].includes(field)) {
-            return `${acc}\r\n${line}`;
+            return acc ? `${acc}\r\n${line}` : line;
         }
         return `${acc}\\n${line}`;
     }, '');
@@ -351,7 +352,11 @@ const reformatLineBreaks = (vcal = '') => {
 /**
  * Same as the parse function, but catching errors
  */
-export const parseWithErrors = (vcal = '', retry = true): VcalCalendarComponent => {
+export const parseWithErrors = (
+    vcal = '',
+    retry = { retryLineBreaks: true, retryEnclosing: true }
+): VcalCalendarComponent => {
+    const { retryLineBreaks, retryEnclosing } = retry;
     try {
         if (!vcal) {
             return {} as VcalCalendarComponent;
@@ -359,14 +364,14 @@ export const parseWithErrors = (vcal = '', retry = true): VcalCalendarComponent 
         return fromIcalComponentWithErrors(new ICAL.Component(ICAL.parse(vcal)));
     } catch (e) {
         // try to recover from line break errors
-        if (e.message.toLowerCase().includes('invalid line (no token ";" or ":")') && retry) {
+        if (e.message.toLowerCase().includes('invalid line (no token ";" or ":")') && retryLineBreaks) {
             const reformattedVcal = reformatLineBreaks(vcal);
-            return parseWithErrors(reformattedVcal, false);
+            return parseWithErrors(reformattedVcal, { ...retry, retryLineBreaks: false });
         }
         // try to recover from enclosing errors
-        if (e.message.toLowerCase().includes('invalid ical body') && retry) {
+        if (e.message.toLowerCase().includes('invalid ical body') && retryEnclosing) {
             const reformattedVcal = reformatVcalEnclosing(vcal);
-            return parseWithErrors(reformattedVcal, false);
+            return parseWithErrors(reformattedVcal, { ...retry, retryEnclosing: false });
         }
         throw e;
     }
