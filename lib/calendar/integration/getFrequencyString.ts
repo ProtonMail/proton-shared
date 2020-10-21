@@ -178,9 +178,9 @@ const getCustomDailyString = (
     if (endType === END_TYPE.AFTER_N_TIMES) {
         const timesString = getTimesString(count);
         if (interval === 1) {
-            return c('Daily recurring event, frequency').t(`Daily, ${timesString}`);
+            return c('Daily recurring event, frequency').t`Daily, ${timesString}`;
         }
-        return c('Daily recurring event, frequency').t(`Every ${interval} days, ${timesString}`);
+        return c('Daily recurring event, frequency').t`Every ${interval} days, ${timesString}`;
     }
 
     if (endType === END_TYPE.UNTIL && until) {
@@ -189,7 +189,7 @@ const getCustomDailyString = (
         if (interval === 1) {
             return c('Daily recurring event, frequency').t`Daily, ${untilString}`;
         }
-        return c('Daily recurring event, frequency').t(`Every ${interval} days, ${untilString}`);
+        return c('Daily recurring event, frequency').t`Every ${interval} days, ${untilString}`;
     }
 };
 const getWeekdayString = (weekday: number) => {
