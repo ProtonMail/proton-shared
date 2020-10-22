@@ -1,15 +1,15 @@
-import { getOccurrences } from '../recurring';
-import { propertyToUTCDate } from '../vcalConverter';
-import { getIsDateTimeValue, getIsPropertyAllDay, getPropertyTzid } from '../vcalHelper';
-import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, toLocalDate, toUTCDate } from '../../date/timezone';
-import { omit, pick } from '../../helpers/object';
+import { getOccurrences } from './recurring';
+import { propertyToUTCDate } from './vcalConverter';
+import { getIsDateTimeValue, getIsPropertyAllDay, getPropertyTzid } from './vcalHelper';
+import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, toLocalDate, toUTCDate } from '../date/timezone';
+import { omit, pick } from '../helpers/object';
 import {
     VcalDateOrDateTimeValue,
     VcalDaysKeys,
     VcalRruleProperty,
     VcalRrulePropertyValue,
     VcalVeventComponent,
-} from '../../interfaces/calendar/VcalModel';
+} from '../interfaces/calendar/VcalModel';
 import {
     MAXIMUM_DATE,
     MAXIMUM_DATE_UTC,
@@ -17,7 +17,7 @@ import {
     FREQUENCY_COUNT_MAX,
     FREQUENCY_INTERVALS_MAX,
     FREQUENCY_COUNT_MAX_INVITATION,
-} from '../constants';
+} from './constants';
 
 export const getIsStandardByday = (byday = ''): byday is VcalDaysKeys => {
     return /^(SU|MO|TU|WE|TH|FR|SA)$/.test(byday);
@@ -35,7 +35,14 @@ export const getDayAndSetpos = (byday?: string, bysetpos?: number) => {
             return { day, setpos: +pos };
         }
     }
-    return { day: byday, setpos: bysetpos };
+    const result: { day?: string; setpos?: number } = {};
+    if (byday) {
+        result.day = byday;
+    }
+    if (bysetpos) {
+        result.setpos = bysetpos;
+    }
+    return result;
 };
 
 export const SUPPORTED_RRULE_PROPERTIES = [

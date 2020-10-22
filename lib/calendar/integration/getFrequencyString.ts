@@ -11,7 +11,7 @@ import {
     VcalRruleProperty,
 } from '../../interfaces/calendar/VcalModel';
 import { getEndType, getMonthType, getUntilDate, getWeeklyDays } from './rruleProperties';
-import { getIsRruleCustom, getIsRruleSimple } from './rrule';
+import { getIsRruleCustom, getIsRruleSimple } from '../rrule';
 import { getPropertyTzid } from '../vcalHelper';
 import { toUTCDate } from '../../date/timezone';
 
