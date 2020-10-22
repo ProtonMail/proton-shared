@@ -34,7 +34,7 @@ export interface CalendarEventSharedData {
     SharedEventID: string;
     CalendarID: string;
     CreateTime: number;
-    ModifyTime: number;
+    LastEditTime: number;
     Permissions: number;
     IsOrganizer: 1 | 0;
     Author: string;
@@ -53,6 +53,8 @@ export interface CalendarEventMetadata {
 }
 
 export interface CalendarEvent extends CalendarEventSharedData, CalendarEventBlobData {}
+
+export interface CalendarEventWithMetadata extends CalendarEvent, CalendarEventMetadata {}
 
 export interface CalendarEventWithoutBlob extends CalendarEventSharedData, CalendarEventMetadata {}
 
