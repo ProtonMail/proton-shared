@@ -8,8 +8,12 @@ export const getCookies = (): string[] => {
     }
 };
 
-export const getCookie = (name: string, value: string) => {
-    return getCookies().find((cookie) => cookie.includes(`${name}=${value}`));
+export const getCookie = (name: string) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts && parts.length === 2) {
+        return parts.pop()?.split(';').shift();
+    }
 };
 
 export const checkCookie = (name: string, value: string) => {
