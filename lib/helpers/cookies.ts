@@ -35,8 +35,9 @@ export const setCookie = ({
     cookieDomain,
 }: SetCookieArguments) => {
     const expirationDate = maybeCookieValue === undefined ? new Date(0).toUTCString() : maybeExpirationDate;
+    const cookieValue = maybeCookieValue === undefined ? '' : maybeCookieValue;
     document.cookie = [
-        `${cookieName}=${maybeCookieValue === undefined ? '' : maybeCookieValue}`,
+        `${cookieName}=${cookieValue}`,
         expirationDate && `expires=${expirationDate}`,
         cookieDomain && `domain=${cookieDomain}`,
         path && `path=${path}`,
