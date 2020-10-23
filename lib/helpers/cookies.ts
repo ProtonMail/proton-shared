@@ -22,14 +22,22 @@ export const checkCookie = (name: string, value: string) => {
 
 export interface SetCookieArguments {
     cookieName: string;
-    cookieValue: string;
+    cookieValue: string | undefined;
     expirationDate?: string;
     path?: string;
     cookieDomain?: string;
 }
-export const setCookie = ({ cookieName, cookieValue, expirationDate, path, cookieDomain }: SetCookieArguments) => {
+export const setCookie = ({
+    cookieName,
+    cookieValue: maybeCookieValue,
+    expirationDate: maybeExpirationDate,
+    path,
+    cookieDomain,
+}: SetCookieArguments) => {
+    const expirationDate = maybeCookieValue === undefined ? new Date(0).toUTCString() : maybeExpirationDate;
+
     document.cookie = [
-        `${cookieName}=${cookieValue}`,
+        `${cookieName}=${maybeCookieValue === undefined ? '' : maybeCookieValue}`,
         expirationDate && `expires=${expirationDate}`,
         cookieDomain && `domain=${cookieDomain}`,
         path && `path=${path}`,
