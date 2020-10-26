@@ -34,7 +34,7 @@ export interface CalendarEventSharedData {
     SharedEventID: string;
     CalendarID: string;
     CreateTime: number;
-    LastEditTime: number;
+    ModifyTime: number;
     Permissions: number;
     IsOrganizer: 1 | 0;
     Author: string;
