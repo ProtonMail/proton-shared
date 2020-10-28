@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE } from '../constants';
  * Gets the first specified locale from the browser, if any.
  */
 export const getBrowserLocale = () => {
-    return window.navigator.languages && window.navigator.languages.length ? window.navigator.languages[0] : undefined;
+    return window.navigator?.languages?.[0];
 };
 
 export const getNormalizedLocale = (locale = '') => {
