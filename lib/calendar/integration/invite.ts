@@ -122,7 +122,10 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
             const attendee = attendees[index];
             const partstat = getAttendeePartstat(attendee);
             const answeredAttendeeFound = partstat !== ICAL_ATTENDEE_STATUS.NEEDS_ACTION;
-            return { selfActiveAttendee: attendee, selfActiveAddress: address, answeredAttendeeFound };
+            if (answeredAttendeeFound || !(acc.selfActiveAttendee && acc.selfActiveAddress)) {
+                return { selfActiveAttendee: attendee, selfActiveAddress: address, answeredAttendeeFound };
+            }
+            return acc;
         },
         { answeredAttendeeFound: false }
     );
@@ -130,9 +133,9 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
         return { selfAttendee: selfActiveAttendee, selfAddress: selfActiveAddress };
     }
     const disabledAddresses = addresses.filter(({ Status }) => Status === 0);
-    const { selfAttendee, selfAddress } = disabledAddresses.reduce<{
-        selfAttendee?: VcalAttendeeProperty;
-        selfAddress?: Address;
+    const { selfDisabledAttendee, selfDisabledAddress } = disabledAddresses.reduce<{
+        selfDisabledAttendee?: VcalAttendeeProperty;
+        selfDisabledAddress?: Address;
         answeredAttendeeFound: boolean;
     }>(
         (acc, address) => {
@@ -147,11 +150,14 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
             const attendee = attendees[index];
             const partstat = getAttendeePartstat(attendee);
             const answeredAttendeeFound = partstat !== ICAL_ATTENDEE_STATUS.NEEDS_ACTION;
-            return { selfAttendee: attendee, selfAddress: address, answeredAttendeeFound };
+            if (answeredAttendeeFound || !(acc.selfDisabledAttendee && acc.selfDisabledAddress)) {
+                return { selfDisabledAttendee: attendee, selfDisabledAddress: address, answeredAttendeeFound };
+            }
+            return acc;
         },
         { answeredAttendeeFound: false }
     );
-    return { selfAttendee, selfAddress };
+    return { selfAttendee: selfDisabledAttendee, selfAddress: selfDisabledAddress };
 }
 
 export const getInvitedEventWithAlarms = (
