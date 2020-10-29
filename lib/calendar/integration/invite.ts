@@ -105,8 +105,9 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
     const normalizedAttendeeEmails = attendees.map((attendee) => cleanEmail(getAttendeeEmail(attendee)));
     // start checking active addresses
     const activeAddresses = addresses.filter(({ Status }) => Status !== 0);
-    const { selfActiveAttendee, selfActiveAddress } = activeAddresses.reduce<{
+    const { selfActiveAttendee, selfActiveAddress, selfActiveAttendeeIndex } = activeAddresses.reduce<{
         selfActiveAttendee?: VcalAttendeeProperty;
+        selfActiveAttendeeIndex?: number;
         selfActiveAddress?: Address;
         answeredAttendeeFound: boolean;
     }>(
@@ -123,18 +124,28 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
             const partstat = getAttendeePartstat(attendee);
             const answeredAttendeeFound = partstat !== ICAL_ATTENDEE_STATUS.NEEDS_ACTION;
             if (answeredAttendeeFound || !(acc.selfActiveAttendee && acc.selfActiveAddress)) {
-                return { selfActiveAttendee: attendee, selfActiveAddress: address, answeredAttendeeFound };
+                return {
+                    selfActiveAttendee: attendee,
+                    selfActiveAddress: address,
+                    selfActiveAttendeeIndex: index,
+                    answeredAttendeeFound,
+                };
             }
             return acc;
         },
         { answeredAttendeeFound: false }
     );
     if (selfActiveAttendee && selfActiveAddress) {
-        return { selfAttendee: selfActiveAttendee, selfAddress: selfActiveAddress };
+        return {
+            selfAttendee: selfActiveAttendee,
+            selfAddress: selfActiveAddress,
+            attendeeIndex: selfActiveAttendeeIndex,
+        };
     }
     const disabledAddresses = addresses.filter(({ Status }) => Status === 0);
-    const { selfDisabledAttendee, selfDisabledAddress } = disabledAddresses.reduce<{
+    const { selfDisabledAttendee, selfDisabledAddress, selfDisabledAttendeeIndex } = disabledAddresses.reduce<{
         selfDisabledAttendee?: VcalAttendeeProperty;
+        selfDisabledAttendeeIndex?: number;
         selfDisabledAddress?: Address;
         answeredAttendeeFound: boolean;
     }>(
@@ -151,13 +162,22 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
             const partstat = getAttendeePartstat(attendee);
             const answeredAttendeeFound = partstat !== ICAL_ATTENDEE_STATUS.NEEDS_ACTION;
             if (answeredAttendeeFound || !(acc.selfDisabledAttendee && acc.selfDisabledAddress)) {
-                return { selfDisabledAttendee: attendee, selfDisabledAddress: address, answeredAttendeeFound };
+                return {
+                    selfDisabledAttendee: attendee,
+                    selfDisabledAttendeeIndex: index,
+                    selfDisabledAddress: address,
+                    answeredAttendeeFound,
+                };
             }
             return acc;
         },
         { answeredAttendeeFound: false }
     );
-    return { selfAttendee: selfDisabledAttendee, selfAddress: selfDisabledAddress };
+    return {
+        selfAttendee: selfDisabledAttendee,
+        selfAddress: selfDisabledAddress,
+        attendeeIndex: selfDisabledAttendeeIndex,
+    };
 }
 
 export const getInvitedEventWithAlarms = (
