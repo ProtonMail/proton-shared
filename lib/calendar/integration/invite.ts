@@ -101,7 +101,7 @@ export const findAttendee = (email: string, attendees: VcalAttendeeProperty[] = 
     return { index, attendee };
 };
 
-export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: Address[] = []) {
+export function getSelfAttendeeData(attendees: VcalAttendeeProperty[] = [], addresses: Address[] = []) {
     const normalizedAttendeeEmails = attendees.map((attendee) => cleanEmail(getAttendeeEmail(attendee)));
     // start checking active addresses
     const activeAddresses = addresses.filter(({ Status }) => Status !== 0);
@@ -139,7 +139,7 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
         return {
             selfAttendee: selfActiveAttendee,
             selfAddress: selfActiveAddress,
-            attendeeIndex: selfActiveAttendeeIndex,
+            selfAttendeeIndex: selfActiveAttendeeIndex,
         };
     }
     const disabledAddresses = addresses.filter(({ Status }) => Status === 0);
@@ -176,7 +176,7 @@ export function findSelfAttendee(attendees: VcalAttendeeProperty[], addresses: A
     return {
         selfAttendee: selfDisabledAttendee,
         selfAddress: selfDisabledAddress,
-        attendeeIndex: selfDisabledAttendeeIndex,
+        selfAttendeeIndex: selfDisabledAttendeeIndex,
     };
 }
 
