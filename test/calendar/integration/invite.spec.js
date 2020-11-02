@@ -1,5 +1,5 @@
-import { createReplyIcs } from '../../../lib/calendar/integration/invite';
-import { ICAL_ATTENDEE_STATUS } from '../../../lib/calendar/constants';
+import { createInviteIcs } from '../../../lib/calendar/integration/invite';
+import { ICAL_ATTENDEE_STATUS, ICAL_METHOD } from '../../../lib/calendar/constants';
 import { toCRLF } from '../veventHelper.spec';
 
 const exampleVevent = {
@@ -21,9 +21,10 @@ const exampleVevent = {
     sequence: { value: 0 },
 };
 
-describe('createReplyIcs()', () => {
+describe('createInviteIcs for REPLY method', () => {
     it('should create the correct ics when there is no summary', () => {
         const params = {
+            method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
             emailTo: 'uid@proton.me',
             partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
@@ -33,7 +34,7 @@ describe('createReplyIcs()', () => {
             },
             keepDtstamp: true,
         };
-        const ics = createReplyIcs(params);
+        const ics = createInviteIcs(params);
         const expected = `BEGIN:VCALENDAR
 PRODID:Proton Calendar
 VERSION:2.0
@@ -55,6 +56,7 @@ END:VCALENDAR`;
 
     it('should create the correct ics when there is an empty summary', () => {
         const params = {
+            method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
             emailTo: 'uid@proton.me',
             partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
@@ -64,7 +66,7 @@ END:VCALENDAR`;
             },
             keepDtstamp: true,
         };
-        const ics = createReplyIcs(params);
+        const ics = createInviteIcs(params);
         const expected = `BEGIN:VCALENDAR
 PRODID:Proton Calendar
 VERSION:2.0
@@ -87,6 +89,7 @@ END:VCALENDAR`;
 
     it('should create the correct ics when there is a summary and a recurrence-id', () => {
         const params = {
+            method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
             emailTo: 'uid@proton.me',
             partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
@@ -99,7 +102,7 @@ END:VCALENDAR`;
             },
             keepDtstamp: true,
         };
-        const ics = createReplyIcs(params);
+        const ics = createInviteIcs(params);
         const expected = `BEGIN:VCALENDAR
 PRODID:Proton Calendar
 VERSION:2.0

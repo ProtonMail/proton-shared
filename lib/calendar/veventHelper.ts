@@ -1,6 +1,7 @@
 import { fromUTCDate } from '../date/timezone';
 import { omit, pick } from '../helpers/object';
 import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { RequireOnly } from '../interfaces/utils';
 import { fromInternalAttendee } from './attendees';
 import { CALENDAR_CARD_TYPE } from './constants';
 import { generateUID, hasMoreThan, wrap } from './helper';
@@ -58,9 +59,19 @@ export const withUid = <T>(properties: VcalVeventComponent & T): VcalVeventCompo
     };
 };
 
-export const withDtstamp = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
-    if (properties.dtstamp) {
+export const withSummary = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
+    if (properties.summary) {
         return properties;
+    }
+    return {
+        ...properties,
+        summary: { value: '' },
+    };
+};
+
+export const withDtstamp = <T>(properties: RequireOnly<VcalVeventComponent, 'uid' | 'component' | 'dtstart'> & T): VcalVeventComponent & T => {
+    if (properties.dtstamp) {
+        return properties as VcalVeventComponent & T;
     }
     return {
         ...properties,
