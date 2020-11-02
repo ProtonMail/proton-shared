@@ -1,22 +1,33 @@
 import { c } from 'ttag';
+import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
+import { unique } from '../../helpers/array';
+import { dateLocale } from '../../i18n';
+import { getVtimezones } from '../../api/calendars';
+import { format as formatUTC } from '../../date-fns-utc';
 import { cleanEmail, normalizeInternalEmail } from '../../helpers/email';
+import isTruthy from '../../helpers/isTruthy';
 import { omit, pick } from '../../helpers/object';
-import { Address } from '../../interfaces';
-import { CalendarSettings, Participant, SETTINGS_NOTIFICATION_TYPE } from '../../interfaces/calendar';
+import { Address, Api } from '../../interfaces';
 import {
+    CalendarSettings,
+    Participant,
+    SETTINGS_NOTIFICATION_TYPE,
     VcalAttendeeProperty,
     VcalOrganizerProperty,
     VcalValarmComponent,
     VcalVcalendar,
     VcalVeventComponent,
     VcalVtimezoneComponent,
-} from '../../interfaces/calendar/VcalModel';
+} from '../../interfaces/calendar';
 import { ContactEmail } from '../../interfaces/contacts';
-import { RequireSome } from '../../interfaces/utils';
+import { RequireSome, SimpleMap } from '../../interfaces/utils';
+import { formatSubject, RE_PREFIX } from '../../mail/messages';
 import { getAttendeeEmail } from '../attendees';
-import { ICAL_ATTENDEE_STATUS } from '../constants';
-import { fromTriggerString, serialize } from '../vcal';
-import { getAttendeePartstat, getAttendeeRole, getIsAlarmComponent, getIsAllDay } from '../vcalHelper';
+import { ICAL_ATTENDEE_STATUS, ICAL_METHOD } from '../constants';
+import { getDisplayTitle } from '../helper';
+import { fromTriggerString, parse, serialize } from '../vcal';
+import { getAllDayInfo, propertyToUTCDate } from '../vcalConverter';
+import { getAttendeePartstat, getAttendeeRole, getIsAlarmComponent, getIsAllDay, getPropertyTzid } from '../vcalHelper';
 import { withDtstamp } from '../veventHelper';
 
 export const getParticipantHasAddressID = (
@@ -65,63 +76,91 @@ export const getParticipant = (
     return result;
 };
 
-interface CreateReplyIcsParams {
-    prodId: string;
-    emailTo: string;
-    partstat: ICAL_ATTENDEE_STATUS;
+interface CreateInviteVeventParams {
+    method: ICAL_METHOD;
+    emailTo?: string;
+    partstat?: ICAL_ATTENDEE_STATUS;
     vevent: VcalVeventComponent;
-    vtimezone?: VcalVtimezoneComponent;
     keepDtstamp?: boolean;
 }
 
-export const createReplyIcs = ({
+export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtstamp }: CreateInviteVeventParams) => {
+    if (method === ICAL_METHOD.REPLY && emailTo) {
+        // only put RFC-mandatory fields to make reply as short as possible
+        // rrule, summary and location are also included for a better UI in the external provider widget
+        const propertiesToKeep: (keyof VcalVeventComponent)[] = [
+            'uid',
+            'dtstart',
+            'dtend',
+            'sequence',
+            'recurrence-id',
+            'organizer',
+            'rrule',
+            'location',
+            'summary',
+        ];
+        // use current time as dtstamp unless indicated otherwise
+        if (keepDtstamp) {
+            propertiesToKeep.push('dtstamp');
+        }
+        return withDtstamp({
+            ...pick(vevent, propertiesToKeep),
+            component: 'vevent',
+            attendee: [
+                {
+                    value: emailTo,
+                    parameters: { partstat },
+                },
+            ],
+        });
+    }
+    if (method === ICAL_METHOD.REQUEST) {
+        // strip alarms
+        const propertiesToOmit: (keyof VcalVeventComponent)[] = ['components'];
+        // use current time as dtstamp unless indicated otherwise
+        if (!keepDtstamp) {
+            propertiesToOmit.push('dtstamp');
+        }
+        return withDtstamp(omit(vevent, propertiesToOmit) as VcalVeventComponent);
+    }
+};
+
+interface CreateInviteIcsParams {
+    method: ICAL_METHOD;
+    prodId: string;
+    emailTo?: string;
+    partstat?: ICAL_ATTENDEE_STATUS;
+    vevent: VcalVeventComponent;
+    vtimezones?: VcalVtimezoneComponent[];
+    keepDtstamp?: boolean;
+}
+
+export const createInviteIcs = ({
+    method,
     prodId,
     emailTo,
     partstat,
     vevent,
-    vtimezone,
+    vtimezones,
     keepDtstamp,
-}: CreateReplyIcsParams): string => {
-    // only put RFC-mandatory fields to make reply as short as possible
-    // rrule, summary and location are also included for a better UI in the external provider widget
-    const propertiesToKeep: (keyof VcalVeventComponent)[] = [
-        'uid',
-        'dtstart',
-        'dtend',
-        'sequence',
-        'recurrence-id',
-        'exdate',
-        'organizer',
-        'rrule',
-        'location',
-        'summary',
-    ];
-    // use current time as dtstamp unless indicated otherwise
-    if (keepDtstamp) {
-        propertiesToKeep.push('dtstamp');
+}: CreateInviteIcsParams): string => {
+    // use current time as dtstamp
+    const inviteVevent = createInviteVevent({ method, vevent, emailTo, partstat, keepDtstamp });
+    if (!inviteVevent) {
+        throw new Error('Invite vevent failed to be created');
     }
-    const replyVevent = withDtstamp({
-        ...pick(vevent, propertiesToKeep),
-        component: 'vevent',
-        attendee: [
-            {
-                value: emailTo,
-                parameters: { partstat },
-            },
-        ],
-    });
-    const replyVcal: RequireSome<VcalVcalendar, 'components'> = {
+    const inviteVcal: RequireSome<VcalVcalendar, 'components'> = {
         component: 'vcalendar',
-        components: [replyVevent],
+        components: [inviteVevent],
         prodid: { value: prodId },
         version: { value: '2.0' },
-        method: { value: 'REPLY' },
+        method: { value: method },
         calscale: { value: 'GREGORIAN' },
     };
-    if (vtimezone) {
-        replyVcal.components.unshift(vtimezone);
+    if (vtimezones?.length) {
+        inviteVcal.components = [...vtimezones, ...inviteVcal.components];
     }
-    return serialize(replyVcal);
+    return serialize(inviteVcal);
 };
 
 export const findAttendee = (email: string, attendees: VcalAttendeeProperty[] = []) => {
@@ -265,4 +304,48 @@ export const getSelfAttendeeToken = (vevent?: VcalVeventComponent, addresses: Ad
         return;
     }
     return vevent.attendee[selfAttendeeIndex].parameters?.['x-pm-token'];
+};
+
+export const generateVtimezonesComponents = async (
+    api: Api,
+    { dtstart, dtend }: VcalVeventComponent
+): Promise<VcalVtimezoneComponent[]> => {
+    const startTimezone = getPropertyTzid(dtstart);
+    const endTimezone = dtend ? getPropertyTzid(dtend) : undefined;
+    const tzids = unique(
+        [startTimezone, endTimezone].filter(isTruthy).filter((tzid) => isTruthy(tzid) && tzid.toLowerCase() !== 'utc')
+    );
+    const encodedTzids = tzids.map((tzid) => encodeURIComponent(tzid));
+    if (!tzids.length) {
+        return Promise.resolve([]);
+    }
+    const { Timezones = {} } = await api<{ Timezones: SimpleMap<string> }>(getVtimezones(encodedTzids));
+    return tzids.map((tzid) => {
+        const vtimezoneString = Timezones[tzid];
+        if (!vtimezoneString) {
+            throw new Error('Could not obtain timezone');
+        }
+        return parse(vtimezoneString) as VcalVtimezoneComponent;
+    });
+};
+
+export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComponent) => {
+    if (method === ICAL_METHOD.REQUEST) {
+        const { dtstart, dtend } = vevent;
+        const { isAllDay, isSingleAllDay } = getAllDayInfo(dtstart, dtend);
+        if (isAllDay) {
+            const formattedStartDate = formatUTC(toUTCDate(dtstart.value), 'PP', { locale: dateLocale });
+            return isSingleAllDay
+                ? `Invitation for an event on ${formattedStartDate}`
+                : `Invitation for an event starting on ${formattedStartDate}`;
+        }
+        const formattedStartDateTime = formatUTC(toUTCDate(vevent.dtstart.value), 'PPp', { locale: dateLocale });
+        const { offset } = getTimezoneOffset(propertyToUTCDate(dtstart), getPropertyTzid(dtstart) || 'UTC');
+        const formattedOffset = `GMT${formatTimezoneOffset(offset)}`;
+        return `Invitation for an event starting on ${formattedStartDateTime} (${formattedOffset})`;
+    }
+    if (method === ICAL_METHOD.REPLY) {
+        return formatSubject(`Invitation: ${getDisplayTitle(vevent.summary?.value)}`, RE_PREFIX);
+    }
+    throw new Error('Unexpected method');
 };
