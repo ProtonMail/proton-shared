@@ -52,12 +52,18 @@ export const verifySignedCard = async (
     publicKeys: OpenPGPKey | OpenPGPKey[]
 ) => {
     // we always expect a signed card
-    const { verified } = await verifyMessage({
+    const options = {
         message: await createCleartextMessage(dataToVerify),
         publicKeys,
         signature: await getSignature(signature),
         detached: true,
-    });
+    };
+    const { verified, errors } = await verifyMessage(options);
+    if (verified === VERIFICATION_STATUS.SIGNED_AND_INVALID) {
+        console.log('date in verify', options.date);
+        console.log('new date in verify', new Date());
+        console.log('error in verify', errors);
+    }
     const hasPublicKeys = Array.isArray(publicKeys) ? !!publicKeys.length : !!publicKeys;
     const verificationStatus = getEventVerificationStatus(verified, hasPublicKeys);
 
@@ -71,12 +77,18 @@ export const decryptCard = async (
     sessionKey?: SessionKey
 ) => {
     // we always expect a signed card
-    const { data: decryptedData, verified } = await decryptMessage({
+    const options = {
         message: await getMessage(dataToDecrypt),
         publicKeys,
         signature: signature ? await getSignature(signature) : undefined,
         sessionKeys: sessionKey ? [sessionKey] : undefined,
-    });
+    };
+    const { data: decryptedData, verified, errors } = await decryptMessage(options);
+    if (verified === VERIFICATION_STATUS.SIGNED_AND_INVALID) {
+        console.log('date in decrypt', options.date);
+        console.log('new date in decrypt', new Date());
+        console.log('error in decrypt', errors);
+    }
     const hasPublicKeys = Array.isArray(publicKeys) ? !!publicKeys.length : !!publicKeys;
     const verificationStatus = getEventVerificationStatus(verified, hasPublicKeys);
 
