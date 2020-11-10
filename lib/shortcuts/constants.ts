@@ -1,6 +1,6 @@
 import { c } from 'ttag';
-import { APPS, APP_NAMES } from 'proton-shared/lib/constants';
-import { isMac } from 'proton-shared/lib/helpers/browser';
+import { APPS, APP_NAMES } from '../constants';
+import { isMac } from '../helpers/browser';
 
 export const getShortcutsForApp = (app: APP_NAMES) => {
     const IS_MAC = isMac();
