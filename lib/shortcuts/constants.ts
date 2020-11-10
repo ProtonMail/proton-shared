@@ -145,10 +145,10 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Shortcut name').t`Open shortcuts modal`,
                             keys: '?',
                         },
-                        {
-                            name: c('Shortcut name').t`Launch command line`,
-                            keys: `${META_KEY} + K`,
-                        },
+                        // {
+                        //     name: c('Shortcut name').t`Launch command line`,
+                        //     keys: `${META_KEY} + K`,
+                        // },
                     ],
                 },
                 {
@@ -227,6 +227,14 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Shortcut name').t`Move to Trash`,
                             keys: 'Backspace',
                         },
+                        {
+                            name: c('Shortcut name').t`Delete permanently`,
+                            keys: `${META_KEY} + Backspace`,
+                        },
+                        {
+                            name: c('Shortcut name').t`Empty folder`,
+                            keys: `${META_KEY} + Shift + Backspace`,
+                        },
                     ],
                 },
                 {
@@ -239,14 +247,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         {
                             name: c('Shortcut name').t`Show all emails`,
                             keys: 'Shift + A',
-                        },
-                        {
-                            name: c('Shortcut name').t`Delete permanently`,
-                            keys: 'Shift + Backspace',
-                        },
-                        {
-                            name: c('Shortcut name').t`Empty folder`,
-                            keys: `${META_KEY} + Shift + Backspace`,
                         },
                     ],
                 },
