@@ -44,6 +44,11 @@ export const getRecurrenceId = ({ 'recurrence-id': recurrenceId }: Pick<VcalVeve
     return recurrenceId;
 };
 
+export const getSequence = (event: VcalVeventComponent) => {
+    const sequence = +(event.sequence?.value || 0);
+    return Math.max(sequence, 0);
+};
+
 export const getIsDateTimeValue = (value: VcalDateOrDateTimeValue): value is VcalDateTimeValue => {
     return (value as VcalDateTimeValue).hours !== undefined;
 };
