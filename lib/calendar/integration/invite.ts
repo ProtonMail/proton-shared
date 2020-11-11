@@ -87,7 +87,7 @@ interface CreateInviteVeventParams {
 export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtstamp }: CreateInviteVeventParams) => {
     if (method === ICAL_METHOD.REPLY && emailTo) {
         // only put RFC-mandatory fields to make reply as short as possible
-        // summary is also included for a better UI in the external provider widget
+        // rrule, summary and location are also included for a better UI in the external provider widget
         const propertiesToKeep: (keyof VcalVeventComponent)[] = [
             'uid',
             'dtstart',
@@ -95,6 +95,8 @@ export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtst
             'sequence',
             'recurrence-id',
             'organizer',
+            'rrule',
+            'location',
             'summary',
         ];
         // use current time as dtstamp unless indicated otherwise
