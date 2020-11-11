@@ -28,10 +28,7 @@ describe('createInviteIcs for REPLY method', () => {
             prodId: 'Proton Calendar',
             emailTo: 'uid@proton.me',
             partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
-            vevent: {
-                ...exampleVevent,
-                rrule: { value: { freq: 'WEEKLY', until: { year: 2020, month: 5, day: 15 } } },
-            },
+            vevent: exampleVevent,
             keepDtstamp: true,
         };
         const ics = createInviteIcs(params);
