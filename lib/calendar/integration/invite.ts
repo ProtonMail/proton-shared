@@ -25,10 +25,18 @@ import { formatSubject, RE_PREFIX } from '../../mail/messages';
 import { getAttendeeEmail } from '../attendees';
 import { ICAL_ATTENDEE_STATUS, ICAL_METHOD } from '../constants';
 import { getDisplayTitle } from '../helper';
+import { getIsRruleEqual } from '../rruleEqual';
 import { fromTriggerString, parse, serialize } from '../vcal';
-import { getAllDayInfo, propertyToUTCDate } from '../vcalConverter';
-import { getAttendeePartstat, getAttendeeRole, getIsAlarmComponent, getIsAllDay, getPropertyTzid } from '../vcalHelper';
-import { withDtstamp } from '../veventHelper';
+import { getAllDayInfo, getHasModifiedDateTimes, propertyToUTCDate } from '../vcalConverter';
+import {
+    getAttendeePartstat,
+    getAttendeeRole,
+    getIsAlarmComponent,
+    getIsAllDay,
+    getPropertyTzid,
+    getSequence,
+} from '../vcalHelper';
+import { withDtstamp, withSummary } from '../veventHelper';
 
 export const getParticipantHasAddressID = (
     participant: Participant
@@ -121,7 +129,9 @@ export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtst
         if (!keepDtstamp) {
             propertiesToOmit.push('dtstamp');
         }
-        return withDtstamp(omit(vevent, propertiesToOmit) as VcalVeventComponent);
+        // SUMMARY is mandatory in a REQUEST ics
+        const veventWithSummary = withSummary(vevent);
+        return withDtstamp(omit(veventWithSummary, propertiesToOmit) as VcalVeventComponent);
     }
 };
 
@@ -337,4 +347,29 @@ export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComp
         return formatSubject(`Invitation: ${getDisplayTitle(vevent.summary?.value)}`, RE_PREFIX);
     }
     throw new Error('Unexpected method');
+};
+
+export const getUpdateRequestVevent = (newVevent: VcalVeventComponent, oldVevent: VcalVeventComponent) => {
+    if (getSequence(newVevent) > getSequence(oldVevent)) {
+        if (!newVevent.attendee?.length) {
+            return { ...newVevent };
+        }
+        const withResetPartstatAttendees = newVevent.attendee.map((attendee) => ({
+            ...attendee,
+            parameters: {
+                ...attendee.parameters,
+                partstat: ICAL_ATTENDEE_STATUS.NEEDS_ACTION,
+            },
+        }));
+        return { ...newVevent, attendee: withResetPartstatAttendees };
+    }
+    const hasUpdatedDateTimes = getHasModifiedDateTimes(newVevent, oldVevent);
+    const hasUpdatedTitle = newVevent.summary?.value !== oldVevent.summary?.value;
+    const hasUpdatedDescription = newVevent.description?.value !== oldVevent.description?.value;
+    const hasUpdatedLocation = newVevent.location?.value !== oldVevent.location?.value;
+    const hasUpdatedRrule = !getIsRruleEqual(newVevent.rrule, oldVevent.rrule);
+    if (hasUpdatedDateTimes || hasUpdatedTitle || hasUpdatedDescription || hasUpdatedLocation || hasUpdatedRrule) {
+        return { ...newVevent };
+    }
+    // return undefined if no update request is needed
 };
