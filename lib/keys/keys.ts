@@ -175,12 +175,16 @@ export const decryptPrivateKeyWithSalt = async ({
     return decryptPrivateKey(PrivateKey, keyPassword);
 };
 
-export const getOldUserIDEmail = async (PrivateKey: string): Promise<string> => {
-    const [oldPrivateKey] = await getKeys(PrivateKey);
+export const getOldUserIDEmailHelper = (privateKey: OpenPGPKey) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore - openpgp typings are incorrect, todo
-    const { email } = oldPrivateKey.users[0].userId;
+    const { email } = privateKey.users[0].userId;
     return email;
+};
+
+export const getOldUserIDEmail = async (PrivateKey: string): Promise<string> => {
+    const [privateKey] = await getKeys(PrivateKey);
+    return getOldUserIDEmailHelper(privateKey);
 };
 
 export const getEncryptedArmoredAddressKey = async (

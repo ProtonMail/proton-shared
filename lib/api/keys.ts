@@ -121,3 +121,13 @@ export const resetKeysRoute = (data: {
     method: 'post',
     data,
 });
+
+export const upgradeKeysRoute = (data: {
+    KeySalt: string;
+    Keys: { ID: string; PrivateKey: string }[];
+    OrganizationKey?: string;
+}) => ({
+    url: 'keys/private/upgrade',
+    method: 'post',
+    data,
+});
