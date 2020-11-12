@@ -1,5 +1,5 @@
 export const getFeature = (featureCode: string) => ({
-    url: `features/${featureCode}`,
+    url: `core/v4/features/${featureCode}`,
     method: 'get',
 });
 
