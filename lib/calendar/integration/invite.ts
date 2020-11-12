@@ -180,7 +180,26 @@ export const findAttendee = (email: string, attendees: VcalAttendeeProperty[] = 
     return { index, attendee };
 };
 
-export function getSelfAttendeeData(attendees: VcalAttendeeProperty[] = [], addresses: Address[] = []) {
+export function getSelfAddressData({
+    isOrganizer,
+    organizer,
+    attendees = [],
+    addresses = [],
+}: {
+    isOrganizer: boolean;
+    organizer?: VcalOrganizerProperty;
+    attendees?: VcalAttendeeProperty[];
+    addresses?: Address[];
+}) {
+    if (isOrganizer) {
+        if (!organizer) {
+            throw new Error('Missing organizer');
+        }
+        const organizerEmail = normalizeInternalEmail(getAttendeeEmail(organizer));
+        return {
+            selfAddress: addresses.find(({ Email }) => normalizeInternalEmail(Email) === organizerEmail),
+        };
+    }
     const normalizedAttendeeEmails = attendees.map((attendee) => cleanEmail(getAttendeeEmail(attendee)));
     // start checking active addresses
     const activeAddresses = addresses.filter(({ Status }) => Status !== 0);
@@ -339,7 +358,7 @@ export const generateVtimezonesComponents = async (
     });
 };
 
-export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComponent) => {
+export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComponent, isCreateEvent?: boolean) => {
     if (method === ICAL_METHOD.REQUEST) {
         const { dtstart, dtend } = vevent;
         const { isAllDay, isSingleAllDay } = getAllDayInfo(dtstart, dtend);
@@ -352,7 +371,9 @@ export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComp
         const formattedStartDateTime = formatUTC(toUTCDate(vevent.dtstart.value), 'PPp', { locale: dateLocale });
         const { offset } = getTimezoneOffset(propertyToUTCDate(dtstart), getPropertyTzid(dtstart) || 'UTC');
         const formattedOffset = `GMT${formatTimezoneOffset(offset)}`;
-        return `Invitation for an event starting on ${formattedStartDateTime} (${formattedOffset})`;
+        return isCreateEvent
+            ? `Invitation for an event starting on ${formattedStartDateTime} (${formattedOffset})`
+            : `Update for an event starting on ${formattedStartDateTime} (${formattedOffset})`;
     }
     if (method === ICAL_METHOD.REPLY) {
         return formatSubject(`Invitation: ${getDisplayTitle(vevent.summary?.value)}`, RE_PREFIX);
