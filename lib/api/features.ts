@@ -4,7 +4,7 @@ export const getFeature = (featureCode: string) => ({
 });
 
 export const updateFeatureValue = (featureCode: string, Value: any) => ({
-    url: `features/${featureCode}/value`,
+    url: `core/v4/features/${featureCode}/value`,
     method: 'put',
     data: { Value },
 });
