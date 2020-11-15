@@ -381,6 +381,27 @@ export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComp
     throw new Error('Unexpected method');
 };
 
+export const getHasUpdatedInviteData = ({
+    newVevent,
+    oldVevent,
+    hasModifiedDateTimes,
+}: {
+    newVevent: VcalVeventComponent;
+    oldVevent?: VcalVeventComponent;
+    hasModifiedDateTimes?: boolean;
+}) => {
+    if (!oldVevent) {
+        return;
+    }
+    const hasUpdatedDateTimes =
+        hasModifiedDateTimes !== undefined ? hasModifiedDateTimes : getHasModifiedDateTimes(newVevent, oldVevent);
+    const hasUpdatedTitle = newVevent.summary?.value !== oldVevent.summary?.value;
+    const hasUpdatedDescription = newVevent.description?.value !== oldVevent.description?.value;
+    const hasUpdatedLocation = newVevent.location?.value !== oldVevent.location?.value;
+    const hasUpdatedRrule = !getIsRruleEqual(newVevent.rrule, oldVevent.rrule);
+    return hasUpdatedDateTimes || hasUpdatedTitle || hasUpdatedDescription || hasUpdatedLocation || hasUpdatedRrule;
+};
+
 export const getUpdateRequestVevent = (newVevent: VcalVeventComponent, oldVevent: VcalVeventComponent) => {
     if (getSequence(newVevent) > getSequence(oldVevent)) {
         if (!newVevent.attendee?.length) {
@@ -395,13 +416,5 @@ export const getUpdateRequestVevent = (newVevent: VcalVeventComponent, oldVevent
         }));
         return { ...newVevent, attendee: withResetPartstatAttendees };
     }
-    const hasUpdatedDateTimes = getHasModifiedDateTimes(newVevent, oldVevent);
-    const hasUpdatedTitle = newVevent.summary?.value !== oldVevent.summary?.value;
-    const hasUpdatedDescription = newVevent.description?.value !== oldVevent.description?.value;
-    const hasUpdatedLocation = newVevent.location?.value !== oldVevent.location?.value;
-    const hasUpdatedRrule = !getIsRruleEqual(newVevent.rrule, oldVevent.rrule);
-    if (hasUpdatedDateTimes || hasUpdatedTitle || hasUpdatedDescription || hasUpdatedLocation || hasUpdatedRrule) {
-        return { ...newVevent };
-    }
-    // return undefined if no update request is needed
+    return { ...newVevent };
 };
