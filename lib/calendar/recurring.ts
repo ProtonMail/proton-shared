@@ -198,7 +198,7 @@ export const getOccurrences = ({
     maxStart = new Date(9999, 0, 1),
     maxCount = 1,
     cache = {},
-}: GetOccurrences) => {
+}: GetOccurrences): Pick<RecurringResult, 'localStart' | 'localEnd' | 'occurrenceNumber'>[] => {
     if (maxCount <= 0) {
         return [];
     }
