@@ -191,7 +191,8 @@ export function getSelfAddressData({
 }) {
     if (isOrganizer) {
         if (!organizer) {
-            throw new Error('Missing organizer');
+            // old events will not have organizer
+            return {};
         }
         const organizerEmail = normalizeInternalEmail(getAttendeeEmail(organizer));
         return {
