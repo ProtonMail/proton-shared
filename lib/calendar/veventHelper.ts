@@ -74,10 +74,19 @@ export const withSummary = <T>(properties: VcalVeventComponent & T): VcalVeventC
     };
 };
 
-export const withDtstamp = <T>(properties: RequireOnly<VcalVeventComponent, 'uid' | 'component' | 'dtstart'> & T): VcalVeventComponent & T => {
+export const withDtstamp = <T>(
+    properties: RequireOnly<VcalVeventComponent, 'uid' | 'component' | 'dtstart'> & T
+): VcalVeventComponent & T => {
     if (properties.dtstamp) {
         return properties as VcalVeventComponent & T;
     }
+    return {
+        ...properties,
+        dtstamp: dateTimeToProperty(fromUTCDate(new Date()), true),
+    };
+};
+
+export const withUpdatedDtstamp = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
     return {
         ...properties,
         dtstamp: dateTimeToProperty(fromUTCDate(new Date()), true),
