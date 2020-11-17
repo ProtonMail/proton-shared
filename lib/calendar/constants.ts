@@ -34,6 +34,7 @@ export enum CALENDAR_FLAGS {
 }
 
 export enum ICAL_METHOD {
+    PUBLISH = 'PUBLISH',
     REQUEST = 'REQUEST',
     REPLY = 'REPLY',
     CANCEL = 'CANCEL',

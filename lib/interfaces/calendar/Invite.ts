@@ -35,6 +35,7 @@ export interface Participant {
     partstat?: ICAL_ATTENDEE_STATUS;
     role?: ICAL_ATTENDEE_ROLE;
     addressID?: string;
+    attendeeIndex?: number;
 }
 
 export interface SavedInviteData {
