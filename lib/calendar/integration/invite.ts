@@ -1,12 +1,12 @@
 import { c } from 'ttag';
-import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
-import { unique } from '../../helpers/array';
-import { dateLocale } from '../../i18n';
 import { getVtimezones } from '../../api/calendars';
 import { format as formatUTC } from '../../date-fns-utc';
+import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
+import { unique } from '../../helpers/array';
 import { cleanEmail, normalizeInternalEmail } from '../../helpers/email';
 import isTruthy from '../../helpers/isTruthy';
 import { omit, pick } from '../../helpers/object';
+import { dateLocale } from '../../i18n';
 import { Address, Api } from '../../interfaces';
 import {
     CalendarSettings,
@@ -48,7 +48,8 @@ export const getParticipant = (
     participant: VcalAttendeeProperty | VcalOrganizerProperty,
     contactEmails: ContactEmail[],
     ownAddresses: Address[],
-    emailTo?: string
+    emailTo?: string,
+    index?: number
 ): Participant => {
     const emailAddress = getAttendeeEmail(participant);
     const normalizedEmailAddress = normalizeInternalEmail(emailAddress);
@@ -80,6 +81,9 @@ export const getParticipant = (
         result.emailAddress = selfAddress.Email;
         // Use Proton name when sending out the email
         result.name = selfAddress.DisplayName || participantName;
+    }
+    if (index !== undefined) {
+        result.attendeeIndex = index;
     }
     return result;
 };
@@ -392,8 +396,12 @@ export const getHasUpdatedInviteData = ({
     return hasUpdatedDateTimes || hasUpdatedTitle || hasUpdatedDescription || hasUpdatedLocation || hasUpdatedRrule;
 };
 
-export const getUpdateRequestVevent = (newVevent: VcalVeventComponent, oldVevent: VcalVeventComponent) => {
-    if (getSequence(newVevent) > getSequence(oldVevent)) {
+export const getUpdatedInviteVevent = (
+    newVevent: VcalVeventComponent,
+    oldVevent: VcalVeventComponent,
+    method?: ICAL_METHOD
+) => {
+    if (method === ICAL_METHOD.REQUEST && getSequence(newVevent) > getSequence(oldVevent)) {
         if (!newVevent.attendee?.length) {
             return { ...newVevent };
         }
