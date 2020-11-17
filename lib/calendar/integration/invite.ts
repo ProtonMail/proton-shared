@@ -358,19 +358,25 @@ export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComp
         const { isAllDay, isSingleAllDay } = getAllDayInfo(dtstart, dtend);
         if (isAllDay) {
             const formattedStartDate = formatUTC(toUTCDate(dtstart.value), 'PP', { locale: dateLocale });
-            return isSingleAllDay
-                ? `Invitation for an event on ${formattedStartDate}`
-                : `Invitation for an event starting on ${formattedStartDate}`;
+            if (isSingleAllDay) {
+                return isCreateEvent
+                    ? c('Email subject').t`Invitation for an event on ${formattedStartDate}`
+                    : c('Email subject').t`Update for an event on ${formattedStartDate}`;
+            }
+            return isCreateEvent
+                ? c('Email subject').t`Invitation for an event starting on ${formattedStartDate}`
+                : c('Email subject').t`Update for an event starting on ${formattedStartDate}`;
         }
         const formattedStartDateTime = formatUTC(toUTCDate(vevent.dtstart.value), 'PPp', { locale: dateLocale });
         const { offset } = getTimezoneOffset(propertyToUTCDate(dtstart), getPropertyTzid(dtstart) || 'UTC');
         const formattedOffset = `GMT${formatTimezoneOffset(offset)}`;
         return isCreateEvent
-            ? `Invitation for an event starting on ${formattedStartDateTime} (${formattedOffset})`
-            : `Update for an event starting on ${formattedStartDateTime} (${formattedOffset})`;
+            ? c('Email subject').t`Invitation for an event starting on ${formattedStartDateTime} (${formattedOffset})`
+            : c('Email subject').t`Update for an event starting on ${formattedStartDateTime} (${formattedOffset})`;
     }
     if (method === ICAL_METHOD.REPLY) {
-        return formatSubject(`Invitation: ${getDisplayTitle(vevent.summary?.value)}`, RE_PREFIX);
+        const eventTitle = getDisplayTitle(vevent.summary?.value);
+        return formatSubject(c('Email subject').t`Invitation: ${eventTitle}`, RE_PREFIX);
     }
     throw new Error('Unexpected method');
 };
