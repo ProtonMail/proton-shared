@@ -113,6 +113,9 @@ export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtst
         if (keepDtstamp) {
             propertiesToKeep.push('dtstamp');
         }
+        if (!partstat) {
+            throw new Error('Cannot reply without participant status');
+        }
         return withDtstamp({
             ...pick(vevent, propertiesToKeep),
             component: 'vevent',
