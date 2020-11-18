@@ -245,6 +245,10 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             keys: 'Shift + U',
                         },
                         {
+                            name: c('Shortcut name').t`Show read emails`,
+                            keys: 'Shift + R',
+                        },
+                        {
                             name: c('Shortcut name').t`Show all emails`,
                             keys: 'Shift + A',
                         },
