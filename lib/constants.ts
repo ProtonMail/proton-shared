@@ -773,8 +773,8 @@ export const isStandaloneMode = APP_MODE === 'standalone';
 declare const WEBPACK_PUBLIC_PATH: string;
 export const PUBLIC_PATH = typeof WEBPACK_PUBLIC_PATH === 'undefined' ? '' : WEBPACK_PUBLIC_PATH;
 
-declare const WEBPACK_PRODUCTION: string;
-export const PRODUCTION = typeof WEBPACK_PRODUCTION === 'undefined' ? '' : WEBPACK_PRODUCTION;
+declare const WEBPACK_PRODUCTION: boolean;
+export const PRODUCTION = typeof WEBPACK_PRODUCTION === 'undefined' ? false : WEBPACK_PRODUCTION;
 
 interface OpenPGPFile {
     filepath: string;
