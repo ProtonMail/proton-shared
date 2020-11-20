@@ -100,11 +100,11 @@ export const getAttendeeEmail = (attendee: VcalAttendeeProperty | VcalOrganizerP
     if (validateEmailAddress(emailTo)) {
         return emailTo;
     }
-    if (cn && validateEmailAddress(cn)) {
-        return cn;
-    }
     if (email && validateEmailAddress(email)) {
         return email;
+    }
+    if (cn && validateEmailAddress(cn)) {
+        return cn;
     }
     return emailTo;
 };

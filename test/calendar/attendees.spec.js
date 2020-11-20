@@ -20,22 +20,22 @@ END:VEVENT`;
         expect(email).toBe('email@test.com');
     });
 
-    it('should prioritize the cn value if attendee value is not an email', async () => {
+    it('should prioritize the email value if attendee value is not an email', async () => {
         const ics = `BEGIN:VEVENT
 ATTENDEE;CN=email2@test.com;EMAIL=email3@test.com;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:IAmNotAnEmail
 END:VEVENT`;
         const { attendee } = parse(ics);
         const email = await getAttendeeEmail(attendee[0]);
-        expect(email).toBe('email2@test.com');
+        expect(email).toBe('email3@test.com');
     });
 
-    it('should return email value if attendee and cn values are not emails', async () => {
+    it('should return cn value if attendee and email values are not emails', async () => {
         const ics = `BEGIN:VEVENT
-ATTENDEE;CN=IAmNotAnEmailEither;EMAIL=email3@test.com;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:IAmNotAnEmail
+ATTENDEE;CN=email2@test.com;EMAIL=IAmNotAnEmailEither;PARTSTAT=NEEDS-ACTION;ROLE=REQ-PARTICIPANT:IAmNotAnEmail
 END:VEVENT`;
         const { attendee } = parse(ics);
         const email = await getAttendeeEmail(attendee[0]);
-        expect(email).toBe('email3@test.com');
+        expect(email).toBe('email2@test.com');
     });
 
     it('should fall back to the attendee value if attendee, cn and email values are not emails', async () => {
