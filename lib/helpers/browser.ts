@@ -16,6 +16,7 @@ export const textToClipboard = (text = '') => {
     document.body.appendChild(dummy);
     dummy.value = text;
     dummy.select();
+    dummy.focus();
     document.execCommand('copy');
     document.body.removeChild(dummy);
 };
