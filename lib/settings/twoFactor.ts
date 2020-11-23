@@ -1,11 +1,6 @@
-import { UserSettings } from '../interfaces';
+import { UserSettings, SETTINGS_2FA_ENABLED } from '../interfaces';
 import { hasBit } from '../helpers/bitset';
 import { generateSharedSecret, getUri } from '../helpers/twofa';
-
-export enum TWO_FA_FLAGS {
-    TOTP = 1,
-    U2F = 2,
-}
 
 export const TWO_FA_CONFIG = {
     PERIOD: 30,
@@ -14,11 +9,11 @@ export const TWO_FA_CONFIG = {
 };
 
 export const getHasTOTPEnabled = (Enabled?: number) => {
-    return hasBit(Enabled || 0, TWO_FA_FLAGS.TOTP);
+    return hasBit(Enabled || 0, SETTINGS_2FA_ENABLED.OTP);
 };
 
 export const getHasU2FEnabled = (Enabled?: number) => {
-    return hasBit(Enabled || 0, TWO_FA_FLAGS.U2F);
+    return hasBit(Enabled || 0, SETTINGS_2FA_ENABLED.U2F);
 };
 
 export const getHasTOTPSettingEnabled = (userSettings?: Pick<UserSettings, '2FA'>) => {
