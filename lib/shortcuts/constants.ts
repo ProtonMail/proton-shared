@@ -164,7 +164,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         {
                             name: c('Shortcut name').t`Select / unselect all`,
-                            keys: 'Shift + X',
+                            keys: `${META_KEY} + A`,
                         },
                     ],
                 },
