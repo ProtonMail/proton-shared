@@ -8,7 +8,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
 
     switch (app) {
         case APPS.PROTONMAIL:
-        case APPS.PROTONMAIL_SETTINGS:
             return [
                 {
                     name: c('Shortcut section name').t`Basic navigation`,
