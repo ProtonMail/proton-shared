@@ -90,6 +90,7 @@ export const createReplyIcs = ({
         'dtend',
         'sequence',
         'recurrence-id',
+        'exdate',
         'organizer',
         'rrule',
         'location',

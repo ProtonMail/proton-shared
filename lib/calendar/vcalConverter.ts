@@ -76,6 +76,8 @@ export const propertyToUTCDate = (property: VcalDateOrDateTimeProperty) => {
     return toUTCDate(convertZonedDateTimeToUTC(property.value, property.parameters.tzid));
 };
 
+export const dateOrDateTimePropertyComparator = (property: VcalDateOrDateTimeProperty) => +propertyToUTCDate(property);
+
 interface GetDtendPropertyArgs {
     dtstart: VcalDateOrDateTimeProperty;
     dtend?: VcalDateOrDateTimeProperty;
