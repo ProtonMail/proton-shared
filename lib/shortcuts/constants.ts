@@ -134,7 +134,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             keys: `${META_KEY} + Shift + E`,
                         },
                         {
-                            name: c('Shortcut name').t`Delete draft`,
+                            name: c('Shortcut name').t`Discard draft`,
                             keys: `${META_KEY} + Backspace`,
                         },
                         // {
@@ -209,7 +209,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         {
                             name: c('Shortcut name').t`Move to Trash`,
-                            keys: 'Backspace',
+                            keys: 'T',
                         },
                         {
                             name: c('Shortcut name').t`Delete permanently`,
