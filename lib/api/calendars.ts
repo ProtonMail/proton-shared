@@ -1,5 +1,5 @@
 import { PaginationParams } from './interface';
-import { Calendar, CalendarEventData, CalendarSettings, CalendarUserSettings } from '../interfaces/calendar';
+import { Attendee, Calendar, CalendarEventData, CalendarSettings, CalendarUserSettings } from '../interfaces/calendar';
 
 const CALENDAR_V1 = 'calendar/v1';
 
@@ -168,6 +168,8 @@ export interface CreateCalendarEventBlobData {
     SharedKeyPacket?: string;
     SharedEventContent: Omit<CalendarEventData, 'Author'>[];
     PersonalEventContent?: Omit<CalendarEventData, 'Author'>;
+    AttendeesEventContent?: Omit<CalendarEventData, 'Author'>[];
+    Attendees?: Attendee[];
 }
 export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
     Permissions: number;
