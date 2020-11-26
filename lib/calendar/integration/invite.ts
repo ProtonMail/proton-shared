@@ -255,3 +255,14 @@ export const getInvitedEventWithAlarms = (
         components: components ? components.concat(valarmComponents) : valarmComponents,
     };
 };
+
+export const getSelfAttendeeToken = (vevent?: VcalVeventComponent, addresses: Address[] = []) => {
+    if (!vevent?.attendee) {
+        return;
+    }
+    const { selfAddress, selfAttendeeIndex } = getSelfAttendeeData(vevent.attendee, addresses);
+    if (!selfAddress || selfAttendeeIndex === undefined) {
+        return;
+    }
+    return vevent.attendee[selfAttendeeIndex].parameters?.['x-pm-token'];
+};
