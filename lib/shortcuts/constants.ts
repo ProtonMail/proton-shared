@@ -55,10 +55,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Shortcut name').t`Open this modal`,
                             keys: '?',
                         },
-                        {
-                            name: c('Shortcut name').t`Search`,
-                            keys: '/',
-                        },
                         // {
                         //     name: c('Shortcut name').t`Launch command line`,
                         //     keys: `${META_KEY} + K`,
@@ -147,6 +143,14 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                     name: c('Shortcut section name').t`List shortcuts`,
                     shortcuts: [
                         {
+                            name: c('Shortcut name').t`Open previous message`,
+                            keys: 'J',
+                        },
+                        {
+                            name: c('Shortcut name').t`Open next message`,
+                            keys: 'K',
+                        },
+                        {
                             name: c('Shortcut name').t`Show unread emails`,
                             keys: 'Shift + U',
                         },
@@ -161,6 +165,10 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         {
                             name: c('Shortcut name').t`Select / unselect all`,
                             keys: `${META_KEY} + A`,
+                        },
+                        {
+                            name: c('Shortcut name').t`Search`,
+                            keys: '/',
                         },
                     ],
                 },
