@@ -144,11 +144,11 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                     shortcuts: [
                         {
                             name: c('Shortcut name').t`Open previous message`,
-                            keys: 'J',
+                            keys: 'K',
                         },
                         {
                             name: c('Shortcut name').t`Open next message`,
-                            keys: 'K',
+                            keys: 'J',
                         },
                         {
                             name: c('Shortcut name').t`Show unread emails`,
