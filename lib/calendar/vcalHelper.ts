@@ -121,6 +121,12 @@ export const getHasAttendee = (
     return !!vevent.attendee;
 };
 
+export const getHasAttendees = (
+    vevent: VcalVeventComponent
+): vevent is VcalVeventComponent & Required<Pick<VcalVeventComponent, 'attendee'>> => {
+    return !!vevent.attendee?.length;
+};
+
 export const getAttendeeHasCn = (attendee: VcalAttendeeProperty): attendee is VcalAttendeePropertyWithCn => {
     return !!attendee.parameters?.cn;
 };
