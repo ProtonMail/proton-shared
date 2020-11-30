@@ -14,6 +14,15 @@ export const generateUID = () => {
     return `${base64String}@proton.me`;
 };
 
+export const getIsProtonUID = (uid = '') => {
+    const parts = uid.split('@');
+    if (parts.length !== 2) {
+        return false;
+    }
+    const [randomData, domain] = parts;
+    return randomData.length === 28 && domain === 'proton.me';
+};
+
 export const getDisplayTitle = (title = '') => {
     return title.trim() || c('Event title').t`(no title)`;
 };
