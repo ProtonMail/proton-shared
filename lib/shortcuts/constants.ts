@@ -1,11 +1,8 @@
 import { c } from 'ttag';
 import { APPS, APP_NAMES } from '../constants';
-import { isMac } from '../helpers/browser';
+import { metaKey } from '../helpers/browser';
 
 export const getShortcutsForApp = (app: APP_NAMES) => {
-    const IS_MAC = isMac();
-    const META_KEY = IS_MAC ? '⌘' : 'Ctrl';
-
     switch (app) {
         case APPS.PROTONMAIL:
             return [
@@ -19,7 +16,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         {
                             name: c('Shortcut name').t`Jump to first`,
-                            keys: `${META_KEY} + ↑`,
+                            keys: `${metaKey} + ↑`,
                         },
                         {
                             name: c('Shortcut name').t`Move down`,
@@ -27,7 +24,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         {
                             name: c('Shortcut name').t`Jump to last`,
-                            keys: `${META_KEY} + ↓`,
+                            keys: `${metaKey} + ↓`,
                         },
                         {
                             name: c('Shortcut name').t`Move right / expand`,
@@ -57,7 +54,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         // {
                         //     name: c('Shortcut name').t`Launch command line`,
-                        //     keys: `${META_KEY} + K`,
+                        //     keys: `${metaKey} + K`,
                         // },
                     ],
                 },
@@ -103,39 +100,39 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                     shortcuts: [
                         {
                             name: c('Shortcut name').t`Close draft`,
-                            keys: `${META_KEY} + W`,
+                            keys: `${metaKey} + W`,
                         },
                         {
                             name: c('Shortcut name').t`Minimize composer`,
-                            keys: `${META_KEY} + M`,
+                            keys: `${metaKey} + M`,
                         },
                         {
                             name: c('Shortcut name').t`Insert file`,
-                            keys: `${META_KEY} + I`,
+                            keys: `${metaKey} + I`,
                         },
                         {
                             name: c('Shortcut name').t`Save draft`,
-                            keys: `${META_KEY} + S`,
+                            keys: `${metaKey} + S`,
                         },
                         {
                             name: c('Shortcut name').t`Send email`,
-                            keys: `${META_KEY} + Enter`,
+                            keys: `${metaKey} + Enter`,
                         },
                         {
                             name: c('Shortcut name').t`Add expiration time`,
-                            keys: `${META_KEY} + Shift + X`,
+                            keys: `${metaKey} + Shift + X`,
                         },
                         {
                             name: c('Shortcut name').t`Add encryption`,
-                            keys: `${META_KEY} + Shift + E`,
+                            keys: `${metaKey} + Shift + E`,
                         },
                         {
                             name: c('Shortcut name').t`Discard draft`,
-                            keys: `${META_KEY} + Backspace`,
+                            keys: `${metaKey} + Backspace`,
                         },
                         // {
                         //     name: c('Shortcut name').t`Undo send`,
-                        //     keys: `${META_KEY} + Z`,
+                        //     keys: `${metaKey} + Z`,
                         // },
                     ],
                 },
@@ -164,7 +161,7 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         {
                             name: c('Shortcut name').t`Select / unselect all`,
-                            keys: `${META_KEY} + A`,
+                            keys: `${metaKey} + A`,
                         },
                         {
                             name: c('Shortcut name').t`Search`,
@@ -217,15 +214,15 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         },
                         {
                             name: c('Shortcut name').t`Delete permanently`,
-                            keys: `${META_KEY} + Backspace`,
+                            keys: `${metaKey} + Backspace`,
                         },
                         {
                             name: c('Shortcut name').t`Empty folder`,
-                            keys: `${META_KEY} + Shift + Backspace`,
+                            keys: `${metaKey} + Shift + Backspace`,
                         },
                         // {
                         //     name: c('Shortcut name').t`Undo action`,
-                        //     keys: `${META_KEY} + Z`,
+                        //     keys: `${metaKey} + Z`,
                         // },
                     ],
                 },
