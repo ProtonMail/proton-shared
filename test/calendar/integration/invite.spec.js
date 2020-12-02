@@ -19,6 +19,24 @@ const exampleVevent = {
     rrule: { value: { freq: 'WEEKLY', until: { year: 2020, month: 5, day: 15 } } },
     location: { value: 'asd' },
     sequence: { value: 0 },
+    attendee: [
+        {
+            value: 'emailto:name1@proton.me',
+            parameters: { cn: 'Unknown attendee 1', partstat: ICAL_ATTENDEE_STATUS.ACCEPTED },
+        },
+        {
+            value: 'emailto:name2@example.com',
+            parameters: { cn: 'Unknown attendee 2', partstat: ICAL_ATTENDEE_STATUS.TENTATIVE },
+        },
+        {
+            value: 'emailto:name3@example.com',
+            parameters: { cn: 'Unknown attendee 3', partstat: ICAL_ATTENDEE_STATUS.DECLINED },
+        },
+        {
+            value: 'emailto:name4@proton.me',
+            parameters: { cn: 'Unknown attendee 4', partstat: ICAL_ATTENDEE_STATUS.NEEDS_ACTION },
+        },
+    ],
 };
 
 describe('createInviteIcs for REPLY method', () => {
@@ -26,8 +44,7 @@ describe('createInviteIcs for REPLY method', () => {
         const params = {
             method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
-            emailTo: 'uid@proton.me',
-            partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
+            attendeesTo: [{ value: 'mailto:name@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.ACCEPTED } }],
             vevent: exampleVevent,
             keepDtstamp: true,
         };
@@ -45,7 +62,7 @@ SEQUENCE:0
 RRULE:FREQ=WEEKLY;UNTIL=20200515
 LOCATION:asd
 DTSTAMP:20200901T120000Z
-ATTENDEE;PARTSTAT=ACCEPTED:uid@proton.me
+ATTENDEE;PARTSTAT=ACCEPTED:mailto:name@proton.me
 END:VEVENT
 END:VCALENDAR`;
         expect(ics).toEqual(toCRLF(expected));
@@ -55,8 +72,7 @@ END:VCALENDAR`;
         const params = {
             method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
-            emailTo: 'uid@proton.me',
-            partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
+            attendeesTo: [{ value: 'mailto:name@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.TENTATIVE } }],
             vevent: {
                 ...exampleVevent,
                 summary: { value: '' },
@@ -78,7 +94,7 @@ RRULE:FREQ=WEEKLY;UNTIL=20200515
 LOCATION:asd
 SUMMARY:
 DTSTAMP:20200901T120000Z
-ATTENDEE;PARTSTAT=ACCEPTED:uid@proton.me
+ATTENDEE;PARTSTAT=TENTATIVE:mailto:name@proton.me
 END:VEVENT
 END:VCALENDAR`;
         expect(ics).toEqual(toCRLF(expected));
@@ -88,8 +104,7 @@ END:VCALENDAR`;
         const params = {
             method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
-            emailTo: 'uid@proton.me',
-            partstat: ICAL_ATTENDEE_STATUS.ACCEPTED,
+            attendeesTo: [{ value: 'mailto:name@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.DECLINED } }],
             vevent: {
                 ...exampleVevent,
                 'recurrence-id': {
@@ -115,7 +130,45 @@ RRULE:FREQ=WEEKLY;UNTIL=20200515
 LOCATION:asd
 SUMMARY:dcf
 DTSTAMP:20200901T120000Z
-ATTENDEE;PARTSTAT=ACCEPTED:uid@proton.me
+ATTENDEE;PARTSTAT=DECLINED:mailto:name@proton.me
+END:VEVENT
+END:VCALENDAR`;
+        expect(ics).toEqual(toCRLF(expected));
+    });
+});
+
+describe('createInviteIcs for CANCEL method', () => {
+    it('should create the correct ics', () => {
+        const params = {
+            method: ICAL_METHOD.CANCEL,
+            prodId: 'Proton Calendar',
+            attendeesTo: [
+                { value: 'mailto:attendee1@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.ACCEPTED } },
+                { value: 'mailto:attendee2@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.TENTATIVE } },
+                { value: 'mailto:attendee3@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.DECLINED } },
+                { value: 'mailto:attendee4@proton.me', parameters: { partstat: ICAL_ATTENDEE_STATUS.NEEDS_ACTION } },
+            ],
+            vevent: exampleVevent,
+            keepDtstamp: true,
+        };
+        const ics = createInviteIcs(params);
+        const expected = `BEGIN:VCALENDAR
+PRODID:Proton Calendar
+VERSION:2.0
+METHOD:CANCEL
+CALSCALE:GREGORIAN
+BEGIN:VEVENT
+UID:test-event
+DTSTART;TZID=Europe/Zurich:20200312T083000
+DTEND;TZID=Europe/Zurich:20200312T093000
+SEQUENCE:0
+RRULE:FREQ=WEEKLY;UNTIL=20200515
+LOCATION:asd
+DTSTAMP:20200901T120000Z
+ATTENDEE:mailto:attendee1@proton.me
+ATTENDEE:mailto:attendee2@proton.me
+ATTENDEE:mailto:attendee3@proton.me
+ATTENDEE:mailto:attendee4@proton.me
 END:VEVENT
 END:VCALENDAR`;
         expect(ics).toEqual(toCRLF(expected));
