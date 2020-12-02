@@ -90,14 +90,13 @@ export const getParticipant = (
 
 interface CreateInviteVeventParams {
     method: ICAL_METHOD;
-    emailTo?: string;
-    partstat?: ICAL_ATTENDEE_STATUS;
+    attendeesTo?: VcalAttendeeProperty[];
     vevent: VcalVeventComponent;
     keepDtstamp?: boolean;
 }
 
-export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtstamp }: CreateInviteVeventParams) => {
-    if (method === ICAL_METHOD.REPLY && emailTo) {
+export const createInviteVevent = ({ method, attendeesTo, vevent, keepDtstamp }: CreateInviteVeventParams) => {
+    if ([ICAL_METHOD.REPLY, ICAL_METHOD.CANCEL].includes(method) && attendeesTo?.length) {
         // only put RFC-mandatory fields to make reply as short as possible
         // rrule, summary and location are also included for a better UI in the external provider widget
         const propertiesToKeep: (keyof VcalVeventComponent)[] = [
@@ -115,18 +114,23 @@ export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtst
         if (keepDtstamp) {
             propertiesToKeep.push('dtstamp');
         }
-        if (!partstat) {
-            throw new Error('Cannot reply without participant status');
-        }
+        const attendee = attendeesTo.map(({ value, parameters }) => {
+            const { partstat } = parameters || {};
+            if (method === ICAL_METHOD.REPLY) {
+                if (!partstat) {
+                    throw new Error('Cannot reply without participant status');
+                }
+                return {
+                    value,
+                    parameters: { partstat },
+                };
+            }
+            return { value };
+        });
         return withDtstamp({
             ...pick(vevent, propertiesToKeep),
             component: 'vevent',
-            attendee: [
-                {
-                    value: emailTo,
-                    parameters: { partstat },
-                },
-            ],
+            attendee,
         });
     }
     if (method === ICAL_METHOD.REQUEST) {
@@ -145,9 +149,8 @@ export const createInviteVevent = ({ method, emailTo, partstat, vevent, keepDtst
 interface CreateInviteIcsParams {
     method: ICAL_METHOD;
     prodId: string;
-    emailTo?: string;
-    partstat?: ICAL_ATTENDEE_STATUS;
     vevent: VcalVeventComponent;
+    attendeesTo?: VcalAttendeeProperty[];
     vtimezones?: VcalVtimezoneComponent[];
     keepDtstamp?: boolean;
 }
@@ -155,14 +158,13 @@ interface CreateInviteIcsParams {
 export const createInviteIcs = ({
     method,
     prodId,
-    emailTo,
-    partstat,
+    attendeesTo,
     vevent,
     vtimezones,
     keepDtstamp,
 }: CreateInviteIcsParams): string => {
     // use current time as dtstamp
-    const inviteVevent = createInviteVevent({ method, vevent, emailTo, partstat, keepDtstamp });
+    const inviteVevent = createInviteVevent({ method, vevent, attendeesTo, keepDtstamp });
     if (!inviteVevent) {
         throw new Error('Invite vevent failed to be created');
     }
@@ -356,15 +358,21 @@ export const generateVtimezonesComponents = async (
 };
 
 export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComponent, isCreateEvent?: boolean) => {
-    if (method === ICAL_METHOD.REQUEST) {
+    if ([ICAL_METHOD.REQUEST, ICAL_METHOD.CANCEL].includes(method)) {
         const { dtstart, dtend } = vevent;
         const { isAllDay, isSingleAllDay } = getAllDayInfo(dtstart, dtend);
         if (isAllDay) {
             const formattedStartDate = formatUTC(toUTCDate(dtstart.value), 'PP', { locale: dateLocale });
             if (isSingleAllDay) {
+                if (method === ICAL_METHOD.CANCEL) {
+                    return c('Email subject').t`Cancellation of an event on ${formattedStartDate}`;
+                }
                 return isCreateEvent
                     ? c('Email subject').t`Invitation for an event on ${formattedStartDate}`
                     : c('Email subject').t`Update for an event on ${formattedStartDate}`;
+            }
+            if (method === ICAL_METHOD.CANCEL) {
+                return c('Email subject').t`Cancellation of an event starting on ${formattedStartDate}`;
             }
             return isCreateEvent
                 ? c('Email subject').t`Invitation for an event starting on ${formattedStartDate}`
@@ -373,6 +381,10 @@ export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComp
         const formattedStartDateTime = formatUTC(toUTCDate(vevent.dtstart.value), 'PPp', { locale: dateLocale });
         const { offset } = getTimezoneOffset(propertyToUTCDate(dtstart), getPropertyTzid(dtstart) || 'UTC');
         const formattedOffset = `GMT${formatTimezoneOffset(offset)}`;
+        if (method === ICAL_METHOD.CANCEL) {
+            return c('Email subject')
+                .t`Cancellation of an event starting on ${formattedStartDateTime} (${formattedOffset})`;
+        }
         return isCreateEvent
             ? c('Email subject').t`Invitation for an event starting on ${formattedStartDateTime} (${formattedOffset})`
             : c('Email subject').t`Update for an event starting on ${formattedStartDateTime} (${formattedOffset})`;
