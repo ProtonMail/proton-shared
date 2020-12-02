@@ -1,8 +1,8 @@
 import { ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from '../../calendar/constants';
-import { CachedKey } from '../CachedKey';
 import { Calendar, CalendarSettings } from './Calendar';
 import { CalendarEvent } from './Event';
 import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from './VcalModel';
+import { DecryptedKey } from '../Key';
 
 export interface PartstatActions {
     accept: () => Promise<void>;
@@ -17,8 +17,8 @@ export interface CalendarWidgetData {
     isCalendarDisabled: boolean;
     calendarNeedsUserAction: boolean;
     memberID?: string;
-    addressKeys?: CachedKey[];
-    calendarKeys?: CachedKey[];
+    addressKeys?: DecryptedKey[];
+    calendarKeys?: DecryptedKey[];
     calendarSettings?: CalendarSettings;
 }
 

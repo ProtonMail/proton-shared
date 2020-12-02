@@ -1,6 +1,7 @@
 import { decryptPrivateKey, generateKey } from 'pmcrypto';
 import { upgradeV2KeysHelper } from '../../lib/keys/upgradeKeysV2';
 import { Modulus } from '../authentication/login.data';
+import { User as tsUser, Address as tsAddress } from '../../lib/interfaces';
 
 const DEFAULT_EMAIL = 'test@test.com';
 const DEFAULT_KEYPASSWORD = '1';
@@ -37,7 +38,7 @@ describe('upgrade keys v2', () => {
                         Version: 2,
                     },
                 ],
-            };
+            } as tsUser;
             const Addresses = [
                 {
                     Email: 'test@test.com',
@@ -64,37 +65,40 @@ describe('upgrade keys v2', () => {
                         },
                     ],
                 },
-            ];
+            ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
             const newKeyPassword = await upgradeV2KeysHelper({
-                User,
-                Addresses,
+                user: User,
+                addresses: Addresses,
                 loginPassword: keyPassword,
                 keyPassword,
                 clearKeyPassword: keyPassword,
                 isOnePasswordMode: true,
                 api,
             });
+            if (!newKeyPassword) {
+                throw new Error('Missing new password');
+            }
             expect(api.calls.all().length).toBe(2);
             const newKeysArgs = api.calls.all()[1].args[0];
             const decryptedKeys = await Promise.all(
-                newKeysArgs.data.Keys.map(({ PrivateKey }) => {
+                newKeysArgs.data.Keys.map(({ PrivateKey }: any) => {
                     return decryptPrivateKey(PrivateKey, newKeyPassword);
                 })
             );
-            expect(decryptedKeys.every((key) => key.isDecrypted())).toBe(true);
-            expect(decryptedKeys.length).toBe(5);
+            expect(decryptedKeys.every((key: any) => key.isDecrypted())).toBe(true);
+            expect(decryptedKeys.length).toBe(5 as any);
             expect(newKeysArgs.data.Keys[0].PrivateKey);
             expect(newKeysArgs).toEqual({
                 url: 'keys/private/upgrade',
                 method: 'post',
                 data: jasmine.objectContaining({
-                    KeySalt: 'AAECAwQFBgcICQoLDA0ODw==',
+                    KeySalt: jasmine.any(String),
                     Auth: jasmine.any(Object),
                     Keys: jasmine.any(Array),
                 }),
             });
-            expect(newKeyPassword).toBe('RDn2zC9IHLTbaTSx5g2YPujCkT59mqW');
+            expect(newKeyPassword).toEqual(jasmine.any(String));
         });
 
         it('should upgrade v2 keys in two password mode', async () => {
@@ -118,7 +122,7 @@ describe('upgrade keys v2', () => {
                         Version: 2,
                     },
                 ],
-            };
+            } as tsUser;
             const Addresses = [
                 {
                     Email: 'test@test.com',
@@ -135,11 +139,11 @@ describe('upgrade keys v2', () => {
                         },
                     ],
                 },
-            ];
+            ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
             const newKeyPassword = await upgradeV2KeysHelper({
-                User,
-                Addresses,
+                user: User,
+                addresses: Addresses,
                 loginPassword: '123',
                 keyPassword,
                 clearKeyPassword: keyPassword,
@@ -147,24 +151,27 @@ describe('upgrade keys v2', () => {
                 api,
             });
             expect(api.calls.all().length).toBe(1);
+            if (!newKeyPassword) {
+                throw new Error('Missing password');
+            }
             const newKeysArgs = api.calls.all()[0].args[0];
             const decryptedKeys = await Promise.all(
-                newKeysArgs.data.Keys.map(({ PrivateKey }) => {
+                newKeysArgs.data.Keys.map(({ PrivateKey }: any) => {
                     return decryptPrivateKey(PrivateKey, newKeyPassword);
                 })
             );
-            expect(decryptedKeys.length).toBe(4);
-            expect(decryptedKeys.every((key) => key.isDecrypted())).toBe(true);
+            expect(decryptedKeys.length).toBe(4 as any);
+            expect(decryptedKeys.every((key: any) => key.isDecrypted())).toBe(true);
             expect(newKeysArgs.data.Keys[0].PrivateKey);
             expect(newKeysArgs).toEqual({
                 url: 'keys/private/upgrade',
                 method: 'post',
                 data: jasmine.objectContaining({
-                    KeySalt: 'AAECAwQFBgcICQoLDA0ODw==',
+                    KeySalt: jasmine.any(String),
                     Keys: jasmine.any(Array),
                 }),
             });
-            expect(newKeyPassword).toBe('RDn2zC9IHLTbaTSx5g2YPujCkT59mqW');
+            expect(newKeyPassword).toEqual(jasmine.any(String));
         });
 
         it('should upgrade v2 and v3 keys mixed', async () => {
@@ -188,7 +195,7 @@ describe('upgrade keys v2', () => {
                         Version: 2,
                     },
                 ],
-            };
+            } as tsUser;
             const Addresses = [
                 {
                     Email: 'test@test.com',
@@ -205,36 +212,39 @@ describe('upgrade keys v2', () => {
                         },
                     ],
                 },
-            ];
+            ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
             const newKeyPassword = await upgradeV2KeysHelper({
-                User,
-                Addresses,
+                user: User,
+                addresses: Addresses,
                 loginPassword: '123',
                 keyPassword,
                 clearKeyPassword: keyPassword,
                 isOnePasswordMode: false,
                 api,
             });
+            if (!newKeyPassword) {
+                throw new Error('Missing password');
+            }
             expect(api.calls.all().length).toBe(1);
             const newKeysArgs = api.calls.all()[0].args[0];
             const decryptedKeys = await Promise.all(
-                newKeysArgs.data.Keys.map(({ PrivateKey }) => {
+                newKeysArgs.data.Keys.map(({ PrivateKey }: any) => {
                     return decryptPrivateKey(PrivateKey, newKeyPassword);
                 })
             );
-            expect(decryptedKeys.length).toBe(4);
-            expect(decryptedKeys.every((key) => key.isDecrypted())).toBe(true);
+            expect(decryptedKeys.length).toBe(4 as any);
+            expect(decryptedKeys.every((key: any) => key.isDecrypted())).toBe(true);
             expect(newKeysArgs.data.Keys[0].PrivateKey);
             expect(newKeysArgs).toEqual({
                 url: 'keys/private/upgrade',
                 method: 'post',
                 data: jasmine.objectContaining({
-                    KeySalt: 'AAECAwQFBgcICQoLDA0ODw==',
+                    KeySalt: jasmine.any(String),
                     Keys: jasmine.any(Array),
                 }),
             });
-            expect(newKeyPassword).toBe('RDn2zC9IHLTbaTSx5g2YPujCkT59mqW');
+            expect(newKeyPassword).toEqual(jasmine.any(String));
         });
     });
 
@@ -255,7 +265,7 @@ describe('upgrade keys v2', () => {
                         Version: 3,
                     },
                 ],
-            };
+            } as tsUser;
             const Addresses = [
                 {
                     Email: email,
@@ -272,11 +282,11 @@ describe('upgrade keys v2', () => {
                         },
                     ],
                 },
-            ];
+            ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
             const newKeyPassword = await upgradeV2KeysHelper({
-                User,
-                Addresses,
+                user: User,
+                addresses: Addresses,
                 loginPassword: keyPassword,
                 keyPassword,
                 clearKeyPassword: keyPassword,
@@ -299,7 +309,7 @@ describe('upgrade keys v2', () => {
                         Version: 3,
                     },
                 ],
-            };
+            } as tsUser;
             const Addresses = [
                 {
                     Email: email,
@@ -316,11 +326,11 @@ describe('upgrade keys v2', () => {
                         },
                     ],
                 },
-            ];
+            ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
             const newKeyPassword = await upgradeV2KeysHelper({
-                User,
-                Addresses,
+                user: User,
+                addresses: Addresses,
                 loginPassword: keyPassword,
                 keyPassword,
                 clearKeyPassword: keyPassword,

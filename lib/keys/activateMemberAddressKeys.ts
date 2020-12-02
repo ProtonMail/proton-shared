@@ -1,9 +1,9 @@
 import { encryptPrivateKey } from 'pmcrypto';
-import { Address, Api, CachedKey, UserModel as tsUserModel } from '../interfaces';
+import { Address, Api, DecryptedKey, UserModel as tsUserModel } from '../interfaces';
 import { MEMBER_PRIVATE } from '../constants';
-import getActionableKeysList from './getActionableKeysList';
-import getSignedKeyList from './getSignedKeyList';
+import { getSignedKeyList } from './signedKeyList';
 import { activateKeyRoute } from '../api/keys';
+import { getActiveKeys } from './getActiveKeys';
 
 export const getAddressesWithKeysToActivate = (user: tsUserModel, addresses: Address[]) => {
     // If signed in as subuser, or not a readable member
@@ -16,35 +16,29 @@ export const getAddressesWithKeysToActivate = (user: tsUserModel, addresses: Add
 };
 
 interface Args {
-    addressKeys: CachedKey[];
+    address: Address;
+    addressKeys: DecryptedKey[];
     keyPassword: string;
     api: Api;
 }
-export const activateMemberAddressKeys = async ({ addressKeys, keyPassword, api }: Args) => {
+
+export const activateMemberAddressKeys = async ({ address, addressKeys, keyPassword, api }: Args) => {
     if (!addressKeys.length) {
         return;
     }
     if (!keyPassword) {
         throw new Error('Password required to generate keys');
     }
-    const primaryPrivateKey = addressKeys[0].privateKey;
-    if (!primaryPrivateKey) {
-        // Should never happen in the initialization case, since these keys are decrypted with the activation token.
-        return;
-    }
-    const actionableAddressKeys = await getActionableKeysList(addressKeys);
+    const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, addressKeys);
     for (const addressKey of addressKeys) {
-        const {
-            Key: { ID: KeyID, Activation },
-            privateKey,
-        } = addressKey;
-        if (!Activation || !privateKey) {
-            // eslint-disable-next-line no-continue
-            return;
+        const { ID, privateKey } = addressKey;
+        const Key = address.Keys.find(({ ID: otherID }) => otherID === ID);
+        if (!Key?.Activation || !privateKey) {
+            continue;
         }
         const encryptedPrivateKey = await encryptPrivateKey(privateKey, keyPassword);
-        const SignedKeyList = await getSignedKeyList(actionableAddressKeys, primaryPrivateKey);
+        const SignedKeyList = await getSignedKeyList(activeKeys);
 
-        await api(activateKeyRoute({ ID: KeyID, PrivateKey: encryptedPrivateKey, SignedKeyList }));
+        await api(activateKeyRoute({ ID, PrivateKey: encryptedPrivateKey, SignedKeyList }));
     }
 };

@@ -1,60 +1,57 @@
-import { decryptPrivateKey } from 'pmcrypto';
+import { decryptPrivateKey, OpenPGPKey } from 'pmcrypto';
 
+import isTruthy from '../helpers/isTruthy';
 import { noop } from '../helpers/function';
-import { CachedKey, Key as tsKey } from '../interfaces';
+import { DecryptedKey, Key as tsKey, User } from '../interfaces';
 import { decryptMemberToken } from './memberToken';
 
+const getUserKeyPassword = ({ Token }: tsKey, keyPassword: string, organizationKey?: OpenPGPKey) => {
+    if (Token && organizationKey) {
+        return decryptMemberToken(Token, organizationKey);
+    }
+    return keyPassword;
+};
+
+const getDecryptedUserKey = async (Key: tsKey, keyPassword: string, organizationKey?: OpenPGPKey) => {
+    try {
+        const { ID, PrivateKey } = Key;
+        const userKeyPassword = await getUserKeyPassword(Key, keyPassword, organizationKey);
+        const privateKey = await decryptPrivateKey(PrivateKey, userKeyPassword);
+        return {
+            ID,
+            privateKey,
+            publicKey: privateKey.toPublic(),
+        };
+    } catch (e) {
+        return undefined;
+    }
+};
+
 interface Args {
+    user: User;
     userKeys: tsKey[];
-    OrganizationPrivateKey?: string;
     keyPassword: string;
 }
 
-export const getDecryptedUserKeys = async ({
-    userKeys,
-    OrganizationPrivateKey,
-    keyPassword,
-}: Args): Promise<CachedKey[]> => {
+export const getDecryptedUserKeys = async ({ user, userKeys, keyPassword }: Args): Promise<DecryptedKey[]> => {
     if (userKeys.length === 0) {
         return [];
     }
+
+    const { OrganizationPrivateKey } = user;
 
     const organizationKey = OrganizationPrivateKey
         ? await decryptPrivateKey(OrganizationPrivateKey, keyPassword).catch(noop)
         : undefined;
 
-    const getKeyPasssword = ({ Token }: tsKey) => {
-        if (Token && organizationKey) {
-            return decryptMemberToken(Token, organizationKey);
-        }
-        return keyPassword;
-    };
-
-    const process = async (Key: tsKey) => {
-        try {
-            const { PrivateKey } = Key;
-            const keyPassword = await getKeyPasssword(Key);
-            const privateKey = await decryptPrivateKey(PrivateKey, keyPassword);
-            return {
-                Key,
-                privateKey,
-                publicKey: privateKey.toPublic(),
-            };
-        } catch (e) {
-            return {
-                Key,
-                error: e,
-            };
-        }
-    };
-
     const [primaryKey, ...restKeys] = userKeys;
-    const primaryKeyResult = await process(primaryKey);
-
-    // In case the primary key fails to decrypt, something is broken, so don't even try to decrypt the rest of the keys.
-    if (primaryKeyResult.error) {
-        return [primaryKeyResult, ...restKeys.map((Key) => ({ Key, error: primaryKeyResult.error }))];
+    const primaryKeyResult = await getDecryptedUserKey(primaryKey, keyPassword, organizationKey);
+    if (!primaryKeyResult) {
+        return [];
     }
-    const restKeysResult = await Promise.all(restKeys.map(process));
-    return [primaryKeyResult, ...restKeysResult];
+
+    const restKeysResult = await Promise.all(
+        restKeys.map((restKey) => getDecryptedUserKey(restKey, keyPassword, organizationKey))
+    );
+    return [primaryKeyResult, ...restKeysResult].filter(isTruthy);
 };

@@ -1,7 +1,7 @@
 import { encryptMessage, encryptPrivateKey, generateKey, OpenPGPKey, reformatKey } from 'pmcrypto';
 import { computeKeyPassword, generateKeySalt } from 'pm-srp';
 
-import { generateAddressKey } from './keys';
+import { generateAddressKey } from './addressKeys';
 import { decryptMemberToken, encryptMemberToken, generateMemberToken } from './memberToken';
 import { Member, EncryptionConfig, Address } from '../interfaces';
 

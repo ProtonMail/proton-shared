@@ -3,22 +3,24 @@ import { computeKeyPassword, generateKeySalt } from 'pm-srp';
 import {
     Address as tsAddress,
     Api,
-    CachedKey,
     Key as tsKey,
     User as tsUser,
     OrganizationKey as tsOrganizationKey,
     CachedOrganizationKey,
+    DecryptedKey,
 } from '../interfaces';
-import { getOldUserIDEmailHelper, reformatAddressKey } from './keys';
+import { getOrganizationKeys } from '../api/organization';
+import { USER_ROLES } from '../constants';
 import { srpVerify } from '../srp';
+import { getOldUserIDEmailHelper } from './keys';
+import { reformatAddressKey } from './addressKeys';
+import { getDecryptedOrganizationKey } from './getDecryptedOrganizationKey';
+import { reformatOrganizationKey } from './organizationKeys';
 import { upgradeKeysRoute } from '../api/keys';
 import { getDecryptedUserKeys } from './getDecryptedUserKeys';
 import { getDecryptedAddressKeys } from './getDecryptedAddressKeys';
 import isTruthy from '../helpers/isTruthy';
-import { getOrganizationKeys } from '../api/organization';
-import { USER_ROLES } from '../constants';
-import { getDecryptedOrganizationKey } from './getDecryptedOrganizationKey';
-import { reformatOrganizationKey } from './organizationKeys';
+import { getPrimaryKey } from './getPrimaryKey';
 
 export const getV2KeyToUpgrade = (Key: tsKey) => {
     return Key.Version < 3;
@@ -38,9 +40,9 @@ export const getHasV2KeysToUpgrade = (User: tsUser, Addresses: tsAddress[]) => {
     );
 };
 
-const getReformattedKeys = (keys: CachedKey[], email: string, passphrase: string) => {
+const getReformattedKeys = (keys: DecryptedKey[], email: string, passphrase: string) => {
     return Promise.all(
-        keys.map(async ({ privateKey, Key }) => {
+        keys.map(async ({ privateKey, ID }) => {
             if (!privateKey) {
                 return;
             }
@@ -50,41 +52,41 @@ const getReformattedKeys = (keys: CachedKey[], email: string, passphrase: string
                 privateKey,
             });
             return {
-                ID: Key.ID,
+                ID,
                 PrivateKey: privateKeyArmored,
             };
         })
     );
 };
 
-const getReformattedUserKeys = async (userKeys: CachedKey[], newPassword: string) => {
+const getReformattedUserKeys = async (userKeys: DecryptedKey[], newPassword: string) => {
     if (!userKeys || !userKeys.length) {
         return [];
     }
-    const primaryKey = userKeys[0].privateKey;
-    if (!primaryKey) {
+    const primaryPrivateKey = getPrimaryKey(userKeys)?.privateKey;
+    if (!primaryPrivateKey) {
         return [];
     }
-    const emailToUse = getOldUserIDEmailHelper(primaryKey);
+    const emailToUse = getOldUserIDEmailHelper(primaryPrivateKey);
     return getReformattedKeys(userKeys, emailToUse, newPassword);
 };
 
 interface UpgradeKeysArgs {
-    User: tsUser;
+    user: tsUser;
     loginPassword: string;
     clearKeyPassword: string;
     api: Api;
     isOnePasswordMode?: boolean;
-    userKeys: CachedKey[];
+    userKeys: DecryptedKey[];
     organizationKey?: CachedOrganizationKey;
     addressesKeys: {
-        Address: tsAddress;
-        keys: CachedKey[];
+        address: tsAddress;
+        keys: DecryptedKey[];
     }[];
 }
 
 export const upgradeV2Keys = async ({
-    User,
+    user,
     userKeys,
     addressesKeys,
     organizationKey,
@@ -97,16 +99,18 @@ export const upgradeV2Keys = async ({
         throw new Error('Password required');
     }
     // Not allowed signed into member
-    if (User.OrganizationPrivateKey) {
+    if (user.OrganizationPrivateKey) {
         return;
     }
 
-    const hasDecryptedUserKeysToUpgrade = userKeys.some(({ privateKey, Key }) => {
-        return privateKey && getV2KeyToUpgrade(Key);
+    const hasDecryptedUserKeysToUpgrade = userKeys.some(({ privateKey, ID }) => {
+        const Key = user.Keys.find(({ ID: KeyID }) => KeyID === ID);
+        return Key && privateKey && getV2KeyToUpgrade(Key);
     });
-    const hasDecryptedAddressKeyToUpgrade = addressesKeys.some(({ keys }) => {
-        return keys.some(({ privateKey, Key }) => {
-            return privateKey && getV2KeyToUpgrade(Key);
+    const hasDecryptedAddressKeyToUpgrade = addressesKeys.some(({ address, keys }) => {
+        return keys.some(({ privateKey, ID }) => {
+            const Key = address.Keys.find(({ ID: KeyID }) => KeyID === ID);
+            return Key && privateKey && getV2KeyToUpgrade(Key);
         });
     });
 
@@ -120,8 +124,8 @@ export const upgradeV2Keys = async ({
     const [reformattedUserKeys, reformattedAddressesKeys, reformattedOrganizationKey] = await Promise.all([
         getReformattedUserKeys(userKeys, newKeyPassword),
         Promise.all(
-            addressesKeys.map(async ({ Address, keys }) => {
-                return getReformattedKeys(keys, Address.Email, newKeyPassword);
+            addressesKeys.map(async ({ address, keys }) => {
+                return getReformattedKeys(keys, address.Email, newKeyPassword);
             })
         ),
         organizationKey?.privateKey ? reformatOrganizationKey(organizationKey.privateKey, newKeyPassword) : undefined,
@@ -153,8 +157,8 @@ export const upgradeV2Keys = async ({
 };
 
 interface Args {
-    Addresses: tsAddress[];
-    User: tsUser;
+    addresses: tsAddress[];
+    user: tsUser;
     loginPassword: string;
     clearKeyPassword: string;
     keyPassword: string;
@@ -163,23 +167,25 @@ interface Args {
 }
 
 export const upgradeV2KeysHelper = async ({
-    User,
-    Addresses,
+    user,
+    addresses,
     loginPassword,
     clearKeyPassword,
     keyPassword,
     isOnePasswordMode,
     api,
 }: Args) => {
-    const userKeys = await getDecryptedUserKeys({ userKeys: User.Keys, keyPassword });
+    const userKeys = await getDecryptedUserKeys({ user, userKeys: user.Keys, keyPassword });
 
     const addressesKeys = await Promise.all(
-        Addresses.map(async (Address) => {
+        addresses.map(async (address) => {
             return {
-                Address,
+                address,
                 keys: await getDecryptedAddressKeys({
+                    user,
                     userKeys,
-                    addressKeys: Address.Keys,
+                    address,
+                    addressKeys: address.Keys,
                     keyPassword,
                 }),
             };
@@ -187,14 +193,14 @@ export const upgradeV2KeysHelper = async ({
     );
 
     const organizationKey =
-        User.Role === USER_ROLES.ADMIN_ROLE
+        user.Role === USER_ROLES.ADMIN_ROLE
             ? await api<tsOrganizationKey>(getOrganizationKeys()).then((Key) => {
                   return getDecryptedOrganizationKey({ keyPassword, Key });
               })
             : undefined;
 
     return upgradeV2Keys({
-        User,
+        user,
         userKeys,
         addressesKeys,
         organizationKey,

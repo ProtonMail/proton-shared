@@ -1,7 +1,8 @@
-import { Address, Api, UserModel as tsUserModel } from '../interfaces';
-import { ADDRESS_STATUS, DEFAULT_ENCRYPTION_CONFIG, ENCRYPTION_CONFIGS, MEMBER_PRIVATE } from '../constants';
-import { generateAddressKey } from './keys';
-import createAddressKeyHelper from './createAddressKeyHelper';
+import { Address, Api, DecryptedKey, UserModel as tsUserModel } from '../interfaces';
+import { ADDRESS_STATUS, MEMBER_PRIVATE } from '../constants';
+import { createAddressKeyLegacy, createAddressKeyV2 } from './add';
+import { getHasMigratedAddressKeys } from './keyMigration';
+import { getPrimaryKey } from './getPrimaryKey';
 
 export const getAddressesWithKeysToGenerate = (user: tsUserModel, addresses: Address[]) => {
     // If signed in as subuser, or not a private user
@@ -14,30 +15,50 @@ export const getAddressesWithKeysToGenerate = (user: tsUserModel, addresses: Add
     });
 };
 
-interface Args {
-    address: Address;
-    keyPassword: string;
+interface GenerateAllPrivateMemberKeys {
+    addresses: Address[];
+    addressesToGenerate: Address[];
+    userKeys: DecryptedKey[];
     api: Api;
+    keyPassword: string;
 }
 
-export const generatePrivateMemberKeys = async ({ address, keyPassword, api }: Args) => {
+export const generateAllPrivateMemberKeys = async ({
+    addresses,
+    addressesToGenerate,
+    userKeys,
+    keyPassword,
+    api,
+}: GenerateAllPrivateMemberKeys) => {
     if (!keyPassword) {
         throw new Error('Password required to generate keys');
     }
 
-    const { privateKey, privateKeyArmored } = await generateAddressKey({
-        email: address.Email,
-        passphrase: keyPassword,
-        encryptionConfig: ENCRYPTION_CONFIGS[DEFAULT_ENCRYPTION_CONFIG],
-    });
+    if (getHasMigratedAddressKeys(addresses)) {
+        const primaryUserKey = getPrimaryKey(userKeys)?.privateKey;
+        if (!primaryUserKey) {
+            throw new Error('Missing primary user key');
+        }
+        return Promise.all(
+            addressesToGenerate.map((address) => {
+                return createAddressKeyV2({
+                    api,
+                    userKey: primaryUserKey,
+                    address,
+                    activeKeys: [],
+                });
+            })
+        );
+    }
 
-    await createAddressKeyHelper({
-        api,
-        privateKeyArmored,
-        privateKey,
-        Address: address,
-        parsedKeys: [],
-        actionableKeys: [],
-        signingKey: privateKey,
-    });
+    return Promise.all(
+        addressesToGenerate.map((address) => {
+            return createAddressKeyLegacy({
+                api,
+                address,
+                passphrase: keyPassword,
+                activeKeys: [],
+            });
+        })
+    );
 };
