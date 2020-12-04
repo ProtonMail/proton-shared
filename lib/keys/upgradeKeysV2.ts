@@ -59,15 +59,10 @@ const getReformattedKeys = (keys: DecryptedKey[], email: string, passphrase: str
     );
 };
 
-const getReformattedAddressKeysV2 = (
-    keys: DecryptedKey[],
-    email: string,
-    userKey: OpenPGPKey,
-    organizationKey?: OpenPGPKey
-) => {
+const getReformattedAddressKeysV2 = (keys: DecryptedKey[], email: string, userKey: OpenPGPKey) => {
     return Promise.all(
         keys.map(async ({ privateKey, ID }) => {
-            const { token, encryptedToken, signature } = await generateAddressKeyTokens(userKey, organizationKey);
+            const { token, encryptedToken, signature } = await generateAddressKeyTokens(userKey);
             const { privateKey: reformattedPrivateKey, privateKeyArmored } = await reformatAddressKey({
                 email,
                 passphrase: token,
