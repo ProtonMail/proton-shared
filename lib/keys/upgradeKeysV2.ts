@@ -12,7 +12,7 @@ import {
     SignedKeyList,
 } from '../interfaces';
 import { getOrganizationKeys } from '../api/organization';
-import { hasAddressKeyMigration, USER_ROLES } from '../constants';
+import { hasAddressKeyMigration as originalHasAdressKeyMigration, USER_ROLES } from '../constants';
 import { srpVerify } from '../srp';
 import { generateAddressKeyTokens, reformatAddressKey } from './addressKeys';
 import { getDecryptedOrganizationKey } from './getDecryptedOrganizationKey';
@@ -227,6 +227,7 @@ interface UpgradeV2KeysHelperArgs {
     keyPassword: string;
     api: Api;
     isOnePasswordMode?: boolean;
+    hasAddressKeyMigration?: boolean;
 }
 
 export const upgradeV2KeysHelper = async ({
@@ -237,6 +238,7 @@ export const upgradeV2KeysHelper = async ({
     keyPassword,
     isOnePasswordMode,
     api,
+    hasAddressKeyMigration = originalHasAdressKeyMigration,
 }: UpgradeV2KeysHelperArgs) => {
     const userKeys = await getDecryptedUserKeys({ user, userKeys: user.Keys, keyPassword });
 
