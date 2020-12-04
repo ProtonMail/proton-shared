@@ -181,16 +181,28 @@ export const resetKeysRoute = (data: ResetKeysPayload | ResetKeysPayloadV2) => (
     data,
 });
 
+interface UpgradeKeyPayload {
+    ID: string;
+    PrivateKey: string;
+}
+
 interface UpgradeKeysPayload {
     KeySalt: string;
-    Keys: { ID: string; PrivateKey: string }[];
+    Keys: UpgradeKeyPayload[];
     OrganizationKey?: string;
+}
+
+export interface UpgradeAddressKeyPayload {
+    ID: string;
+    PrivateKey: string;
+    Token: string;
+    Signature: string;
 }
 
 interface UpgradeKeysPayloadV2 {
     KeySalt: string;
-    UserKeys: { ID: string; PrivateKey: string }[];
-    AddressKeys: { ID: string; PrivateKey: string; Token: string; Signature: string }[];
+    UserKeys: UpgradeKeyPayload[];
+    AddressKeys: UpgradeAddressKeyPayload[];
     OrganizationKey?: string;
     SignedKeyLists: {
         [key: string]: SignedKeyList;

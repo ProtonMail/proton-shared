@@ -92,6 +92,10 @@ interface AddressKeyTokenResult {
 export function generateAddressKeyTokens(userKey: OpenPGPKey): Promise<AddressKeyTokenResult>;
 export function generateAddressKeyTokens(
     userKey: OpenPGPKey,
+    organizationKey?: OpenPGPKey | undefined
+): Promise<AddressKeyTokenResult & { organizationSignature?: string }>;
+export function generateAddressKeyTokens(
+    userKey: OpenPGPKey,
     organizationKey: OpenPGPKey
 ): Promise<AddressKeyTokenResult & { organizationSignature: string }>;
 
