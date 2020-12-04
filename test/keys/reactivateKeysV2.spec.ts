@@ -1,72 +1,25 @@
 import { OpenPGPKey } from 'pmcrypto';
 import { User as tsUser, Address as tsAddress, Key, User, DecryptedKey, Address } from '../../lib/interfaces';
 import {
-    generateAddressKey,
-    generateAddressKeyTokens,
     getHasMigratedAddressKey,
-    generateUserKey,
     getDecryptedUserKeys,
     getDecryptedAddressKeys,
     reactivateKeysProcess,
 } from '../../lib/keys';
 import { KeyReactivationData, KeyReactivationRecord } from '../../lib/keys/reactivation/interface';
+import { getAddressKey, getLegacyAddressKey, getUserKey } from './keyDataHelper';
 
 const DEFAULT_KEYPASSWORD = '1';
 
-const getUserKey = async (ID: string, keyPassword: string) => {
-    const { privateKey, privateKeyArmored } = await generateUserKey({ passphrase: keyPassword });
-    return {
-        privateKey,
-        Key: {
-            ID,
-            PrivateKey: privateKeyArmored,
-            Version: 3,
-        } as Key,
-    };
-};
-
-const getAddressKey = async (ID: string, userKey: OpenPGPKey, email: string) => {
-    const result = await generateAddressKeyTokens(userKey);
-
-    const key = await generateAddressKey({
-        email,
-        passphrase: result.token,
-    });
-
-    return {
-        privateKey: key.privateKey,
-        Key: {
-            ID,
-            PrivateKey: key.privateKeyArmored,
-            Signature: result.signature,
-            Token: result.encryptedToken,
-            Version: 3,
-        } as Key,
-    };
-};
-
-const getLegacyAddressKey = async (ID: string, password: string, email: string) => {
-    const key = await generateAddressKey({
-        email,
-        passphrase: password,
-    });
-    return {
-        privateKey: key.privateKey,
-        Key: {
-            ID,
-            PrivateKey: key.privateKeyArmored,
-            Version: 3,
-        } as Key,
-    };
-};
-
 interface FullKey {
-    privateKey: OpenPGPKey;
+    key: {
+        privateKey: OpenPGPKey;
+    };
     Key: Key;
     uploadedKey?: boolean;
 }
 
-const getKeyToReactivate = ({ privateKey, Key, uploadedKey = false }: FullKey) => {
+const getKeyToReactivate = ({ key: { privateKey }, Key, uploadedKey = false }: FullKey) => {
     if (getHasMigratedAddressKey(Key) && !uploadedKey) {
         return {
             Key,
@@ -129,11 +82,11 @@ const getSetup1 = async () => {
     const address1 = 'test@test.com';
     const userKeys = await getDecryptedUserKeys({ user: User, userKeys: UserKeys, keyPassword });
     const addressKeysFull = await Promise.all([
-        getAddressKey('a', userKeysFull[0].privateKey, address1),
-        getAddressKey('b', userKeysFull[0].privateKey, address1),
-        getAddressKey('c', userKeysFull[1].privateKey, address1),
-        getAddressKey('d', userKeysFull[1].privateKey, address1),
-        getAddressKey('e', userKeysFull[2].privateKey, address1),
+        getAddressKey('a', userKeysFull[0].key.privateKey, address1),
+        getAddressKey('b', userKeysFull[0].key.privateKey, address1),
+        getAddressKey('c', userKeysFull[1].key.privateKey, address1),
+        getAddressKey('d', userKeysFull[1].key.privateKey, address1),
+        getAddressKey('e', userKeysFull[2].key.privateKey, address1),
     ]);
     const AddressKeys = addressKeysFull.map(({ Key }) => Key);
     const Addresses = ([
@@ -164,8 +117,8 @@ const getSetup1 = async () => {
         User,
         Addresses,
         userKeys,
-        expectedUserKeysReactivated: [userKeysFull[1].privateKey],
-        expectedAddressKeysReactivated: [addressKeysFull[2].privateKey, addressKeysFull[3].privateKey],
+        expectedUserKeysReactivated: [userKeysFull[1].key.privateKey],
+        expectedAddressKeysReactivated: [addressKeysFull[2].key.privateKey, addressKeysFull[3].key.privateKey],
         keyReactivationRecords,
     };
 };
@@ -187,19 +140,19 @@ const getSetup2 = async () => {
     const address3 = 'test3@test.com';
     const userKeys = await getDecryptedUserKeys({ user: User, userKeys: UserKeys, keyPassword });
     const addressKeys1Full = await Promise.all([
-        getAddressKey('a', userKeysFull[0].privateKey, address1),
-        getAddressKey('b', userKeysFull[1].privateKey, address1),
+        getAddressKey('a', userKeysFull[0].key.privateKey, address1),
+        getAddressKey('b', userKeysFull[1].key.privateKey, address1),
     ]);
     const AddressKeys1 = addressKeys1Full.map(({ Key }) => Key);
     const addressKeys2Full = await Promise.all([
-        getAddressKey('a1', userKeysFull[0].privateKey, address2),
-        getAddressKey('b1', userKeysFull[2].privateKey, address2),
-        getAddressKey('c1', userKeysFull[2].privateKey, address2),
+        getAddressKey('a1', userKeysFull[0].key.privateKey, address2),
+        getAddressKey('b1', userKeysFull[2].key.privateKey, address2),
+        getAddressKey('c1', userKeysFull[2].key.privateKey, address2),
     ]);
     const AddressKeys2 = addressKeys2Full.map(({ Key }) => Key);
     const addressKeys3Full = await Promise.all([
-        getAddressKey('a2', userKeysFull[1].privateKey, address3),
-        getAddressKey('b2', userKeysFull[1].privateKey, address3),
+        getAddressKey('a2', userKeysFull[1].key.privateKey, address3),
+        getAddressKey('b2', userKeysFull[1].key.privateKey, address3),
         getLegacyAddressKey('c2', oldKeyPassword, address3),
     ]);
     const AddressKeys3 = addressKeys3Full.map(({ Key }) => Key);
@@ -251,9 +204,9 @@ const getSetup2 = async () => {
         Addresses,
         userKeys,
         expectedAddressKeysReactivated: [
-            addressKeys1Full[1].privateKey,
-            addressKeys3Full[0].privateKey,
-            addressKeys3Full[1].privateKey,
+            addressKeys1Full[1].key.privateKey,
+            addressKeys3Full[0].key.privateKey,
+            addressKeys3Full[1].key.privateKey,
         ],
         keyReactivationRecords,
     };

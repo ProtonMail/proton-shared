@@ -1,44 +1,15 @@
-import { OpenPGPKey } from 'pmcrypto';
-import { User as tsUser, Address as tsAddress, Key } from '../../lib/interfaces';
+import { User as tsUser, Key as tsKey, Address as tsAddress, DecryptedKey } from '../../lib/interfaces';
 import {
-    generateAddressKey,
-    generateUserKey,
     getDecryptedUserKeys,
     getDecryptedAddressKeys,
     reactivateKeysProcess,
     KeyReactivationRecord,
 } from '../../lib/keys';
+import { getLegacyAddressKey, getUserKey } from './keyDataHelper';
 
 const DEFAULT_KEYPASSWORD = '1';
 
-const getUserKey = async (ID: string, keyPassword: string) => {
-    const { privateKey, privateKeyArmored } = await generateUserKey({ passphrase: keyPassword });
-    return {
-        privateKey,
-        Key: {
-            ID,
-            PrivateKey: privateKeyArmored,
-            Version: 3,
-        } as Key,
-    };
-};
-
-const getLegacyAddressKey = async (ID: string, password: string, email: string) => {
-    const key = await generateAddressKey({
-        email,
-        passphrase: password,
-    });
-    return {
-        privateKey: key.privateKey,
-        Key: {
-            ID,
-            PrivateKey: key.privateKeyArmored,
-            Version: 3,
-        } as Key,
-    };
-};
-
-const getKeyToReactivate = ({ privateKey, Key }: { privateKey: OpenPGPKey; Key: Key }) => ({
+const getKeyToReactivate = ({ key: { privateKey }, Key }: { key: DecryptedKey; Key: tsKey }) => ({
     Key,
     id: Key.ID,
     privateKey,
@@ -135,9 +106,9 @@ const getSetup1 = async () => {
         Addresses,
         userKeys,
         expectedAddressKeysReactivated: [
-            addressKeys1Full[1].privateKey,
-            addressKeys3Full[0].privateKey,
-            addressKeys3Full[1].privateKey,
+            addressKeys1Full[1].key.privateKey,
+            addressKeys3Full[0].key.privateKey,
+            addressKeys3Full[1].key.privateKey,
         ],
         keyReactivationRecords,
     };

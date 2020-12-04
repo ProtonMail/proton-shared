@@ -1,55 +1,23 @@
-import { generateKey, OpenPGPKey } from 'pmcrypto';
-import { User as tsUser, Address as tsAddress, Key } from '../../lib/interfaces';
-import {
-    generateAddressKeyTokens,
-    generateUserKey,
-    getDecryptedUserKeys,
-    getDecryptedAddressKeys,
-} from '../../lib/keys';
+import { User as tsUser, Address as tsAddress } from '../../lib/interfaces';
+import { getDecryptedUserKeys, getDecryptedAddressKeys } from '../../lib/keys';
 import {
     getAddressReactivationPayload,
     getReactivatedAddressesKeys,
     getReactivatedAddressKeys,
 } from '../../lib/keys/reactivation/reactivateKeyHelper';
+import { getAddressKey, getUserKey } from './keyDataHelper';
 
 const DEFAULT_KEYPASSWORD = '1';
 
-const getUserKey = async (ID: string, keyPassword: string) => {
-    const { privateKeyArmored } = await generateUserKey({ passphrase: keyPassword });
-    return {
-        ID,
-        PrivateKey: privateKeyArmored,
-        Version: 3,
-    } as Key;
-};
-
-const getAddressKey = async (ID: string, userKey: OpenPGPKey, email: string) => {
-    const result = await generateAddressKeyTokens(userKey);
-
-    const key = await generateKey({
-        userIds: [{ name: email, email }],
-        passphrase: result.token,
-        curve: 'ed25519',
-    });
-
-    return {
-        ID,
-        PrivateKey: key.privateKeyArmored,
-        Signature: result.signature,
-        Token: result.encryptedToken,
-        Version: 3,
-    } as Key;
-};
-
 const getSetup1 = async () => {
     const keyPassword = DEFAULT_KEYPASSWORD;
-    const UserKeys = await Promise.all([getUserKey('1', keyPassword), getUserKey('2', keyPassword)]);
+    const UserKeysFull = await Promise.all([getUserKey('1', keyPassword), getUserKey('2', keyPassword)]);
     const User = ({
-        Keys: UserKeys,
+        Keys: UserKeysFull.map(({ Key }) => Key),
     } as unknown) as tsUser;
     const address1 = 'test@test.com';
-    const userKeys = await getDecryptedUserKeys({ user: User, userKeys: UserKeys, keyPassword });
-    const addressKeys = await Promise.all([
+    const userKeys = await getDecryptedUserKeys({ user: User, userKeys: User.Keys, keyPassword });
+    const addressKeysFull = await Promise.all([
         getAddressKey('a', userKeys[0].privateKey, address1),
         getAddressKey('b', userKeys[0].privateKey, address1),
         getAddressKey('c', userKeys[1].privateKey, address1),
@@ -57,14 +25,14 @@ const getSetup1 = async () => {
     const Address = ({
         ID: 'AddressID',
         Email: address1,
-        Keys: addressKeys,
+        Keys: addressKeysFull.map(({ Key }) => Key),
     } as unknown) as tsAddress;
     return {
         User,
         Address,
         userKeys,
         addressKeys: await getDecryptedAddressKeys({
-            addressKeys,
+            addressKeys: Address.Keys,
             address: Address,
             user: User,
             userKeys,
@@ -75,17 +43,17 @@ const getSetup1 = async () => {
 
 const getSetup2 = async () => {
     const keyPassword = DEFAULT_KEYPASSWORD;
-    const UserKeys = await Promise.all([
+    const UserKeysFull = await Promise.all([
         getUserKey('1', keyPassword),
         getUserKey('2', keyPassword),
         getUserKey('3', keyPassword),
         getUserKey('4', keyPassword),
     ]);
     const User = ({
-        Keys: UserKeys,
+        Keys: UserKeysFull.map(({ Key }) => Key),
     } as unknown) as tsUser;
     const address1 = 'test@test.com';
-    const userKeys = await getDecryptedUserKeys({ user: User, userKeys: UserKeys, keyPassword });
+    const userKeys = await getDecryptedUserKeys({ user: User, userKeys: User.Keys, keyPassword });
     const AddressKeys1 = await Promise.all([
         getAddressKey('1a', userKeys[0].privateKey, address1),
         getAddressKey('1b', userKeys[0].privateKey, address1),
@@ -103,26 +71,26 @@ const getSetup2 = async () => {
     const Address1 = ({
         ID: 'AddressID-1',
         Email: address1,
-        Keys: AddressKeys1,
+        Keys: AddressKeys1.map(({ Key }) => Key),
     } as unknown) as tsAddress;
     const Address2 = ({
         ID: 'AddressID-2',
         Email: address2,
-        Keys: AddressKeys2,
+        Keys: AddressKeys2.map(({ Key }) => Key),
     } as unknown) as tsAddress;
     return {
         User,
         Addresses: [Address1, Address2],
         userKeys,
         addressKeys1: await getDecryptedAddressKeys({
-            addressKeys: AddressKeys1,
+            addressKeys: Address1.Keys,
             address: Address1,
             user: User,
             userKeys,
             keyPassword,
         }),
         addressKeys2: await getDecryptedAddressKeys({
-            addressKeys: AddressKeys2,
+            addressKeys: Address2.Keys,
             address: Address2,
             user: User,
             userKeys,
