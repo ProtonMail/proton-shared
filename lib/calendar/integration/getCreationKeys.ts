@@ -2,7 +2,7 @@ import { c } from 'ttag';
 import { hasBit } from '../../helpers/bitset';
 import { readSessionKeys } from '../deserialize';
 import { splitKeys, getPrimaryKey } from '../../keys';
-import { CalendarEvent, DecryptedCalendarKey, KeyFlags } from '../../interfaces/calendar';
+import { CalendarEvent, DecryptedCalendarKey, CalendarKeyFlags } from '../../interfaces/calendar';
 import { DecryptedKey } from '../../interfaces';
 
 interface GetCreationKeysArguments {
@@ -25,7 +25,7 @@ export const getCreationKeys = async ({
     }
 
     const { privateKey: primaryPrivateCalendarKey, publicKey: primaryPublicCalendarKey } =
-        newCalendarKeys.find(({ Key: { Flags } }) => hasBit(Flags, KeyFlags.PRIMARY)) || {};
+        newCalendarKeys.find(({ Key: { Flags } }) => hasBit(Flags, CalendarKeyFlags.PRIMARY)) || {};
     if (!primaryPrivateCalendarKey || !primaryPublicCalendarKey) {
         throw new Error(c('Error').t`Calendar primary private key is not decrypted`);
     }

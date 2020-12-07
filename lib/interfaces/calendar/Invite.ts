@@ -3,6 +3,7 @@ import { Calendar, CalendarSettings } from './Calendar';
 import { CalendarEvent } from './Event';
 import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from './VcalModel';
 import { DecryptedKey } from '../Key';
+import { DecryptedCalendarKey } from './CalendarKey';
 
 export interface PartstatActions {
     accept: () => Promise<void>;
@@ -18,7 +19,7 @@ export interface CalendarWidgetData {
     calendarNeedsUserAction: boolean;
     memberID?: string;
     addressKeys?: DecryptedKey[];
-    calendarKeys?: DecryptedKey[];
+    calendarKeys?: DecryptedCalendarKey[];
     calendarSettings?: CalendarSettings;
 }
 

@@ -17,7 +17,7 @@ import { ENCRYPTION_TYPES, ENCRYPTION_CONFIGS } from '../constants';
 import { normalize } from '../helpers/string';
 import { uint8ArrayToBase64String } from '../helpers/encoding';
 import { Address, EncryptionConfig } from '../interfaces';
-import { DecryptedCalendarKey, Key as tsKey, Member } from '../interfaces/calendar';
+import { DecryptedCalendarKey, CalendarKey as tsKey, Member } from '../interfaces/calendar';
 import isTruthy from '../helpers/isTruthy';
 
 export const generatePassphrase = () => {
