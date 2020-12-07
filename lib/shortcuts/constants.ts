@@ -7,250 +7,254 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
         case APPS.PROTONMAIL:
             return [
                 {
-                    name: c('Shortcut section name').t`Basic navigation`,
+                    name: c('Keyboard shortcut section name').t`Basic navigation`,
                     alwaysActive: true,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`Move up`,
+                            name: c('Keyboard shortcut name').t`Move up`,
                             keys: '↑',
                         },
                         {
-                            name: c('Shortcut name').t`Jump to first`,
+                            name: c('Keyboard shortcut name').t`Jump to first`,
                             keys: `${metaKey} + ↑`,
                         },
                         {
-                            name: c('Shortcut name').t`Move down`,
+                            name: c('Keyboard shortcut name').t`Move down`,
                             keys: '↓',
                         },
                         {
-                            name: c('Shortcut name').t`Jump to last`,
+                            name: c('Keyboard shortcut name').t`Jump to last`,
                             keys: `${metaKey} + ↓`,
                         },
                         {
-                            name: c('Shortcut name').t`Move right / expand`,
+                            name: c('Keyboard shortcut name').t`Move right / expand`,
                             keys: '→',
                         },
                         {
-                            name: c('Shortcut name').t`Move left / collapse`,
+                            name: c('Keyboard shortcut name').t`Move left / collapse`,
                             keys: '←',
                         },
                     ],
                 },
                 {
-                    name: c('Shortcut section name').t`Basic actions`,
+                    name: c('Keyboard shortcut section name').t`Basic actions`,
                     alwaysActive: true,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`Apply / open`,
+                            name: c('Keyboard shortcut name').t`Apply / open`,
                             keys: 'Enter',
                         },
                         {
-                            name: c('Shortcut name').t`Cancel / close`,
+                            name: c('Keyboard shortcut name').t`Cancel / close`,
                             keys: 'Escape',
                         },
                         {
-                            name: c('Shortcut name').t`Open this modal`,
+                            name: c('Keyboard shortcut name').t`Open this modal`,
                             keys: '?',
                         },
                         // {
-                        //     name: c('Shortcut name').t`Launch command line`,
+                        //     name: c('Keyboard shortcut name').t`Launch command line`,
                         //     keys: `${metaKey} + K`,
                         // },
                     ],
                 },
                 {
-                    name: c('Shortcut section name').t`Folder shortcuts`,
+                    name: c('Keyboard shortcut section name').t`Folder shortcuts`,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`Go to Inbox`,
+                            name: c('Keyboard shortcut name').t`Go to Inbox`,
                             keys: ['G', 'I'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to Archive`,
+                            name: c('Keyboard shortcut name').t`Go to Archive`,
                             keys: ['G', 'A'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to Sent`,
+                            name: c('Keyboard shortcut name').t`Go to Sent`,
                             keys: ['G', 'E'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to Starred`,
+                            name: c('Keyboard shortcut name').t`Go to Starred`,
                             keys: ['G', '*'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to Drafts`,
+                            name: c('Keyboard shortcut name').t`Go to Drafts`,
                             keys: ['G', 'D'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to Trash`,
+                            name: c('Keyboard shortcut name').t`Go to Trash`,
                             keys: ['G', 'T'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to Spam`,
+                            name: c('Keyboard shortcut name').t`Go to Spam`,
                             keys: ['G', 'S'],
                         },
                         {
-                            name: c('Shortcut name').t`Go to All Mail`,
+                            name: c('Keyboard shortcut name').t`Go to All Mail`,
                             keys: ['G', 'M'],
                         },
                     ],
                 },
                 {
-                    name: c('Shortcut section name').t`Composer shortcuts`,
+                    name: c('Keyboard shortcut section name').t`Composer shortcuts`,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`Close draft`,
-                            keys: `${metaKey} + W`,
+                            name: c('Keyboard shortcut name').t`Close draft`,
+                            keys: `Escape`,
                         },
                         {
-                            name: c('Shortcut name').t`Minimize composer`,
+                            name: c('Keyboard shortcut name').t`Minimize composer`,
                             keys: `${metaKey} + M`,
                         },
                         {
-                            name: c('Shortcut name').t`Insert file`,
-                            keys: `${metaKey} + I`,
+                            name: c('Keyboard shortcut name').t`Maximize composer`,
+                            keys: `${metaKey} + Shift + M`,
                         },
                         {
-                            name: c('Shortcut name').t`Save draft`,
+                            name: c('Keyboard shortcut name').t`Attach file`,
+                            keys: `${metaKey} + Shift + A`,
+                        },
+                        {
+                            name: c('Keyboard shortcut name').t`Save draft`,
                             keys: `${metaKey} + S`,
                         },
                         {
-                            name: c('Shortcut name').t`Send email`,
+                            name: c('Keyboard shortcut name').t`Send email`,
                             keys: `${metaKey} + Enter`,
                         },
                         {
-                            name: c('Shortcut name').t`Add expiration time`,
+                            name: c('Keyboard shortcut name').t`Add expiration time`,
                             keys: `${metaKey} + Shift + X`,
                         },
                         {
-                            name: c('Shortcut name').t`Add encryption`,
+                            name: c('Keyboard shortcut name').t`Add encryption`,
                             keys: `${metaKey} + Shift + E`,
                         },
                         {
-                            name: c('Shortcut name').t`Discard draft`,
-                            keys: `${metaKey} + Backspace`,
+                            name: c('Keyboard shortcut name').t`Discard draft`,
+                            keys: `${metaKey} + Alt + Backspace`,
                         },
                         // {
-                        //     name: c('Shortcut name').t`Undo send`,
+                        //     name: c('Keyboard shortcut name').t`Undo send`,
                         //     keys: `${metaKey} + Z`,
                         // },
                     ],
                 },
                 {
-                    name: c('Shortcut section name').t`List shortcuts`,
+                    name: c('Keyboard shortcut section name').t`List shortcuts`,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`Open previous message`,
+                            name: c('Keyboard shortcut name').t`Open previous message`,
                             keys: 'K',
                         },
                         {
-                            name: c('Shortcut name').t`Open next message`,
+                            name: c('Keyboard shortcut name').t`Open next message`,
                             keys: 'J',
                         },
                         {
-                            name: c('Shortcut name').t`Show unread emails`,
+                            name: c('Keyboard shortcut name').t`Show unread emails`,
                             keys: 'Shift + U',
                         },
                         {
-                            name: c('Shortcut name').t`Show all emails`,
+                            name: c('Keyboard shortcut name').t`Show all emails`,
                             keys: 'Shift + A',
                         },
                         {
-                            name: c('Shortcut name').t`Select / unselect`,
+                            name: c('Keyboard shortcut name').t`Select / unselect`,
                             keys: 'Space or X',
                         },
                         {
-                            name: c('Shortcut name').t`Select / unselect all`,
+                            name: c('Keyboard shortcut name').t`Select / unselect all`,
                             keys: `${metaKey} + A`,
                         },
                         {
-                            name: c('Shortcut name').t`Search`,
+                            name: c('Keyboard shortcut name').t`Search`,
                             keys: '/',
                         },
                     ],
                 },
                 {
-                    name: c('Shortcut section name').t`Action shortcuts`,
+                    name: c('Keyboard shortcut section name').t`Action shortcuts`,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`New message`,
+                            name: c('Keyboard shortcut name').t`New message`,
                             keys: 'N',
                         },
                         {
-                            name: c('Shortcut name').t`Star`,
+                            name: c('Keyboard shortcut name').t`Star`,
                             keys: '*',
                         },
                         {
-                            name: c('Shortcut name').t`Mark as unread`,
+                            name: c('Keyboard shortcut name').t`Mark as unread`,
                             keys: 'U',
                         },
                         {
-                            name: c('Shortcut name').t`Label as...`,
+                            name: c('Keyboard shortcut name').t`Label as...`,
                             keys: 'L',
                         },
                         {
-                            name: c('Shortcut name').t`Create filter with...`,
+                            name: c('Keyboard shortcut name').t`Create filter with...`,
                             keys: 'F',
                         },
                         {
-                            name: c('Shortcut name').t`Move to...`,
+                            name: c('Keyboard shortcut name').t`Move to...`,
                             keys: 'M',
                         },
                         {
-                            name: c('Shortcut name').t`Move to Inbox`,
+                            name: c('Keyboard shortcut name').t`Move to Inbox`,
                             keys: 'I',
                         },
                         {
-                            name: c('Shortcut name').t`Move to Archive`,
+                            name: c('Keyboard shortcut name').t`Move to Archive`,
                             keys: 'A',
                         },
                         {
-                            name: c('Shortcut name').t`Move to Spam`,
+                            name: c('Keyboard shortcut name').t`Move to Spam`,
                             keys: 'S',
                         },
                         {
-                            name: c('Shortcut name').t`Move to Trash`,
+                            name: c('Keyboard shortcut name').t`Move to Trash`,
                             keys: 'T',
                         },
                         {
-                            name: c('Shortcut name').t`Delete permanently`,
+                            name: c('Keyboard shortcut name').t`Delete permanently`,
                             keys: `${metaKey} + Backspace`,
                         },
                         {
-                            name: c('Shortcut name').t`Empty folder`,
+                            name: c('Keyboard shortcut name').t`Empty folder`,
                             keys: `${metaKey} + Shift + Backspace`,
                         },
                         // {
-                        //     name: c('Shortcut name').t`Undo action`,
+                        //     name: c('Keyboard shortcut name').t`Undo action`,
                         //     keys: `${metaKey} + Z`,
                         // },
                     ],
                 },
                 {
-                    name: c('Shortcut section name').t`Message shortcuts`,
+                    name: c('Keyboard shortcut section name').t`Message shortcuts`,
                     shortcuts: [
                         {
-                            name: c('Shortcut name').t`Reply`,
+                            name: c('Keyboard shortcut name').t`Reply`,
                             keys: 'R',
                         },
                         {
-                            name: c('Shortcut name').t`Reply all`,
+                            name: c('Keyboard shortcut name').t`Reply all`,
                             keys: 'Shift + R',
                         },
                         {
-                            name: c('Shortcut name').t`Forward`,
+                            name: c('Keyboard shortcut name').t`Forward`,
                             keys: 'Shift + F',
                         },
                         {
-                            name: c('Shortcut name').t`Load remote content`,
+                            name: c('Keyboard shortcut name').t`Load remote content`,
                             keys: 'Shift + C',
                         },
                         {
-                            name: c('Shortcut name').t`Load embedded images`,
+                            name: c('Keyboard shortcut name').t`Load embedded images`,
                             keys: 'Shift + E',
                         },
                         {
-                            name: c('Shortcut name').t`Show original message`,
+                            name: c('Keyboard shortcut name').t`Show original message`,
                             keys: 'O',
                         },
                     ],
