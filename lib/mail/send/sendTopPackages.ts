@@ -3,10 +3,9 @@
  */
 import { MIME_TYPES, PACKAGE_TYPE } from '../../constants';
 import isTruthy from '../../helpers/isTruthy';
-import { Package, Packages, PackageStatus, SendPreferences } from '../../interfaces/mail/crypto';
+import { PackageDirect, PackageStatus, SendPreferences } from '../../interfaces/mail/crypto';
 import { Attachment, Message } from '../../interfaces/mail/Message';
 import { RequireOnly, SimpleMap } from '../../interfaces/utils';
-import { addReceived } from '../messages';
 import { constructMime } from './helpers';
 
 const { PLAINTEXT, DEFAULT, MIME } = MIME_TYPES;
@@ -18,22 +17,19 @@ const { PLAINTEXT, DEFAULT, MIME } = MIME_TYPES;
 const generateMimePackage = (
     message: RequireOnly<Message, 'Body'>,
     attachmentData: { attachment: Attachment; data: string }
-): Package => ({
-    Flags: addReceived(message?.Flags),
+): PackageDirect => ({
     Addresses: {},
     MIMEType: MIME,
     Body: constructMime(message.Body, attachmentData),
 });
 
-const generatePlainTextPackage = (message: RequireOnly<Message, 'Body'>): Package => ({
-    Flags: addReceived(message?.Flags),
+const generatePlainTextPackage = (message: RequireOnly<Message, 'Body'>): PackageDirect => ({
     Addresses: {},
     MIMEType: PLAINTEXT,
     Body: message.Body,
 });
 
-const generateHTMLPackage = (message: RequireOnly<Message, 'Body'>): Package => ({
-    Flags: addReceived(message?.Flags),
+const generateHTMLPackage = (message: RequireOnly<Message, 'Body'>): PackageDirect => ({
     Addresses: {},
     MIMEType: DEFAULT,
     // We NEVER upconvert, if the user wants html: plaintext is actually fine as well
@@ -53,7 +49,7 @@ export const generateTopPackages = ({
     message: RequireOnly<Message, 'Body'>;
     mapSendPrefs: SimpleMap<SendPreferences>;
     attachmentData: { attachment: Attachment; data: string };
-}): Packages => {
+}): SimpleMap<PackageDirect> => {
     const packagesStatus: PackageStatus = Object.values(mapSendPrefs)
         .filter(isTruthy)
         .reduce(
@@ -74,7 +70,7 @@ export const generateTopPackages = ({
 
     const demandedPackages = Object.values(MIME_TYPES).filter((k) => packagesStatus[k]);
 
-    const packages: Packages = {};
+    const packages: SimpleMap<PackageDirect> = {};
 
     demandedPackages.map(async (type) => {
         switch (type) {

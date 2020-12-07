@@ -2,7 +2,7 @@
  * Currently this is basically a copy of sendSubPackages from the mail repo. TO BE IMPROVED
  */
 import { MIME_TYPES, PACKAGE_TYPE } from '../../constants';
-import { SendPreferences, Package, Packages } from '../../interfaces/mail/crypto';
+import { SendPreferences, PackageDirect } from '../../interfaces/mail/crypto';
 import { Attachment } from '../../interfaces/mail/Message';
 import { SimpleMap } from '../../interfaces/utils';
 
@@ -15,7 +15,7 @@ const { SEND_PM, SEND_CLEAR, SEND_PGP_INLINE, SEND_PGP_MIME, SEND_CLEAR_MIME } =
 const sendPM = async ({ publicKeys }: Pick<SendPreferences, 'publicKeys'>, attachments: Attachment[] = []) => ({
     Type: SEND_PM,
     PublicKey: (publicKeys?.length && publicKeys[0]) || undefined,
-    Signature: attachments.every(({ Signature }) => Signature),
+    Signature: +attachments.every(({ Signature }) => Signature),
 });
 
 /**
@@ -47,7 +47,7 @@ const sendPGPInline = async (
         return {
             Type: SEND_PGP_INLINE,
             PublicKey: (publicKeys?.length && publicKeys[0]) || undefined,
-            Signature: attachments.every(({ Signature }) => Signature),
+            Signature: +attachments.every(({ Signature }) => Signature),
         };
     }
 
@@ -73,14 +73,14 @@ export const attachSubPackages = async ({
     emails,
     mapSendPrefs,
 }: {
-    packages: Packages;
+    packages: SimpleMap<PackageDirect>;
     attachments: Attachment[];
     emails: string[];
     mapSendPrefs: SimpleMap<SendPreferences>;
-}): Promise<Packages> => {
-    const bindPackageSet = async (promise: Promise<Package>, email: string, type: MIME_TYPES) => {
+}): Promise<SimpleMap<PackageDirect>> => {
+    const bindPackageSet = async (promise: Promise<PackageDirect>, email: string, type: MIME_TYPES) => {
         const pack = await promise;
-        const packageToUpdate = packages[type] as Package;
+        const packageToUpdate = packages[type] as PackageDirect;
 
         if (!packageToUpdate.Addresses) {
             packageToUpdate.Addresses = {};
@@ -89,7 +89,10 @@ export const attachSubPackages = async ({
             packageToUpdate.Type = 0;
         }
 
-        packageToUpdate.Addresses[email] = pack;
+        packageToUpdate.Addresses[email] = {
+            ...pack,
+            AttachmentKeyPackets: attachments.map(({ KeyPackets }) => KeyPackets),
+        };
         packageToUpdate.Type |= pack.Type || 0;
     };
 
