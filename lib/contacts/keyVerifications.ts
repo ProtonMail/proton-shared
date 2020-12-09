@@ -29,17 +29,20 @@ export const getUserKeyIds = async (userKeys: CachedKey[]) => {
  * Technically each cards could be encrypted with different keys but it should never happen
  * So we simplify by returning a flatten array of keys
  */
-export const getContactKeyIds = async (contact: Contact) => {
-    const encryptedCards =
-        contact?.Cards.filter(
-            (card) => card.Type === CONTACT_CARD_TYPE.ENCRYPTED_AND_SIGNED || card.Type === CONTACT_CARD_TYPE.ENCRYPTED
+export const getContactKeyIds = async (contact: Contact, fromEncryption: boolean) => {
+    const selectedCards =
+        contact?.Cards.filter((card) =>
+            fromEncryption
+                ? card.Type === CONTACT_CARD_TYPE.ENCRYPTED_AND_SIGNED || card.Type === CONTACT_CARD_TYPE.ENCRYPTED
+                : card.Type === CONTACT_CARD_TYPE.ENCRYPTED_AND_SIGNED || card.Type === CONTACT_CARD_TYPE.SIGNED
         ) || [];
 
     return (
         await Promise.all(
-            encryptedCards.map(async (card) => {
-                const message = await getMessage(card.Data);
-                return message.getEncryptionKeyIds() as KeyId[];
+            selectedCards.map(async (card) => {
+                const data = fromEncryption ? card.Data : (card.Signature as string);
+                const message = await getMessage(data);
+                return (fromEncryption ? message.getEncryptionKeyIds() : message.getSigningKeyIds()) as KeyId[];
             })
         )
     ).flat();
@@ -61,8 +64,8 @@ export const matchKeys = (keysWithIds: KeyWithIds[], keyIdsToFind: KeyId[]) => {
 /**
  * Get user key used to encrypt this contact considering there is only one
  */
-export const getKeyUsedForContact = async (contact: Contact, userKeys: CachedKey[]) => {
+export const getKeyUsedForContact = async (contact: Contact, userKeys: CachedKey[], fromEncryption: boolean) => {
     const userKeysIds = await getUserKeyIds(userKeys);
-    const contactKeyIds = await getContactKeyIds(contact);
+    const contactKeyIds = await getContactKeyIds(contact, fromEncryption);
     return matchKeys(userKeysIds, contactKeyIds);
 };
