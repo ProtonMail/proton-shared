@@ -392,15 +392,15 @@ export enum CYCLE {
 
 export const BLACK_FRIDAY = {
     COUPON_CODE: 'BF2020',
-    START: new Date(Date.UTC(2020, 11, 16, 6)),
-    CYBER_START: new Date(Date.UTC(2020, 11, 30, 6)),
-    CYBER_END: new Date(Date.UTC(2020, 12, 1, 6)),
-    END: new Date(Date.UTC(2020, 12, 15, 6)),
+    START: new Date(Date.UTC(2020, 10, 16, 6)),
+    CYBER_START: new Date(Date.UTC(2020, 10, 30, 6)),
+    CYBER_END: new Date(Date.UTC(2020, 11, 1, 6)),
+    END: new Date(Date.UTC(2020, 11, 15, 6)),
 };
 
 export const PRODUCT_PAYER = {
-    START: new Date(Date.UTC(2020, 10, 28, 6)),
-    END: new Date(Date.UTC(2020, 12, 15, 6)),
+    START: new Date(Date.UTC(2020, 9, 28, 6)),
+    END: new Date(Date.UTC(2020, 11, 15, 6)),
 };
 
 export const MIN_PAYPAL_AMOUNT = 500;

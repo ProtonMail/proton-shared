@@ -13,7 +13,11 @@ export const isProductPayerPeriod = () => {
 };
 
 export const isProductPayer = (subscription: Subscription) => {
-    const couponCode = subscription.CouponCode || '';
+    if (!subscription) {
+        return false;
+    }
+
+    const couponCode = subscription?.CouponCode || '';
     const noBundle = ![COUPON_CODES.BUNDLE, BLACK_FRIDAY.COUPON_CODE].includes(couponCode);
 
     return (
