@@ -44,7 +44,7 @@ export const getParsedSignedKeyList = (data?: string | null): SignedKeyListItem[
         if (!Array.isArray(parsedData)) {
             return;
         }
-        if (!parsedData.every((data) => !!data.Fingerprint)) {
+        if (!parsedData.every((data) => Array.isArray(data.SHA256Fingerprints))) {
             return;
         }
         return parsedData;
