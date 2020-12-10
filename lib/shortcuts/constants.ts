@@ -52,6 +52,10 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Keyboard shortcut name').t`Open this modal`,
                             keys: '?',
                         },
+                        {
+                            name: c('Keyboard shortcut name').t`Select / unselect`,
+                            keys: 'Space',
+                        },
                         // {
                         //     name: c('Keyboard shortcut name').t`Launch command line`,
                         //     keys: `${metaKey} + K`,
@@ -99,6 +103,14 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                     name: c('Keyboard shortcut section name').t`Composer shortcuts`,
                     shortcuts: [
                         {
+                            name: c('Keyboard shortcut name').t`Send email`,
+                            keys: `${metaKey} + Enter`,
+                        },
+                        {
+                            name: c('Keyboard shortcut name').t`Save draft`,
+                            keys: `${metaKey} + S`,
+                        },
+                        {
                             name: c('Keyboard shortcut name').t`Close draft`,
                             keys: `Escape`,
                         },
@@ -113,14 +125,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                         {
                             name: c('Keyboard shortcut name').t`Attach file`,
                             keys: `${metaKey} + Shift + A`,
-                        },
-                        {
-                            name: c('Keyboard shortcut name').t`Save draft`,
-                            keys: `${metaKey} + S`,
-                        },
-                        {
-                            name: c('Keyboard shortcut name').t`Send email`,
-                            keys: `${metaKey} + Enter`,
                         },
                         {
                             name: c('Keyboard shortcut name').t`Add expiration time`,
@@ -152,16 +156,16 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             keys: 'J',
                         },
                         {
+                            name: c('Keyboard shortcut name').t`Select / unselect`,
+                            keys: 'X',
+                        },
+                        {
                             name: c('Keyboard shortcut name').t`Show unread emails`,
                             keys: 'Shift + U',
                         },
                         {
                             name: c('Keyboard shortcut name').t`Show all emails`,
                             keys: 'Shift + A',
-                        },
-                        {
-                            name: c('Keyboard shortcut name').t`Select / unselect`,
-                            keys: 'Space or X',
                         },
                         {
                             name: c('Keyboard shortcut name').t`Select / unselect all`,
