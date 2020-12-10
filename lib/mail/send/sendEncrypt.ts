@@ -68,34 +68,6 @@ const generateSessionKeyHelper = async (): Promise<SessionKey> => ({
 });
 
 /**
- * Encrypt the body in the given package. Should only be used if the package body differs from message body
- * (i.e. the draft body)
- */
-const encryptBodyPackage = async ({
-    pack,
-    privateKeys,
-    publicKeysList,
-}: {
-    pack: PackageDirect;
-    privateKeys: OpenPGPKey[];
-    publicKeysList: OpenPGPKey[];
-}) => {
-    const cleanPublicKeys = publicKeysList.filter(identity);
-
-    const { data, sessionKey } = await encryptMessage({
-        data: pack.Body || '',
-        publicKeys: cleanPublicKeys,
-        sessionKey: cleanPublicKeys.length ? undefined : await generateSessionKeyHelper(),
-        privateKeys,
-        returnSessionKey: true,
-        compression: enums.compression.zip,
-    });
-
-    const { asymmetric: keys, encrypted } = await splitMessage(data);
-    return { keys, encrypted, sessionKey };
-};
-
-/**
  * Encrypts the draft body. This is done separately from the other bodies so we can make sure that the send body
  * (the encrypted body in the message object) is the same as the other emails so we can use 1 blob for them in the api
  * (i.e. deduplication)
@@ -139,6 +111,40 @@ const encryptDraftBodyPackage = async ({
 };
 
 /**
+ * Encrypt the body in the given package. Should only be used if the package body differs from message body
+ * (i.e. the draft body)
+ */
+const encryptBodyPackage = async ({
+    pack,
+    publicKeys,
+    privateKeys,
+    publicKeysList,
+    message,
+}: {
+    pack: PackageDirect;
+    privateKeys: OpenPGPKey[];
+    publicKeys: OpenPGPKey[];
+    publicKeysList: OpenPGPKey[];
+    message: RequireOnly<Message, 'Body' | 'MIMEType'>;
+}) => {
+    // we need to encrypt the draft body as well
+    await encryptDraftBodyPackage({ pack, publicKeys, privateKeys, publicKeysList, message });
+    const cleanPublicKeys = publicKeysList.filter(identity);
+
+    const { data, sessionKey } = await encryptMessage({
+        data: pack.Body || '',
+        publicKeys: cleanPublicKeys,
+        sessionKey: cleanPublicKeys.length ? undefined : await generateSessionKeyHelper(),
+        privateKeys,
+        returnSessionKey: true,
+        compression: enums.compression.zip,
+    });
+
+    const { asymmetric: keys, encrypted } = await splitMessage(data);
+    return { keys, encrypted, sessionKey };
+};
+
+/**
  * Encrypts the body of the package and then overwrites the body in the package and adds the encrypted session keys
  * to the subpackages. If we send clear message the unencrypted session key is added to the (top-level) package too.
  */
@@ -156,10 +162,7 @@ const encryptBody = async ({
     const addressKeys = Object.keys(pack.Addresses || {}).filter(isTruthy);
     const addresses = Object.values(pack.Addresses || {}).filter(isTruthy);
     const publicKeysList = addresses.map(({ PublicKey }) => PublicKey as OpenPGPKey);
-    /*
-     * Special case: reuse the encryption packet from the draft, this allows us to do deduplication on the back-end.
-     * In fact, this will be the most common case.
-     */
+
     const encryptPack = message.MIMEType === pack.MIMEType ? encryptDraftBodyPackage : encryptBodyPackage;
 
     const { keys, encrypted, sessionKey } = await encryptPack({
@@ -172,12 +175,15 @@ const encryptBody = async ({
 
     let counter = 0;
     publicKeysList.forEach((publicKey, index) => {
-        const address = pack.Addresses?.[addressKeys[index]];
-        if (!publicKey || !address) {
+        if (!publicKey) {
             return;
         }
 
         const key = keys[counter++];
+        const address = pack.Addresses?.[addressKeys[index]];
+        if (!address) {
+            return;
+        }
         address.BodyKeyPacket = uint8ArrayToBase64String(key);
     });
 

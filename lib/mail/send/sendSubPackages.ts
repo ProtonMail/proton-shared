@@ -89,10 +89,7 @@ export const attachSubPackages = async ({
             packageToUpdate.Type = 0;
         }
 
-        packageToUpdate.Addresses[email] = {
-            ...pack,
-            AttachmentKeyPackets: attachments.map(({ KeyPackets }) => KeyPackets),
-        };
+        packageToUpdate.Addresses[email] = pack;
         packageToUpdate.Type |= pack.Type || 0;
     };
 
