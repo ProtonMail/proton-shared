@@ -3,7 +3,7 @@ import { ContactEmail } from '../interfaces/contacts';
 
 export const REGEX_RECIPIENT = /(.*?)\s*<([^>]*)>/;
 
-export const inputToRecipient = (input: string): Recipient => {
+export const inputToRecipient = (input: string) => {
     const match = REGEX_RECIPIENT.exec(input);
 
     if (match !== null) {
@@ -17,19 +17,19 @@ export const inputToRecipient = (input: string): Recipient => {
         Address: input,
     };
 };
-export const contactToRecipient = (contact: Partial<ContactEmail> = {}, groupPath?: string): Partial<Recipient> => ({
+export const contactToRecipient = (contact: ContactEmail, groupPath?: string) => ({
     Name: contact.Name,
     Address: contact.Email,
     ContactID: contact.ContactID,
     Group: groupPath,
 });
 
-export const majorToRecipient = (email: string): Partial<Recipient> => ({
+export const majorToRecipient = (email: string) => ({
     Name: email,
     Address: email,
 });
 
-export const recipientToInput = (recipient: Partial<Recipient> = {}): string => {
+export const recipientToInput = (recipient: Recipient): string => {
     if (recipient.Address && recipient.Name && recipient.Address !== recipient.Name) {
         return `${recipient.Name} <${recipient.Address}>`;
     }
@@ -41,5 +41,4 @@ export const recipientToInput = (recipient: Partial<Recipient> = {}): string => 
     return `${recipient.Name} ${recipient.Address}`;
 };
 
-export const contactToInput = (contact: Partial<ContactEmail> = {}): string =>
-    recipientToInput(contactToRecipient(contact));
+export const contactToInput = (contact: ContactEmail): string => recipientToInput(contactToRecipient(contact));
