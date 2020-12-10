@@ -1,3 +1,7 @@
+export const escapeRegex = (string: string) => {
+    return string.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
 export interface MatchChunk {
     start: number;
     end: number;
