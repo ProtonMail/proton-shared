@@ -62,6 +62,14 @@ export interface PackageDirect {
     AttachmentKeyPackets?: string[];
 }
 
+export interface AttachmentDirect {
+    Filename: string;
+    MIMEType: MIME_TYPES;
+    ContentID?: string;
+    Contents: string;
+    Headers?: any;
+}
+
 export type PackageStatus = {
     [key in MIME_TYPES]?: boolean;
 };

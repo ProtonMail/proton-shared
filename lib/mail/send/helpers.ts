@@ -1,5 +1,5 @@
 import mimemessage from 'mimemessage';
-import { Attachment } from '../../interfaces/mail/Message';
+import { AttachmentDirect } from '../../interfaces/mail/crypto';
 
 /**
  * Remove '; name=' and '; filename=' values
@@ -12,9 +12,9 @@ const extractContentValue = (value = '') => {
     return value.substr(0, semicolonIndex);
 };
 
-const buildAttachment = (attachmentData: { attachment: Attachment; data: string }) => {
+const buildAttachment = (attachmentData: { attachment: AttachmentDirect; data: string }) => {
     const { attachment, data } = attachmentData;
-    const attachmentName = JSON.stringify(attachment.Name);
+    const attachmentName = JSON.stringify(attachment.Filename);
     const headers = attachment.Headers || {};
     const contentTypeValue =
         extractContentValue(headers['content-type']) || attachment.MIMEType || 'application/octet-stream';
@@ -47,7 +47,10 @@ const buildPlaintextEntity = (plaintext?: string) =>
         contentTransferEncoding: 'quoted-printable',
     });
 
-export const constructMime = (plaintext: string, attachmentData: { attachment: Attachment; data: string }): string => {
+export const constructMime = (
+    plaintext: string,
+    attachmentData: { attachment: AttachmentDirect; data: string }
+): string => {
     const bodyEntity = buildPlaintextEntity(plaintext);
     const attachmentEntities = buildAttachment(attachmentData);
     const body = [bodyEntity].concat(attachmentEntities);

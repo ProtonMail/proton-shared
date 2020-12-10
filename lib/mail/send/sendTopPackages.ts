@@ -3,8 +3,8 @@
  */
 import { MIME_TYPES, PACKAGE_TYPE } from '../../constants';
 import isTruthy from '../../helpers/isTruthy';
-import { PackageDirect, PackageStatus, SendPreferences } from '../../interfaces/mail/crypto';
-import { Attachment, Message } from '../../interfaces/mail/Message';
+import { AttachmentDirect, PackageDirect, PackageStatus, SendPreferences } from '../../interfaces/mail/crypto';
+import { Message } from '../../interfaces/mail/Message';
 import { RequireOnly, SimpleMap } from '../../interfaces/utils';
 import { constructMime } from './helpers';
 
@@ -16,7 +16,7 @@ const { PLAINTEXT, DEFAULT, MIME } = MIME_TYPES;
  */
 const generateMimePackage = (
     message: RequireOnly<Message, 'Body'>,
-    attachmentData: { attachment: Attachment; data: string }
+    attachmentData: { attachment: AttachmentDirect; data: string }
 ): PackageDirect => ({
     Addresses: {},
     MIMEType: MIME,
@@ -48,7 +48,7 @@ export const generateTopPackages = ({
 }: {
     message: RequireOnly<Message, 'Body'>;
     mapSendPrefs: SimpleMap<SendPreferences>;
-    attachmentData: { attachment: Attachment; data: string };
+    attachmentData: { attachment: AttachmentDirect; data: string };
 }): SimpleMap<PackageDirect> => {
     const packagesStatus: PackageStatus = Object.values(mapSendPrefs)
         .filter(isTruthy)
