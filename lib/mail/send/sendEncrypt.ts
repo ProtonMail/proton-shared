@@ -9,6 +9,7 @@ import {
     generateSessionKey,
     SessionKey,
     OpenPGPKey,
+    encryptSessionKey,
 } from 'pmcrypto';
 import { enums } from 'openpgp';
 import { hasBit } from '../../helpers/bitset';
@@ -33,6 +34,28 @@ const packToBase64 = ({ data, algorithm: Algorithm = AES256 }: SessionKey) => {
     return { Key: uint8ArrayToBase64String(data), Algorithm };
 };
 
+const encryptKeyPacket = async ({
+    sessionKeys = [],
+    publicKeys = [],
+    passwords = [],
+}: {
+    sessionKeys?: SessionKey[];
+    publicKeys?: OpenPGPKey[];
+    passwords?: string[];
+}) =>
+    Promise.all(
+        sessionKeys.map(async (sessionKey) => {
+            const { message } = await encryptSessionKey({
+                data: sessionKey.data,
+                algorithm: sessionKey.algorithm,
+                publicKeys: publicKeys.length > 0 ? publicKeys : undefined,
+                passwords,
+            });
+            const data = message.packets.write();
+            return uint8ArrayToBase64String(data as Uint8Array);
+        })
+    );
+
 /**
  * Encrypt the attachment session keys and add them to the package
  */
@@ -48,6 +71,19 @@ const encryptAttachmentKeys = async ({
         return;
     }
 
+    const promises = Object.values(pack.Addresses || {}).map(async (address) => {
+        if (!address?.PublicKey) {
+            return;
+        }
+
+        const keys = await encryptKeyPacket({
+            sessionKeys: attachmentKeys.map(({ SessionKey }) => SessionKey),
+            publicKeys: [address.PublicKey],
+        });
+
+        address.AttachmentKeyPackets = keys;
+    });
+
     if (hasBit(pack.Type, PACKAGE_TYPE.SEND_CLEAR)) {
         const AttachmentKeys: { Key: string; Algorithm: string }[] = [];
         attachmentKeys.forEach(({ SessionKey }) => {
@@ -56,7 +92,7 @@ const encryptAttachmentKeys = async ({
         pack.AttachmentKeys = AttachmentKeys;
     }
 
-    return Promise.all([]);
+    return Promise.all(promises);
 };
 
 /**
