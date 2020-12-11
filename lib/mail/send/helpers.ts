@@ -41,11 +41,18 @@ const buildAttachment = (attachmentData: { attachment: AttachmentDirect; data: s
  * Quoted printable for compatibility with old clients
  * Mimemessagefactory doesn't handle the empty string well.
  */
-const buildPlaintextEntity = (plaintext?: string) =>
-    mimemessage.factory({
+const buildPlaintextEntity = (plaintext?: string) => {
+    const entity = mimemessage.factory({
         body: plaintext,
         contentTransferEncoding: 'quoted-printable',
     });
+
+    if (!plaintext) {
+        // the mimemessage library is buggy in this case and converts an empty string into 'null'
+        entity.internalBody = '';
+    }
+    return entity;
+};
 
 export const constructMime = (
     plaintext: string,
