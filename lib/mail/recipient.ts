@@ -4,17 +4,19 @@ import { ContactEmail } from '../interfaces/contacts';
 export const REGEX_RECIPIENT = /(.*?)\s*<([^>]*)>/;
 
 export const inputToRecipient = (input: string) => {
-    const match = REGEX_RECIPIENT.exec(input);
+    const trimmedInput = input.trim();
+    const match = REGEX_RECIPIENT.exec(trimmedInput);
 
-    if (match !== null) {
+    if (match !== null && (match[1] || match[2])) {
+        const trimmedMatches = match.map((match) => match.trim());
         return {
-            Name: match[1],
-            Address: match[2],
+            Name: trimmedMatches[1],
+            Address: trimmedMatches[2] || trimmedMatches[1],
         };
     }
     return {
-        Name: input,
-        Address: input,
+        Name: trimmedInput,
+        Address: trimmedInput,
     };
 };
 export const contactToRecipient = (contact: ContactEmail, groupPath?: string) => ({
