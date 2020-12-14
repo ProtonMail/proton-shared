@@ -1,11 +1,13 @@
-import { User as tsUser, Address as tsAddress, KeyPair, SignedKeyList, DecryptedKey } from '../../interfaces';
+import { User as tsUser, Address as tsAddress, KeyPair, SignedKeyList, DecryptedKey, Key } from '../../interfaces';
 
 import { unique } from '../../helpers/array';
 
-// import { getDefaultKeyFlags } from '../keyFlags';
 import { getDecryptedAddressKeys } from '../getDecryptedAddressKeys';
 import { getSignedKeyList } from '../signedKeyList';
 import { getActiveKeys } from '../getActiveKeys';
+import { getDefaultKeyFlags } from '../keyFlags';
+import { clearBit } from '../../helpers/bitset';
+import { KEY_FLAG } from '../../constants';
 
 interface GetReactivatedAddressKeys {
     address: tsAddress;
@@ -46,55 +48,56 @@ export const getReactivatedAddressKeys = async ({
         keyPassword,
     };
 
-    const oldAddressKeys = await getDecryptedAddressKeys({
+    const oldDecryptedAddressKeys = await getDecryptedAddressKeys({
         ...sharedArgs,
         userKeys: oldUserKeys,
     });
 
     // All keys were able to decrypt previously, can just return.
-    if (oldAddressKeys.length === address.Keys.length) {
+    if (oldDecryptedAddressKeys.length === address.Keys.length) {
         return empty;
     }
-    const newAddressKeys = await getDecryptedAddressKeys({
+    const newDecryptedAddressKeys = await getDecryptedAddressKeys({
         ...sharedArgs,
         userKeys: newUserKeys,
     });
 
     // No difference in how many keys were able to get decrypted
-    if (oldAddressKeys.length === newAddressKeys.length) {
+    if (oldDecryptedAddressKeys.length === newDecryptedAddressKeys.length) {
         return empty;
     }
-    if (newAddressKeys.length < oldAddressKeys.length) {
+    if (newDecryptedAddressKeys.length < oldDecryptedAddressKeys.length) {
         throw new Error('More old decryptable keys than new, should never happen');
     }
 
     // New keys were able to get decrypted
-    const oldAddressKeysSet = new Set<String>(oldAddressKeys.map(({ ID }) => ID));
-    const reactivatedKeys = newAddressKeys.filter(({ ID }) => !oldAddressKeysSet.has(ID));
-    const reactivatedKeysSet = new Set<String>(reactivatedKeys.map(({ ID }) => ID));
+    const oldDecryptedAddressKeysSet = new Set<string>(oldDecryptedAddressKeys.map(({ ID }) => ID));
+    const reactivatedKeys = newDecryptedAddressKeys.filter(({ ID }) => !oldDecryptedAddressKeysSet.has(ID));
+    const reactivatedKeysSet = new Set<string>(reactivatedKeys.map(({ ID }) => ID));
 
     if (!reactivatedKeysSet.size) {
         return empty;
     }
 
-    const newActiveKeys = await getActiveKeys(address.SignedKeyList, address.Keys, newAddressKeys);
-    // Settings default flags needed or not?
-    /*
+    const oldAddressKeysMap = new Map<string, Key>(address.Keys.map((Key) => [Key.ID, Key]));
+    const newActiveKeys = await getActiveKeys(address.SignedKeyList, address.Keys, newDecryptedAddressKeys);
     const newActiveKeysFormatted = newActiveKeys.map((activeKey) => {
         if (!reactivatedKeysSet.has(activeKey.ID)) {
             return activeKey;
         }
         return {
             ...activeKey,
-            flags: getDefaultKeyFlags(),
+            flags: clearBit(
+                oldAddressKeysMap.get(activeKey.ID)?.Flags ?? getDefaultKeyFlags(),
+                KEY_FLAG.FLAG_NOT_OBSOLETE
+            ),
         };
     });
-     */
 
     return {
         address,
         reactivatedKeys,
-        signedKeyList: await getSignedKeyList(newActiveKeys),
+        signedKeyList: await getSignedKeyList(newActiveKeysFormatted),
     };
 };
 

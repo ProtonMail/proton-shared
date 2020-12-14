@@ -45,6 +45,7 @@ export const getAddressKey = async (ID: string, userKey: OpenPGPKey, email: stri
             Signature: result.signature,
             Token: result.encryptedToken,
             Version: 3,
+            Flags: 3,
         } as Key,
     };
 };

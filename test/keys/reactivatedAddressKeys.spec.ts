@@ -63,7 +63,7 @@ const getSetup2 = async () => {
     const address2 = 'test2@test.com';
     const AddressKeys2 = await Promise.all([
         getAddressKey('2a', userKeys[1].privateKey, address2),
-        getAddressKey('2b', userKeys[1].privateKey, address2),
+        getAddressKey('2b', userKeys[1].privateKey, address2).then((r) => ({ ...r, Key: { ...r.Key, Flags: 0 } })),
         getAddressKey('2c', userKeys[2].privateKey, address2),
         getAddressKey('2d', userKeys[2].privateKey, address2),
         getAddressKey('2e', userKeys[3].privateKey, address2),
@@ -166,6 +166,25 @@ describe('reactivate address keys', () => {
             newUserKeys: [userKeys[0], userKeys[1]],
             keyPassword: '',
         });
+        expect(JSON.parse(result[0].signedKeyList?.Data || '')).toEqual([
+            { Primary: 1, Flags: 3, Fingerprint: jasmine.any(String), SHA256Fingerprints: jasmine.any(Array) },
+            { Primary: 0, Flags: 3, Fingerprint: jasmine.any(String), SHA256Fingerprints: jasmine.any(Array) },
+            {
+                Primary: 0,
+                Flags: 1,
+                Fingerprint: jasmine.any(String),
+                SHA256Fingerprints: jasmine.any(Array),
+            },
+        ]);
+        expect(JSON.parse(result[1].signedKeyList?.Data || '')).toEqual([
+            { Primary: 1, Flags: 1, Fingerprint: jasmine.any(String), SHA256Fingerprints: jasmine.any(Array) },
+            {
+                Primary: 0,
+                Flags: 0,
+                Fingerprint: jasmine.any(String),
+                SHA256Fingerprints: jasmine.any(Array),
+            },
+        ]);
         const payload = await getAddressReactivationPayload(result);
         expect(payload).toEqual(
             jasmine.objectContaining({

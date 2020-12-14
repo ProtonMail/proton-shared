@@ -3,7 +3,6 @@ import { ActiveKey, DecryptedKey, Key, SignedKeyList } from '../interfaces';
 import { getParsedSignedKeyList, getSignedKeyListMap } from './signedKeyList';
 import isTruthy from '../helpers/isTruthy';
 import { getDefaultKeyFlags } from './keyFlags';
-import { toMap } from '../helpers/object';
 
 export const getPrimaryFlag = (keys: ActiveKey[]): 1 | 0 => {
     return !keys.length ? 1 : 0;
@@ -34,18 +33,16 @@ export const getActiveKeys = async (
     }
 
     const signedKeyListMap = getSignedKeyListMap(getParsedSignedKeyList(signedKeyList?.Data));
-    const keysMap = toMap(keys, 'ID');
 
     const result = await Promise.all(
         decryptedKeys.map(async ({ ID, privateKey }, index) => {
             const fingerprint = privateKey.getFingerprint();
             const signedKeyListItem = signedKeyListMap[fingerprint];
-            const keyListItem = keysMap[ID];
             return getActiveKeyObject(privateKey, {
                 ID,
                 primary: signedKeyListItem?.Primary ?? index === 0 ? 1 : 0,
                 // Need to use Flags from the key object for the case of reactivating keys.
-                flags: signedKeyListItem?.Flags ?? keyListItem?.Flags ?? getDefaultKeyFlags(),
+                flags: signedKeyListItem?.Flags ?? getDefaultKeyFlags(),
             });
         })
     );
