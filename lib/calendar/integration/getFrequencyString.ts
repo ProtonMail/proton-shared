@@ -418,7 +418,7 @@ const getCustomWeeklyString = (
         }
         return c('Weekly recurring event, frequency').ngettext(
             msgid`Every ${interval} week on ${multipleDaysString}, ${timesString}`,
-            `Every ${interval} weeks on on ${multipleDaysString}, ${timesString}`,
+            `Every ${interval} weeks on ${multipleDaysString}, ${timesString}`,
             interval
         );
     }
