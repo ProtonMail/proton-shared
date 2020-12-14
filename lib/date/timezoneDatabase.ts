@@ -8,8 +8,15 @@
  * The value for each entry is the supported timezone we will re-direct to
  */
 export const unsupportedTimezoneLinks: { [key: string]: string } = {
+    'America/Indiana/Indianapolis': 'America/New_York',
+    'America/Nuuk': 'Atlantic/Stanley',
     'America/Fort_Wayne': 'America/New_York',
-    'Asia/Rangoon': 'Asia/Yangon',
+    'Asia/Singapore': 'Asia/Shanghai',
+    'Asia/Rangoon': 'Indian/Cocos',
+    'Asia/Yangon': 'Indian/Cocos',
+    'Pacific/Funafuti': 'Asia/Kamchatka',
+    'Pacific/Wake': 'Asia/Kamchatka',
+    'Pacific/Wallis': 'Asia/Kamchatka',
     CET: 'Europe/Paris',
     CST6CDT: 'America/Chicago',
     EET: 'Europe/Istanbul',
