@@ -64,7 +64,10 @@ describe('rrule subset', () => {
         ),
         getTest(
             {
-                ...dummyVevent,
+                dtstart: {
+                    value: { year: 2020, month: 1, day: 6, hours: 12, minutes: 0, seconds: 0, isUTC: false },
+                    parameters: { tzid: 'America/New_York' },
+                },
                 rrule: {
                     value: {
                         freq: FREQUENCY.WEEKLY,
@@ -75,7 +78,10 @@ describe('rrule subset', () => {
                 },
             },
             {
-                ...dummyVevent,
+                dtstart: {
+                    value: { year: 2020, month: 1, day: 6, hours: 12, minutes: 0, seconds: 0, isUTC: false },
+                    parameters: { tzid: 'America/New_York' },
+                },
                 rrule: {
                     value: {
                         freq: FREQUENCY.WEEKLY,
