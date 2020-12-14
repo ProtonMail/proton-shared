@@ -544,8 +544,8 @@ const getCustomMonthlyString = (
             return c('Monthly recurring event, frequency').t`Monthly ${onDayString}, ${timesString}`;
         }
         return c('Monthly recurring event, frequency').ngettext(
-            msgid`Every ${interval} month ${timesString}`,
-            `Every ${interval} months ${timesString}`,
+            msgid`Every ${interval} month ${onDayString}, ${timesString}`,
+            `Every ${interval} months ${onDayString}, ${timesString}`,
             interval
         );
     }
@@ -556,8 +556,8 @@ const getCustomMonthlyString = (
             return c('Monthly recurring event, frequency').t`Monthly ${onDayString}, ${untilString}`;
         }
         return c('Monthly recurring event, frequency').ngettext(
-            msgid`Every ${interval} month ${untilString}`,
-            `Every ${interval} months ${untilString}`,
+            msgid`Every ${interval} month ${onDayString}, ${untilString}`,
+            `Every ${interval} months ${onDayString}, ${untilString}`,
             interval
         );
     }
