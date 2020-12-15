@@ -169,7 +169,7 @@ export interface CreateCalendarEventBlobData {
     SharedEventContent: Omit<CalendarEventData, 'Author'>[];
     PersonalEventContent?: Omit<CalendarEventData, 'Author'>;
     AttendeesEventContent?: Omit<CalendarEventData, 'Author'>[];
-    Attendees?: Attendee[];
+    Attendees?: Omit<Attendee, 'UpdateTime' | 'ID'>[];
 }
 export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
     Permissions: number;
@@ -195,9 +195,15 @@ export const deleteEvent = (calendarID: string, eventID: string) => ({
     method: 'delete',
 });
 
-export const getAttendees = (calendarID: string, eventID: string) => ({
-    url: `${CALENDAR_V1}/${calendarID}/events/${eventID}/attendees`,
-    method: 'get',
+export const updateAttendeePartstat = (
+    calendarID: string,
+    eventID: string,
+    attendeeID: string,
+    data: Pick<Attendee, 'Status' | 'UpdateTime'>
+) => ({
+    url: `${CALENDAR_V1}/${calendarID}/events/${eventID}/attendees/${attendeeID}`,
+    method: 'put',
+    data,
 });
 
 export const acceptInvite = (uid: string, data: { Signature: string }) => ({

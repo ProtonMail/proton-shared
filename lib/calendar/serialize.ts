@@ -1,8 +1,5 @@
 import { OpenPGPKey, OpenPGPSignature, SessionKey } from 'pmcrypto';
-import { CreateCalendarEventData } from '../api/calendars';
 import { uint8ArrayToBase64String } from '../helpers/encoding';
-import { pick } from '../helpers/object';
-import { CalendarEvent } from '../interfaces/calendar';
 
 import { getVeventParts } from './veventHelper';
 import { createSessionKey, encryptPart, getEncryptedSessionKey, signPart } from './encrypt';
@@ -179,23 +176,4 @@ export const createCalendarEvent = async ({
         attendeesEncryptedPart,
         attendeesClearPart: attendeesPart[CLEAR_TEXT],
     });
-};
-
-export const createUpdatePartstatEvent = (
-    event: CalendarEvent
-): Omit<CreateCalendarEventData, 'SharedKeyPacket' | 'CalendarKeyPacket'> => {
-    const SharedEventContent = event.SharedEvents.map(({ Type, Data, Signature }) => ({ Type, Data, Signature }));
-    const CalendarEventContent = event.CalendarEvents.map(({ Type, Data, Signature }) => ({ Type, Data, Signature }));
-    const [personalEvent] = event.PersonalEvent;
-    const PersonalEventContent = personalEvent ? pick(personalEvent, ['Type', 'Data', 'Signature']) : undefined;
-    const AttendeesEventContent = event.AttendeesEvents.map(({ Type, Data, Signature }) => ({ Type, Data, Signature }));
-    const Attendees = event.Attendees.map(({ Token, Status }) => ({ Token, Status, Permissions: 3 }));
-    return {
-        ...pick(event, ['SharedEventID', 'IsOrganizer', 'Permissions']),
-        SharedEventContent,
-        CalendarEventContent,
-        PersonalEventContent,
-        AttendeesEventContent,
-        Attendees,
-    };
 };
