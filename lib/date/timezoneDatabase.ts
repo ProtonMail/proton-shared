@@ -9,7 +9,6 @@
  */
 export const unsupportedTimezoneLinks: { [key: string]: string } = {
     'America/Indiana/Indianapolis': 'America/New_York',
-    'America/Nuuk': 'Atlantic/Stanley',
     'America/Fort_Wayne': 'America/New_York',
     'Asia/Singapore': 'Asia/Shanghai',
     'Asia/Rangoon': 'Indian/Cocos',
@@ -83,6 +82,7 @@ export const MANUAL_TIMEZONE_LINKS: { [key: string]: string } = {
     'america eastern': 'America/New_York',
     'america mountain': 'America/Denver',
     'america pacific': 'America/Los_Angeles',
+    'america/nuuk': 'Atlantic/Stanley',
     'amsterdam, berlin, bern, rome, stockholm, vienna': 'Europe/Berlin',
     anadyr: 'Asia/Anadyr',
     apia: 'Pacific/Apia',
