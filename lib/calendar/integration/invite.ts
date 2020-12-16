@@ -1,13 +1,12 @@
 import { c } from 'ttag';
-import { getVtimezones } from '../../api/calendars';
+import { GetVTimezones } from '../../../../react-components/hooks/useGetVtimezones';
 import { format as formatUTC } from '../../date-fns-utc';
 import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
-import { unique } from '../../helpers/array';
 import { cleanEmail, normalizeInternalEmail } from '../../helpers/email';
 import isTruthy from '../../helpers/isTruthy';
 import { omit, pick } from '../../helpers/object';
 import { dateLocale } from '../../i18n';
-import { Address, Api } from '../../interfaces';
+import { Address } from '../../interfaces';
 import {
     Attendee,
     CalendarSettings,
@@ -21,13 +20,13 @@ import {
     VcalVtimezoneComponent,
 } from '../../interfaces/calendar';
 import { ContactEmail } from '../../interfaces/contacts';
-import { RequireSome, SimpleMap } from '../../interfaces/utils';
+import { RequireSome } from '../../interfaces/utils';
 import { formatSubject, RE_PREFIX } from '../../mail/messages';
 import { getAttendeeEmail } from '../attendees';
 import { ICAL_ATTENDEE_STATUS, ICAL_METHOD } from '../constants';
 import { getDisplayTitle } from '../helper';
 import { getIsRruleEqual } from '../rruleEqual';
-import { fromTriggerString, parse, serialize } from '../vcal';
+import { fromTriggerString, serialize } from '../vcal';
 import { getAllDayInfo, getHasModifiedDateTimes, propertyToUTCDate } from '../vcalConverter';
 import {
     getAttendeePartstat,
@@ -367,26 +366,13 @@ export const getSelfAttendeeToken = (vevent?: VcalVeventComponent, addresses: Ad
 };
 
 export const generateVtimezonesComponents = async (
-    api: Api,
-    { dtstart, dtend }: VcalVeventComponent
+    { dtstart, dtend }: VcalVeventComponent,
+    getVTimezones: GetVTimezones
 ): Promise<VcalVtimezoneComponent[]> => {
     const startTimezone = getPropertyTzid(dtstart);
     const endTimezone = dtend ? getPropertyTzid(dtend) : undefined;
-    const tzids = unique(
-        [startTimezone, endTimezone].filter(isTruthy).filter((tzid) => isTruthy(tzid) && tzid.toLowerCase() !== 'utc')
-    );
-    const encodedTzids = tzids.map((tzid) => encodeURIComponent(tzid));
-    if (!tzids.length) {
-        return Promise.resolve([]);
-    }
-    const { Timezones = {} } = await api<{ Timezones: SimpleMap<string> }>(getVtimezones(encodedTzids));
-    return tzids.map((tzid) => {
-        const vtimezoneString = Timezones[tzid];
-        if (!vtimezoneString) {
-            throw new Error('Could not obtain timezone');
-        }
-        return parse(vtimezoneString) as VcalVtimezoneComponent;
-    });
+    const vtimezonesObject = getVTimezones([startTimezone, endTimezone].filter(isTruthy));
+    return Object.values(vtimezonesObject).map(({ vtimezone }) => vtimezone);
 };
 
 export const generateEmailSubject = (method: ICAL_METHOD, vevent: VcalVeventComponent, isCreateEvent?: boolean) => {
