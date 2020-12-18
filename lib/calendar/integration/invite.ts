@@ -338,7 +338,11 @@ export const getSelfAttendeeToken = (vevent?: VcalVeventComponent, addresses: Ad
     if (!vevent?.attendee) {
         return;
     }
-    const { selfAddress, selfAttendeeIndex } = getSelfAttendeeData(vevent.attendee, addresses);
+    const { selfAddress, selfAttendeeIndex } = getSelfAddressData({
+        isOrganizer: false,
+        attendees: vevent.attendee,
+        addresses,
+    });
     if (!selfAddress || selfAttendeeIndex === undefined) {
         return;
     }
