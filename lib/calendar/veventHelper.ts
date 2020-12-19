@@ -86,13 +86,6 @@ export const withDtstamp = <T>(
     };
 };
 
-export const withUpdatedDtstamp = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
-    return {
-        ...properties,
-        dtstamp: dateTimeToProperty(fromUTCDate(new Date()), true),
-    };
-};
-
 export const withRequiredProperties = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
     return withDtstamp(withUid(properties));
 };
