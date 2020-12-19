@@ -9,6 +9,7 @@ import { omit, pick } from '../../helpers/object';
 import { dateLocale } from '../../i18n';
 import { Address, Api } from '../../interfaces';
 import {
+    Attendee,
     CalendarSettings,
     Participant,
     SETTINGS_NOTIFICATION_TYPE,
@@ -44,16 +45,24 @@ export const getParticipantHasAddressID = (
     return !!participant.addressID;
 };
 
-export const getParticipant = (
-    participant: VcalAttendeeProperty | VcalOrganizerProperty,
-    contactEmails: ContactEmail[],
-    ownAddresses: Address[],
-    emailTo?: string,
-    index?: number
-): Participant => {
+export const getParticipant = ({
+    participant,
+    contactEmails,
+    addresses,
+    emailTo,
+    index,
+    calendarAttendees,
+}: {
+    participant: VcalAttendeeProperty | VcalOrganizerProperty;
+    contactEmails: ContactEmail[];
+    addresses: Address[];
+    emailTo?: string;
+    index?: number;
+    calendarAttendees?: Attendee[];
+}): Participant => {
     const emailAddress = getAttendeeEmail(participant);
     const normalizedEmailAddress = normalizeInternalEmail(emailAddress);
-    const selfAddress = ownAddresses.find(({ Email }) => normalizeInternalEmail(Email) === normalizedEmailAddress);
+    const selfAddress = addresses.find(({ Email }) => normalizeInternalEmail(Email) === normalizedEmailAddress);
     const isYou = emailTo ? normalizeInternalEmail(emailTo) === normalizedEmailAddress : !!selfAddress;
     const contact = contactEmails.find(({ Email }) => cleanEmail(Email) === cleanEmail(emailAddress));
     const participantName = participant?.parameters?.cn || emailAddress;
@@ -65,7 +74,8 @@ export const getParticipant = (
         displayName: isYou ? c('Participant name').t`You` : displayName,
         displayEmail: emailAddress,
     };
-    const { partstat, role, email } = (participant as VcalAttendeeProperty).parameters || {};
+    const { partstat, role, email, 'x-pm-token': token } = (participant as VcalAttendeeProperty).parameters || {};
+    const calendarAttendee = token ? calendarAttendees?.find(({ Token }) => Token === token) : undefined;
     if (partstat) {
         result.partstat = getAttendeePartstat(participant);
     }
@@ -74,6 +84,13 @@ export const getParticipant = (
     }
     if (email) {
         result.displayEmail = email;
+    }
+    if (token) {
+        result.token = token;
+    }
+    if (calendarAttendee) {
+        result.updateTime = calendarAttendee.UpdateTime;
+        result.attendeeID = calendarAttendee.ID;
     }
     if (selfAddress) {
         result.addressID = selfAddress.ID;
