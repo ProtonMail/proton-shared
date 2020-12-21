@@ -168,7 +168,6 @@ export const getIcalMethod = ({ value }: VcalStringProperty) => {
     if (Object.values(ICAL_METHOD).some((icalMethod) => icalMethod === value)) {
         return value as ICAL_METHOD;
     }
-    return ICAL_METHOD.PUBLISH;
 };
 
 export const getEventStatus = ({ status }: VcalVeventComponent) => {
