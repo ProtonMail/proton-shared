@@ -20,7 +20,14 @@ import {
     VcalVtodoComponent,
     VcalXOrIanaComponent,
 } from '../interfaces/calendar/VcalModel';
-import { ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS, ICAL_EVENT_STATUS, ICAL_METHOD } from './constants';
+import {
+    ICAL_ATTENDEE_ROLE,
+    ICAL_ATTENDEE_STATUS,
+    ICAL_EVENT_STATUS,
+    ICAL_METHOD,
+    ICAL_METHODS_ATTENDEE,
+    ICAL_METHODS_ORGANIZER,
+} from './constants';
 
 export const getIsPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
     return property.parameters?.type === 'date' ?? false;
@@ -168,6 +175,14 @@ export const getIcalMethod = ({ value }: VcalStringProperty) => {
     if (Object.values(ICAL_METHOD).some((icalMethod) => icalMethod === value)) {
         return value as ICAL_METHOD;
     }
+};
+
+export const getIsValidMethod = (method: ICAL_METHOD, isOrganizerMode: boolean) => {
+    if (method === ICAL_METHOD.DECLINECOUNTER) {
+        // we should never encounter DECLINECOUNTER for the moment
+        return false;
+    }
+    return isOrganizerMode ? ICAL_METHODS_ATTENDEE.includes(method) : ICAL_METHODS_ORGANIZER.includes(method);
 };
 
 export const getEventStatus = ({ status }: VcalVeventComponent) => {
