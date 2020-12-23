@@ -38,13 +38,14 @@ const getPublicKeysVcardHelper = async (
     contactEmailsMap: { [email: string]: ContactEmail | undefined } = {}
 ): Promise<PinnedKeysConfig> => {
     let isContact = false;
+    let isContactSignatureVerified;
     try {
         const ContactEmail = await getContactEmail(emailAddress, contactEmailsMap, api);
         if (ContactEmail === undefined) {
             return { pinnedKeys: [], isContact };
         }
         isContact = true;
-        // ContactEmail.Defaults flag inform if there is specific configuration in the contact for this email
+        // ContactEmail.Defaults flag informs if there is specific configuration in the contact for this email
         if (ContactEmail.Defaults === 1) {
             return { pinnedKeys: [], isContact };
         }
@@ -54,10 +55,10 @@ const getPublicKeysVcardHelper = async (
         const signedCard = Contact.Cards.find(({ Type }) => Type === CONTACT_CARD_TYPE.SIGNED);
         if (!signedCard) {
             // contacts created by the server are not signed
-            return { pinnedKeys: [], isContact: !!Contact.Cards.length, isContactSignatureVerified: true };
+            return { pinnedKeys: [], isContact: !!Contact.Cards.length };
         }
         const { type, data: signedVcard } = await readSigned(signedCard, { publicKeys });
-        const isContactSignatureVerified = type === CRYPTO_PROCESSING_TYPES.SUCCESS;
+        isContactSignatureVerified = type === CRYPTO_PROCESSING_TYPES.SUCCESS;
         const properties = parse(signedVcard);
         const emailProperty = properties.find(
             ({ field, value }) =>
@@ -73,7 +74,7 @@ const getPublicKeysVcardHelper = async (
             isContactSignatureVerified,
         };
     } catch (error) {
-        return { pinnedKeys: [], isContact, isContactSignatureVerified: false, error };
+        return { pinnedKeys: [], isContact, isContactSignatureVerified, error };
     }
 };
 
