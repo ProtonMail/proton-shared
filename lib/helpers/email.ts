@@ -7,9 +7,13 @@ import { MAJOR_DOMAINS } from '../constants';
 import { Recipient } from '../interfaces';
 
 export const validateLocalPart = (localPart: string) => {
-    if (localPart.length > 64) {
-        return false;
-    }
+    /**
+     * Local parts bigger than 64 octets can be found in the wild
+     * // if (localPart.length > 64) {
+     * //     return false;
+     * // }
+     */
+
     // remove comments first
     const match = localPart.match(/(^\(.+?\))?([^()]*)(\(.+?\)$)?/);
     if (!match) {
