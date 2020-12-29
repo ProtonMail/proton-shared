@@ -3,6 +3,13 @@ import { Address, Recipient } from '../interfaces';
 import { ContactEmail } from '../interfaces/contacts';
 import { normalizeInternalEmail } from './email';
 
+export const getIsAddressDisabled = (address?: Address) => {
+    if (!address) {
+        return undefined;
+    }
+    return address.Status === ADDRESS_STATUS.STATUS_DISABLED;
+};
+
 export const getActiveAddresses = (addresses: Address[]): Address[] => {
     return addresses.filter(({ Status, Receive, Send }) => {
         return (
