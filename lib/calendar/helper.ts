@@ -65,3 +65,10 @@ export const getNegativeSetpos = (date: Date) => {
     // return -1 if it's the last occurrence in the month
     return Math.ceil((dayOfMonth - daysInMonth) / 7) - 1;
 };
+
+export const reformatApiErrorMessage = (message: string) => {
+    if (message.toLowerCase().endsWith('. please try again')) {
+        return message.slice(0, -18);
+    }
+    return message;
+};
