@@ -9,7 +9,7 @@ import { getHasMigratedAddressKey } from '../keyMigration';
 import { getDecryptedAddressKeys } from '../getDecryptedAddressKeys';
 import { getSignedKeyList } from '../signedKeyList';
 import { generateAddressKeyTokens, reformatAddressKey } from '../addressKeys';
-import { getActiveKeyObject, getActiveKeys, getPrimaryFlag } from '../getActiveKeys';
+import { getActiveKeyObject, getActiveKeys, getPrimaryFlag, getReactivatedKeyFlag } from '../getActiveKeys';
 import { SimpleMap } from '../../interfaces/utils';
 
 interface ReactivateUserKeysArguments {
@@ -147,7 +147,7 @@ export const reactivateAddressKeysV2 = async ({
 
     for (const keyToReactivate of keysToReactivate) {
         const { id, Key, privateKey: decryptedPrivateKey } = keyToReactivate;
-        const { ID } = Key;
+        const { ID, Flags } = Key;
         try {
             const email = address.Email;
 
@@ -165,6 +165,7 @@ export const reactivateAddressKeysV2 = async ({
             const newActiveKey = await getActiveKeyObject(reformattedPrivateKey, {
                 ID,
                 primary: getPrimaryFlag(mutableActiveKeys),
+                flags: getReactivatedKeyFlag(Flags),
             });
             const updatedActiveKeys = [...mutableActiveKeys, newActiveKey];
             await api(

@@ -1,11 +1,18 @@
 import { getSHA256Fingerprints, OpenPGPKey } from 'pmcrypto';
 import { ActiveKey, DecryptedKey, Key, SignedKeyList } from '../interfaces';
-import { getParsedSignedKeyList, getSignedKeyListMap } from './signedKeyList';
 import isTruthy from '../helpers/isTruthy';
+import { KEY_FLAG } from '../constants';
+import { clearBit } from '../helpers/bitset';
+import { getParsedSignedKeyList, getSignedKeyListMap } from './signedKeyList';
 import { getDefaultKeyFlags } from './keyFlags';
 
 export const getPrimaryFlag = (keys: ActiveKey[]): 1 | 0 => {
     return !keys.length ? 1 : 0;
+};
+
+// When a key is disabled, the NOT_OBSOLETE flag is removed. Thus when the key is reactivated, the client uses the old key flags, with the not obsolete flag removed. This is mainly to take into account the old NOT_COMPROMISED flag
+export const getReactivatedKeyFlag = (Flags?: number) => {
+    return clearBit(Flags ?? getDefaultKeyFlags(), KEY_FLAG.FLAG_NOT_OBSOLETE);
 };
 
 export const getActiveKeyObject = async (

@@ -4,10 +4,7 @@ import { unique } from '../../helpers/array';
 
 import { getDecryptedAddressKeys } from '../getDecryptedAddressKeys';
 import { getSignedKeyList } from '../signedKeyList';
-import { getActiveKeys } from '../getActiveKeys';
-import { getDefaultKeyFlags } from '../keyFlags';
-import { clearBit } from '../../helpers/bitset';
-import { KEY_FLAG } from '../../constants';
+import { getActiveKeys, getReactivatedKeyFlag } from '../getActiveKeys';
 
 interface GetReactivatedAddressKeys {
     address: tsAddress;
@@ -85,14 +82,9 @@ export const getReactivatedAddressKeys = async ({
         if (!reactivatedKeysSet.has(activeKey.ID)) {
             return activeKey;
         }
-        // When a key is disabled, the NOT_OBSOLETE flag is removed. Thus when the key is reactivated, the client uses the old key flags, with the obsolete flag removed.
-        // This is mainly to take into account the old NOT_COMPROMISED flag
         return {
             ...activeKey,
-            flags: clearBit(
-                oldAddressKeysMap.get(activeKey.ID)?.Flags ?? getDefaultKeyFlags(),
-                KEY_FLAG.FLAG_NOT_OBSOLETE
-            ),
+            flags: getReactivatedKeyFlag(oldAddressKeysMap.get(activeKey.ID)?.Flags),
         };
     });
 
