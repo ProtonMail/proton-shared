@@ -85,6 +85,8 @@ export const getReactivatedAddressKeys = async ({
         if (!reactivatedKeysSet.has(activeKey.ID)) {
             return activeKey;
         }
+        // When a key is disabled, the NOT_OBSOLETE flag is removed. Thus when the key is reactivated, the client uses the old key flags, with the obsolete flag removed.
+        // This is mainly to take into account the old NOT_COMPROMISED flag
         return {
             ...activeKey,
             flags: clearBit(

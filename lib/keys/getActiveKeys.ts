@@ -41,7 +41,6 @@ export const getActiveKeys = async (
             return getActiveKeyObject(privateKey, {
                 ID,
                 primary: signedKeyListItem?.Primary ?? index === 0 ? 1 : 0,
-                // Need to use Flags from the key object for the case of reactivating keys.
                 flags: signedKeyListItem?.Flags ?? getDefaultKeyFlags(),
             });
         })
