@@ -56,10 +56,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Keyboard shortcut name').t`Select / unselect`,
                             keys: 'Space',
                         },
-                        // {
-                        //     name: c('Keyboard shortcut name').t`Launch command line`,
-                        //     keys: `${metaKey} + K`,
-                        // },
                     ],
                 },
                 {
@@ -138,10 +134,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Keyboard shortcut name').t`Discard draft`,
                             keys: `${metaKey} + Alt + Backspace`,
                         },
-                        // {
-                        //     name: c('Keyboard shortcut name').t`Undo send`,
-                        //     keys: `${metaKey} + Z`,
-                        // },
                     ],
                 },
                 {
@@ -228,10 +220,6 @@ export const getShortcutsForApp = (app: APP_NAMES) => {
                             name: c('Keyboard shortcut name').t`Empty folder`,
                             keys: `${metaKey} + Shift + Backspace`,
                         },
-                        // {
-                        //     name: c('Keyboard shortcut name').t`Undo action`,
-                        //     keys: `${metaKey} + Z`,
-                        // },
                     ],
                 },
                 {
