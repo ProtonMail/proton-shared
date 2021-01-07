@@ -10,6 +10,7 @@ interface MissingKeysMemberProcessArguments {
     encryptionConfig: EncryptionConfig;
     onUpdate: OnUpdateCallback;
     organizationKey: OpenPGPKey;
+    ownerAddresses: Address[];
     member: Member;
     memberAddresses: Address[];
     memberAddressesToGenerate: Address[];
@@ -19,6 +20,7 @@ export const missingKeysMemberProcess = async ({
     api,
     encryptionConfig,
     onUpdate,
+    ownerAddresses,
     member,
     memberAddresses,
     memberAddressesToGenerate,
@@ -30,7 +32,8 @@ export const missingKeysMemberProcess = async ({
         throw new Error('Member keys are not set up');
     }
 
-    const hasMigratedAddressKeys = getHasMigratedAddressKeys(memberAddresses);
+    const hasMigratedAddressKeys =
+        getHasMigratedAddressKeys(memberAddresses) || getHasMigratedAddressKeys(ownerAddresses);
 
     const primaryMemberUserKey = await getDecryptedMemberKey(PrimaryKey, organizationKey);
 

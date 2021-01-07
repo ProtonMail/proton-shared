@@ -17,6 +17,7 @@ import { createMemberKeyRoute, setupMemberKeyRoute } from '../api/memberKeys';
 import { generateMemberAddressKey } from './organizationKeys';
 import { generateUserKey } from './userKeys';
 import { hasAddressKeyMigration } from '../constants';
+import { getHasMigratedAddressKeys } from './keyMigration';
 
 export const getDecryptedMemberKey = async ({ Token, PrivateKey }: tsKey, organizationKey: OpenPGPKey) => {
     if (!Token) {
@@ -26,7 +27,7 @@ export const getDecryptedMemberKey = async ({ Token, PrivateKey }: tsKey, organi
     return decryptPrivateKey(PrivateKey, decryptedToken);
 };
 
-interface SetupMemberKeyArguments {
+interface SetupMemberKeySharedArgumentsS {
     api: Api;
     member: tsMember;
     address: tsAddress;
@@ -42,7 +43,7 @@ export const setupMemberKeyLegacy = async ({
     password,
     organizationKey,
     encryptionConfig,
-}: SetupMemberKeyArguments) => {
+}: SetupMemberKeySharedArgumentsS) => {
     const { salt: keySalt, passphrase: memberMailboxPassword } = await generateKeySaltAndPassphrase(password);
 
     const { privateKey, privateKeyArmored } = await generateAddressKey({
@@ -98,7 +99,7 @@ export const setupMemberKeyV2 = async ({
     password,
     organizationKey,
     encryptionConfig,
-}: SetupMemberKeyArguments) => {
+}: SetupMemberKeySharedArgumentsS) => {
     const { salt: keySalt, passphrase: memberKeyPassword } = await generateKeySaltAndPassphrase(password);
 
     const { privateKey: userPrivateKey, privateKeyArmored: userPrivateKeyArmored } = await generateUserKey({
@@ -158,11 +159,14 @@ export const setupMemberKeyV2 = async ({
     return updatedActiveKeys;
 };
 
-export const setupMemberKey = async (args: SetupMemberKeyArguments) => {
-    if (hasAddressKeyMigration) {
-        return setupMemberKeyV2(args);
+interface SetupMemberKeyArguments extends SetupMemberKeySharedArgumentsS {
+    ownerAddresses: tsAddress[];
+}
+export const setupMemberKey = async ({ ownerAddresses, ...rest }: SetupMemberKeyArguments) => {
+    if (hasAddressKeyMigration || getHasMigratedAddressKeys(ownerAddresses)) {
+        return setupMemberKeyV2(rest);
     }
-    return setupMemberKeyLegacy(args);
+    return setupMemberKeyLegacy(rest);
 };
 
 interface CreateMemberAddressKeysLegacyArguments {
