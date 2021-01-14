@@ -1,12 +1,11 @@
 import { c } from 'ttag';
-import { GetVTimezones } from '../../../../react-components/hooks/useGetVtimezones';
 import { format as formatUTC } from '../../date-fns-utc';
 import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
 import { cleanEmail, normalizeInternalEmail } from '../../helpers/email';
 import isTruthy from '../../helpers/isTruthy';
 import { omit, pick } from '../../helpers/object';
 import { dateLocale } from '../../i18n';
-import { Address } from '../../interfaces';
+import { Address, GetVTimezones } from '../../interfaces';
 import {
     Attendee,
     CalendarSettings,

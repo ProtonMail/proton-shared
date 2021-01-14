@@ -9,19 +9,20 @@ export const getAreOccurrencesSubset = (
     newOccurrences: (RecurringResult | Pick<RecurringResult, 'localStart'>)[],
     oldVevent: VcalVeventComponent
 ) => {
-    return newOccurrences.reduce((acc, { localStart }) => {
-        if (acc === false) {
-            return false;
-        }
+    const cache = {};
+    for (const { localStart } of newOccurrences) {
         const isAllDay = getIsAllDay(oldVevent);
         const startTzid = getPropertyTzid(oldVevent.dtstart);
         let utcStart = localStart;
         if (!isAllDay && startTzid) {
             utcStart = toUTCDate(convertZonedDateTimeToUTC(fromUTCDate(localStart), startTzid));
         }
-        const [oldOccurrence] = getOccurrencesBetween(oldVevent, +utcStart, +utcStart);
-        return !!oldOccurrence;
-    }, true);
+        const [oldOccurrence] = getOccurrencesBetween(oldVevent, +utcStart, +utcStart, cache);
+        if (!oldOccurrence) {
+            return false;
+        }
+    }
+    return true;
 };
 
 /**
@@ -52,7 +53,7 @@ export const getIsRruleSubset = (newVevent: VcalVeventComponent, oldVevent: Vcal
     // but for performance we use the same trick as above and check max 10
     const maxCount = newCount ? Math.min(newCount, 10) : 10;
     const newOccurrences = newUntil
-        ? getOccurrencesBetween(newVevent, +propertyToUTCDate(newDtstart), +toUTCDate(newUntil))
+        ? getOccurrencesBetween(newVevent, +propertyToUTCDate(newDtstart), +toUTCDate(newUntil), {}, 10)
         : getOccurrences({ component: newVevent, maxCount });
 
     return getAreOccurrencesSubset(newOccurrences, oldVevent);

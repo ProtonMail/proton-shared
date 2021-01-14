@@ -123,8 +123,9 @@ export const getAllDayInfo = (dtstart: VcalDateOrDateTimeProperty, dtend?: VcalD
     if (!dtend) {
         return { isAllDay: true, isSingleAllDay: true };
     }
-    const fakeUTCStart = propertyToUTCDate(dtstart);
-    const fakeUTCEnd = propertyToUTCDate(dtend);
+    // For all-day events, we need fake UTC dates to determine if the event lasts a single day
+    const fakeUTCStart = toUTCDate(dtstart.value);
+    const fakeUTCEnd = toUTCDate(dtend.value);
     // account for non-RFC-compliant all-day events with DTSTART = DTEND
     return { isAllDay: true, isSingleAllDay: isNextDay(fakeUTCStart, fakeUTCEnd) || +fakeUTCStart === +fakeUTCEnd };
 };

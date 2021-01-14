@@ -1,6 +1,6 @@
 import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
-import { GetCanonicalEmails } from '../../../react-components/hooks/useGetCanonicalEmails';
 import { buildMailTo, getEmailTo, validateEmailAddress } from '../helpers/email';
+import { GetCanonicalEmails } from '../interfaces';
 import { Attendee } from '../interfaces/calendar';
 import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
 import { RequireSome, SimpleMap } from '../interfaces/utils';
