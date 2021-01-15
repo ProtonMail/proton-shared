@@ -59,10 +59,11 @@ export const getParticipant = ({
     calendarAttendees?: Attendee[];
 }): Participant => {
     const emailAddress = getAttendeeEmail(participant);
-    const normalizedEmailAddress = normalizeInternalEmail(emailAddress);
-    const selfAddress = addresses.find(({ Email }) => normalizeInternalEmail(Email) === normalizedEmailAddress);
-    const isYou = emailTo ? normalizeInternalEmail(emailTo) === normalizedEmailAddress : !!selfAddress;
-    const contact = contactEmails.find(({ Email }) => cleanEmail(Email) === cleanEmail(emailAddress));
+    const cleanInternalEmailAddress = cleanEmail(emailAddress, true);
+    const cleanExternalEmailAddress = cleanEmail(emailAddress, false);
+    const selfAddress = addresses.find(({ Email }) => normalizeInternalEmail(Email) === cleanInternalEmailAddress);
+    const isYou = emailTo ? normalizeInternalEmail(emailTo) === cleanInternalEmailAddress : !!selfAddress;
+    const contact = contactEmails.find(({ Email }) => cleanEmail(Email) === cleanExternalEmailAddress);
     const participantName = participant?.parameters?.cn || emailAddress;
     const displayName = selfAddress?.DisplayName || contact?.Name || participantName;
     const result: Participant = {
@@ -220,7 +221,7 @@ export function getSelfAddressData({
             // old events will not have organizer
             return {};
         }
-        const organizerEmail = normalizeInternalEmail(getAttendeeEmail(organizer));
+        const organizerEmail = cleanEmail(getAttendeeEmail(organizer), true);
         return {
             selfAddress: addresses.find(({ Email }) => normalizeInternalEmail(Email) === organizerEmail),
         };
