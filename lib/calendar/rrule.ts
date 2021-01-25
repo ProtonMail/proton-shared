@@ -383,7 +383,7 @@ export const getHasConsistentRrule = (vevent: VcalVeventComponent) => {
 
     const { until, count } = rrule.value;
 
-    if (until && count) {
+    if (until && count !== undefined) {
         return false;
     }
 
