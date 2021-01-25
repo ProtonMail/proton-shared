@@ -125,7 +125,7 @@ interface VcalDurationProperty {
     value: VcalDurationValue;
 }
 
-export type VcalValarmComponent<T = VcalTriggerProperty> = {
+export interface VcalValarmComponent<T = VcalTriggerProperty> {
     component: 'valarm';
     action: VcalStringProperty;
     trigger: T;
@@ -135,7 +135,7 @@ export type VcalValarmComponent<T = VcalTriggerProperty> = {
     summary?: VcalStringProperty;
     attendee?: VcalAttendeeProperty[];
     attach?: VcalStringProperty;
-};
+}
 
 export interface VcalStringWithParamsProperty {
     value: string;
