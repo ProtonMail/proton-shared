@@ -137,6 +137,10 @@ export interface VcalValarmComponent<T = VcalTriggerProperty> {
     attach?: VcalStringProperty;
 }
 
+export type VcalValarmRelativeComponent = VcalValarmComponent<VcalTriggerRelativeProperty>;
+
+export type VcalValarmAbsoluteComponent = VcalValarmComponent<VcalDateTimeProperty>;
+
 export interface VcalStringWithParamsProperty {
     value: string;
     params?: { [key: string]: string };
