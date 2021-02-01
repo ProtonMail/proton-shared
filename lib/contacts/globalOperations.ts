@@ -46,8 +46,8 @@ export const dropDataEncryptedWithAKey = async (
                     return { ...card, Signature };
                 })
             );
-            // await api<{ Contact: Contact }>(updateContact(contactID, { Cards }));
-            console.log('dropDataEncryptedWithAKey', updateContact(contactID, { Cards }));
+            await api<{ Contact: Contact }>(updateContact(contactID, { Cards }));
+            // console.log('dropDataEncryptedWithAKey', updateContact(contactID, { Cards }));
         }
         progressionCallback(i + 1, updated);
     }
@@ -91,8 +91,8 @@ export const resignAllContacts = async (
                 contactCards: Contact.Cards,
                 privateKeys: [privateKeys[0]],
             });
-            // await api<{ Contact: Contact }>(updateContact(contactID, { Cards }));
-            console.log('resignAllContacts', updateContact(contactID, { Cards }));
+            await api<{ Contact: Contact }>(updateContact(contactID, { Cards }));
+            // console.log('resignAllContacts', updateContact(contactID, { Cards }));
         }
         progressionCallback(i + 1, updated);
     }
