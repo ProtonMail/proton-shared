@@ -1,6 +1,6 @@
 import { getKeys, getMessage } from 'pmcrypto';
 import { CONTACT_CARD_TYPE } from '../constants';
-import { CachedKey } from '../interfaces';
+import { Key } from '../interfaces';
 import { Contact } from '../interfaces/contacts';
 
 export interface KeyId {
@@ -8,18 +8,18 @@ export interface KeyId {
 }
 
 export interface KeyWithIds {
-    key: CachedKey;
+    key: Key;
     ids: KeyId[];
 }
 
 /**
  * Get all the key ids of each user keys
  */
-export const getUserKeyIds = async (userKeys: CachedKey[]) => {
+export const getUserKeyIds = async (userKeys: Key[]) => {
     return Promise.all(
         userKeys.map(async (userKey) => {
-            const key = await getKeys(userKey.Key.PrivateKey);
-            return { key: userKey, ids: key[0].getKeyIds() as KeyId[] } as KeyWithIds;
+            const keys = await getKeys(userKey.PrivateKey);
+            return { key: userKey, ids: keys[0].getKeyIds() as KeyId[] } as KeyWithIds;
         })
     );
 };
@@ -64,7 +64,7 @@ export const matchKeys = (keysWithIds: KeyWithIds[], keyIdsToFind: KeyId[]) => {
 /**
  * Get user key used to encrypt this contact considering there is only one
  */
-export const getKeyUsedForContact = async (contact: Contact, userKeys: CachedKey[], fromEncryption: boolean) => {
+export const getKeyUsedForContact = async (contact: Contact, userKeys: Key[], fromEncryption: boolean) => {
     const userKeysIds = await getUserKeyIds(userKeys);
     const contactKeyIds = await getContactKeyIds(contact, fromEncryption);
     return matchKeys(userKeysIds, contactKeyIds);

@@ -1,7 +1,7 @@
 import { createCleartextMessage, getSignature, signMessage, VERIFICATION_STATUS, verifyMessage } from 'pmcrypto';
 import { getContact, updateContact } from '../api/contacts';
 import { CONTACT_CARD_TYPE } from '../constants';
-import { Api, CachedKey } from '../interfaces';
+import { Api, DecryptedKey, Key } from '../interfaces';
 import { Contact } from '../interfaces/contacts';
 import { splitKeys } from '../keys/keys';
 import { getKeyUsedForContact } from './keyVerifications';
@@ -12,8 +12,8 @@ import { resignCards } from './resign';
  */
 export const dropDataEncryptedWithAKey = async (
     contacts: Contact[],
-    referenceKey: CachedKey,
-    userKeys: CachedKey[],
+    referenceKey: Key,
+    userKeys: DecryptedKey[],
     api: Api,
     progressionCallback: (progress: number, updated: number) => void,
     exitRef: { current: boolean }
@@ -58,7 +58,7 @@ export const dropDataEncryptedWithAKey = async (
  */
 export const resignAllContacts = async (
     contacts: Contact[],
-    userKeys: CachedKey[],
+    userKeys: DecryptedKey[],
     api: Api,
     progressionCallback: (progress: number, updated: number) => void,
     exitRef: { current: boolean }
