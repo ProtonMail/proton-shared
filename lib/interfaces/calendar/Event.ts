@@ -16,7 +16,6 @@ export interface CalendarPersonalEventData extends CalendarEventData {
 export interface Attendee {
     ID: string;
     Token: string;
-    Permissions: number;
     Status: ATTENDEE_STATUS_API;
     UpdateTime: number;
 }
