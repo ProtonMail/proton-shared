@@ -230,6 +230,8 @@ export interface VcalVeventComponent {
     'related-to'?: VcalStringWithParamsProperty[];
     resources?: VcalStringWithParamsProperty[];
     rdate?: VcalDateTimeProperty[];
+    'x-pm-session-key'?: VcalStringProperty;
+    'x-pm-shared-event-id'?: VcalStringProperty;
 }
 
 export interface VcalPmVeventComponent extends Omit<VcalVeventComponent, 'attendee'> {

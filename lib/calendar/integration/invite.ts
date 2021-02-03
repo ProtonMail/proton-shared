@@ -166,6 +166,7 @@ interface CreateInviteIcsParams {
     vevent: VcalVeventComponent;
     attendeesTo?: VcalAttendeeProperty[];
     vtimezones?: VcalVtimezoneComponent[];
+    sharedEventID?: string;
     keepDtstamp?: boolean;
 }
 
