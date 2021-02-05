@@ -1,10 +1,4 @@
-import {
-    normalizeEmail,
-    normalizeInternalEmail,
-    parseMailtoURL,
-    validateEmailAddress,
-    validateDomain,
-} from '../../lib/helpers/email';
+import { parseMailtoURL, validateEmailAddress, validateDomain, canonizeInternalEmail } from '../../lib/helpers/email';
 
 describe('email', () => {
     describe('validateDomain', () => {
@@ -91,31 +85,23 @@ describe('email', () => {
         });
     });
 
-    describe('normalizeEmail', () => {
-        it('should lower case external emails', () => {
-            const emails = ['testing@myDomain', 'TeS.--TinG@MYDOMAIN', 'ABC;;@cde', 'bad@email@this.is'];
-            const expected = emails.map((email) => email.toLowerCase());
-            expect(emails.map((email) => normalizeEmail(email))).toEqual(expected);
-            expect(emails.map((email) => normalizeEmail(email, false))).toEqual(expected);
-        });
-
-        it('should normalize internal emails properly', () => {
+    describe('canonize', () => {
+        it('should canonize internal emails properly', () => {
             const emails = [
                 'testing@pm.me',
                 'TeS.--TinG@PM.ME',
-                'ABC;;@pm.me',
-                'mo____.-..reTes--_---ting@pm.me',
-                'bad@email@this.is',
+                'ABC+DEF@protonmail.com',
+                'mo____.-.reTes--_---ting+AlIas@protonmail.ch',
+                'a.custom-Domain@this.is',
             ];
-            const normalized = [
+            const canonized = [
                 'testing@pm.me',
                 'testing@pm.me',
-                'abc;;@pm.me',
-                'moretesting@pm.me',
-                'bad@email@this.is',
+                'abc@protonmail.com',
+                'moretesting@protonmail.ch',
+                'acustomdomain@this.is',
             ];
-            expect(emails.map((email) => normalizeEmail(email, true))).toEqual(normalized);
-            expect(emails.map(normalizeInternalEmail)).toEqual(normalized);
+            expect(emails.map((email) => canonizeInternalEmail(email))).toEqual(canonized);
         });
     });
 
