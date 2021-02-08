@@ -1,4 +1,12 @@
-import { parseMailtoURL, validateEmailAddress, validateDomain, canonizeInternalEmail } from '../../lib/helpers/email';
+import {
+    CANONIZE_SCHEME,
+    canonizeEmail,
+    canonizeEmailByGuess,
+    canonizeInternalEmail,
+    parseMailtoURL,
+    validateDomain,
+    validateEmailAddress,
+} from '../../lib/helpers/email';
 
 describe('email', () => {
     describe('validateDomain', () => {
@@ -102,6 +110,60 @@ describe('email', () => {
                 'acustomdomain@this.is',
             ];
             expect(emails.map((email) => canonizeInternalEmail(email))).toEqual(canonized);
+        });
+
+        it('should canonize with the gmail scheme', () => {
+            const emails = [
+                'testing@pm.me',
+                'TeS.--TinG@PM.ME',
+                'ABC+DEF@protonmail.com',
+                'mo____.-.reTes--_---ting+AlIas@protonmail.ch',
+                'a.custom-Domain@this.is',
+            ];
+            const canonized = [
+                'testing@pm.me',
+                'tes--ting@pm.me',
+                'abc@protonmail.com',
+                'mo____-retes--_---ting@protonmail.ch',
+                'acustom-domain@this.is',
+            ];
+            expect(emails.map((email) => canonizeEmail(email, CANONIZE_SCHEME.GMAIL))).toEqual(canonized);
+        });
+
+        it('should canonize with the plus scheme', () => {
+            const emails = [
+                'testing@pm.me',
+                'TeS.--TinG@PM.ME',
+                'ABC+DEF@protonmail.com',
+                'mo____.-.reTes--_---ting+AlIas@protonmail.ch',
+                'a.custom-Domain@this.is',
+            ];
+            const canonized = [
+                'testing@pm.me',
+                'tes.--ting@pm.me',
+                'abc@protonmail.com',
+                'mo____.-.retes--_---ting@protonmail.ch',
+                'a.custom-domain@this.is',
+            ];
+            expect(emails.map((email) => canonizeEmail(email, CANONIZE_SCHEME.PLUS))).toEqual(canonized);
+        });
+
+        it('should canonize guessing the scheme', () => {
+            const emails = [
+                'testing+1@pm.me',
+                'TeS.--TinG+2@PM.ME',
+                'A.B.C-+D.E.F@GMAIL.com',
+                'mo____.-.reTes--_---ting+AlIas@MAIL.RU',
+                'a.custom-Domain+cool@this.is',
+            ];
+            const canonized = [
+                'testing@pm.me',
+                'testing@pm.me',
+                'abc-@gmail.com',
+                'mo____.-.retes--_---ting@mail.ru',
+                'a.custom-domain+cool@this.is',
+            ];
+            expect(emails.map((email) => canonizeEmailByGuess(email))).toEqual(canonized);
         });
     });
 
