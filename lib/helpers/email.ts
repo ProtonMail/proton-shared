@@ -71,17 +71,9 @@ export const validateDomain = (domain: string) => {
 export const getEmailParts = (email: string) => {
     const endIdx = email.lastIndexOf('@');
     if (endIdx === -1) {
-        return {
-            localPart: email,
-            domain: '',
-            hasAt: false,
-        };
+        return [email, ''];
     }
-    return {
-        localPart: email.slice(0, endIdx),
-        domain: email.slice(endIdx + 1),
-        hasAt: true,
-    };
+    return [email.slice(0, endIdx), email.slice(endIdx + 1)];
 };
 
 /**
@@ -89,7 +81,7 @@ export const getEmailParts = (email: string) => {
  * see also https://en.wikipedia.org/wiki/Email_address
  */
 export const validateEmailAddress = (email: string) => {
-    const { localPart, domain } = getEmailParts(email);
+    const [localPart, domain] = getEmailParts(email);
     if (!localPart || !domain) {
         return false;
     }
@@ -101,23 +93,21 @@ const removePlusAliasLocalPart = (localPart = '') => {
     return cleanLocalPart;
 };
 
-export const removePlusAlias = (email = '') => {
-    const { localPart, domain, hasAt } = getEmailParts(email);
-    const cleanLocalPart = removePlusAliasLocalPart(localPart);
-    return hasAt ? `${cleanLocalPart}@${domain}` : `${cleanLocalPart}`;
-};
-
 /**
  * Add plus alias part for an email
  */
 export const addPlusAlias = (email = '', plus = '') => {
-    const { localPart, domain, hasAt } = getEmailParts(email);
-    if (localPart.indexOf('+') !== -1) {
-        // the email contains an alias already
+    const atIndex = email.indexOf('@');
+    const plusIndex = email.indexOf('+');
+
+    if (atIndex === -1 || plusIndex > -1) {
         return email;
     }
 
-    return hasAt ? `${localPart}+${plus}@${domain}` : `${localPart}+${plus}`;
+    const name = email.substring(0, atIndex);
+    const domain = email.substring(atIndex, email.length);
+
+    return `${name}+${plus}${domain}`;
 };
 
 /**
@@ -129,7 +119,7 @@ export const canonizeEmail = (email: string, scheme = CANONIZE_SCHEME.DEFAULT) =
     if (!validateEmailAddress(email)) {
         throw new Error('Cannot canonize invalid email address');
     }
-    const { localPart, domain } = getEmailParts(email);
+    const [localPart, domain] = getEmailParts(email);
     if (scheme === CANONIZE_SCHEME.PROTON) {
         const cleanLocalPart = removePlusAliasLocalPart(localPart);
         const normalizedLocalPart = cleanLocalPart.replace(/[._-]/g, '').toLowerCase();
@@ -165,7 +155,7 @@ export const canonizeInternalEmail = (email: string) => canonizeEmail(email, CAN
  * Only the back-end knows about custom domains. Use GET /addresses/canonical in those cases
  */
 export const canonizeEmailByGuess = (email: string) => {
-    const { domain } = getEmailParts(email);
+    const [, domain] = getEmailParts(email);
     const normalizedDomain = domain.toLocaleLowerCase();
     if (['protonmail.com', 'protonmail.ch', 'pm.me'].includes(normalizedDomain)) {
         return canonizeEmail(email, CANONIZE_SCHEME.PROTON);
@@ -232,7 +222,7 @@ export const getEmailTo = (str: string, decode?: boolean): string => {
 };
 
 export const majorDomainsMatcher = (inputValue: string) => {
-    const { localPart, domain: domainPart } = getEmailParts(inputValue);
+    const [localPart, domainPart] = getEmailParts(inputValue);
     if (!localPart || typeof domainPart !== 'string') {
         return [];
     }

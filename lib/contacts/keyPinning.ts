@@ -56,11 +56,11 @@ export const pinKeyUpdateContact = async ({
         return field === 'email' && canonizeEmail(value as string, scheme) === canonizeEmail(emailAddress, scheme);
     });
     const emailGroup = emailProperty?.group as string;
-    const keyProperties =
-        emailGroup &&
-        (signedProperties.filter(
-            ({ field, group }) => field === 'key' && group === emailGroup
-        ) as Required<ContactProperty>[]);
+    const keyProperties = emailGroup
+        ? signedProperties.filter((prop): prop is Required<ContactProperty> => {
+              return prop.field === 'key' && prop.group === emailGroup;
+          })
+        : undefined;
     if (!keyProperties) {
         throw new Error(c('Error').t`The key properties for ${emailAddress} could not be extracted`);
     }
