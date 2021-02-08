@@ -116,35 +116,31 @@ export const addPlusAlias = (email = '', plus = '') => {
  * See https://confluence.protontech.ch/display/MBE/Canonize+email+addresses
  */
 export const canonizeEmail = (email: string, scheme = CANONIZE_SCHEME.DEFAULT) => {
-    if (!validateEmailAddress(email)) {
-        throw new Error('Cannot canonize invalid email address');
-    }
     const [localPart, domain] = getEmailParts(email);
+    const at = email[email.length - domain.length - 1] === '@' ? '@' : '';
     if (scheme === CANONIZE_SCHEME.PROTON) {
         const cleanLocalPart = removePlusAliasLocalPart(localPart);
         const normalizedLocalPart = cleanLocalPart.replace(/[._-]/g, '').toLowerCase();
-        const normalizedDomain = domain.toLocaleLowerCase();
+        const normalizedDomain = domain.toLowerCase();
 
-        return `${normalizedLocalPart}@${normalizedDomain}`;
+        return `${normalizedLocalPart}${at}${normalizedDomain}`;
     }
     if (scheme === CANONIZE_SCHEME.GMAIL) {
         const cleanLocalPart = removePlusAliasLocalPart(localPart);
         const normalizedLocalPart = cleanLocalPart.replace(/[.]/g, '').toLowerCase();
-        const normalizedDomain = domain.toLocaleLowerCase();
+        const normalizedDomain = domain.toLowerCase();
 
-        return `${normalizedLocalPart}@${normalizedDomain}`;
+        return `${normalizedLocalPart}${at}${normalizedDomain}`;
     }
     if (scheme === CANONIZE_SCHEME.PLUS) {
         const cleanLocalPart = removePlusAliasLocalPart(localPart);
         const normalizedLocalPart = cleanLocalPart.toLowerCase();
-        const normalizedDomain = domain.toLocaleLowerCase();
+        const normalizedDomain = domain.toLowerCase();
 
-        return `${normalizedLocalPart}@${normalizedDomain}`;
+        return `${normalizedLocalPart}${at}${normalizedDomain}`;
     }
-    const normalizedLocalPart = localPart.toLowerCase();
-    const normalizedDomain = domain.toLocaleLowerCase();
 
-    return `${normalizedLocalPart}@${normalizedDomain}`;
+    return email.toLowerCase();
 };
 
 export const canonizeInternalEmail = (email: string) => canonizeEmail(email, CANONIZE_SCHEME.PROTON);
@@ -156,7 +152,7 @@ export const canonizeInternalEmail = (email: string) => canonizeEmail(email, CAN
  */
 export const canonizeEmailByGuess = (email: string) => {
     const [, domain] = getEmailParts(email);
-    const normalizedDomain = domain.toLocaleLowerCase();
+    const normalizedDomain = domain.toLowerCase();
     if (['protonmail.com', 'protonmail.ch', 'pm.me'].includes(normalizedDomain)) {
         return canonizeEmail(email, CANONIZE_SCHEME.PROTON);
     }
