@@ -1,4 +1,5 @@
 import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
+import { groupWith } from '../helpers/array';
 import { buildMailTo, getEmailTo, validateEmailAddress } from '../helpers/email';
 import { GetCanonicalEmails } from '../interfaces';
 import { Attendee } from '../interfaces/calendar';
@@ -202,4 +203,21 @@ export const withPmAttendees = async (
         ...vevent,
         attendee: pmAttendees,
     };
+};
+
+export const getDuplicateAttendees = (veventComponent: VcalVeventComponent) => {
+    const attendees = veventComponent.attendee?.map(({ parameters }) => ({
+        token: parameters?.['x-pm-token'],
+        email: parameters?.cn,
+    }));
+
+    if (attendees) {
+        const duplicateParticipants = groupWith((a, b) => {
+            return a.token === b.token;
+        }, attendees).map((group) => group.map(({ email }) => email)) as string[][];
+
+        if (duplicateParticipants.length < (attendees?.length || 0)) {
+            return duplicateParticipants;
+        }
+    }
 };
