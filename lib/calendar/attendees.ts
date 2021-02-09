@@ -1,11 +1,19 @@
 import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
 import { groupWith } from '../helpers/array';
 import { buildMailTo, getEmailTo, validateEmailAddress } from '../helpers/email';
+import { omit } from '../helpers/object';
 import { GetCanonicalEmails } from '../interfaces';
 import { Attendee } from '../interfaces/calendar';
-import { VcalAttendeeProperty, VcalOrganizerProperty, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import {
+    VcalAttendeeProperty,
+    VcalAttendeePropertyWithToken,
+    VcalOrganizerProperty,
+    VcalPmVeventComponent,
+    VcalVeventComponent,
+} from '../interfaces/calendar/VcalModel';
 import { RequireSome, SimpleMap } from '../interfaces/utils';
 import { ATTENDEE_PERMISSIONS, ATTENDEE_STATUS_API, ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from './constants';
+import { getAttendeeHasToken } from './vcalHelper';
 
 export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
     const uidEmail = `${uid}${normalizedEmail}`;
@@ -162,10 +170,10 @@ export const getSupportedAttendee = (attendee: VcalAttendeeProperty) => {
 export const withPmAttendees = async (
     vevent: VcalVeventComponent,
     getCanonicalEmails: GetCanonicalEmails
-): Promise<VcalVeventComponent> => {
+): Promise<VcalPmVeventComponent> => {
     const { uid, attendee: vcalAttendee } = vevent;
     if (!vcalAttendee?.length) {
-        return { ...vevent };
+        return omit(vevent, ['attendee']);
     }
     const attendeesWithEmail = vcalAttendee.map((attendee) => {
         const emailAddress = getAttendeeEmail(attendee);
@@ -182,7 +190,7 @@ export const withPmAttendees = async (
     const pmAttendees = await Promise.all(
         attendeesWithEmail.map(async ({ attendee, emailAddress }) => {
             const supportedAttendee = getSupportedAttendee(attendee);
-            if (supportedAttendee.parameters?.['x-pm-token']) {
+            if (getAttendeeHasToken(supportedAttendee)) {
                 return supportedAttendee;
             }
             const canonicalEmail = canonicalEmailMap[emailAddress];
@@ -205,19 +213,20 @@ export const withPmAttendees = async (
     };
 };
 
-export const getDuplicateAttendees = (veventComponent: VcalVeventComponent) => {
-    const attendees = veventComponent.attendee?.map(({ parameters }) => ({
-        token: parameters?.['x-pm-token'],
-        email: parameters?.cn,
+export const getDuplicateAttendees = (attendeesWithToken: VcalAttendeePropertyWithToken[]) => {
+    if (!attendeesWithToken.length) {
+        return;
+    }
+
+    const attendees = attendeesWithToken.map((attendee) => ({
+        token: attendee.parameters['x-pm-token'],
+        email: getAttendeeEmail(attendee),
     }));
+    const duplicateAttendees = groupWith((a, b) => a.token === b.token, attendees).map((group) =>
+        group.map(({ email }) => email)
+    );
 
-    if (attendees) {
-        const duplicateParticipants = groupWith((a, b) => {
-            return a.token === b.token;
-        }, attendees).map((group) => group.map(({ email }) => email)) as string[][];
-
-        if (duplicateParticipants.length < (attendees?.length || 0)) {
-            return duplicateParticipants;
-        }
+    if (duplicateAttendees.length < attendees.length) {
+        return duplicateAttendees;
     }
 };
