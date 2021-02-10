@@ -213,8 +213,8 @@ export const withPmAttendees = async (
     };
 };
 
-export const getDuplicateAttendees = (attendeesWithToken: VcalAttendeePropertyWithToken[]) => {
-    if (!attendeesWithToken.length) {
+export const getDuplicateAttendees = (attendeesWithToken?: VcalAttendeePropertyWithToken[]) => {
+    if (!attendeesWithToken?.length) {
         return;
     }
 
