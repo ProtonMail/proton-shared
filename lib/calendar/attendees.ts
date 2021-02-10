@@ -227,6 +227,6 @@ export const getDuplicateAttendees = (attendeesWithToken?: VcalAttendeePropertyW
     );
 
     if (duplicateAttendees.length < attendees.length) {
-        return duplicateAttendees;
+        return duplicateAttendees.filter((group) => group.length > 1);
     }
 };
