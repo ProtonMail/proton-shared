@@ -502,16 +502,14 @@ export const generateEmailBody = ({
 
     if (method === ICAL_METHOD.REQUEST) {
         if (isCreateEvent) {
-            return c('Email body for invitation').t`You are invited to: ${eventTitle}
+            return c('Email body for invitation').t`You are invited to ${eventTitle}
 ${eventDetailsText}`;
         }
-        return c('Email body for invitation').t`The following event has been updated.
-You were invited to: ${eventTitle}
+        return c('Email body for invitation').t`${eventTitle} has been updated.
 ${eventDetailsText}`;
     }
     if (method === ICAL_METHOD.CANCEL) {
-        return c('Email body for invitation').t`The following event has been cancelled.
-You were invited to: ${eventTitle}
+        return c('Email body for invitation').t`${eventTitle} has been cancelled.
 ${eventDetailsText}`;
     }
     if (method === ICAL_METHOD.REPLY) {
