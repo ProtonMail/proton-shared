@@ -1,19 +1,18 @@
 import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
 import { groupWith } from '../helpers/array';
-import { buildMailTo, getEmailTo, validateEmailAddress } from '../helpers/email';
+import { buildMailTo, canonizeEmailByGuess, getEmailTo, validateEmailAddress } from '../helpers/email';
 import { omit } from '../helpers/object';
 import { GetCanonicalEmails } from '../interfaces';
 import { Attendee } from '../interfaces/calendar';
 import {
     VcalAttendeeProperty,
-    VcalAttendeePropertyWithToken,
     VcalOrganizerProperty,
     VcalPmVeventComponent,
     VcalVeventComponent,
 } from '../interfaces/calendar/VcalModel';
 import { RequireSome, SimpleMap } from '../interfaces/utils';
 import { ATTENDEE_PERMISSIONS, ATTENDEE_STATUS_API, ICAL_ATTENDEE_ROLE, ICAL_ATTENDEE_STATUS } from './constants';
-import { getAttendeeHasToken } from './vcalHelper';
+import { getAttendeeHasToken, getAttendeesHaveToken } from './vcalHelper';
 
 export const generateAttendeeToken = async (normalizedEmail: string, uid: string) => {
     const uidEmail = `${uid}${normalizedEmail}`;
@@ -213,20 +212,33 @@ export const withPmAttendees = async (
     };
 };
 
-export const getDuplicateAttendees = (attendeesWithToken?: VcalAttendeePropertyWithToken[]) => {
-    if (!attendeesWithToken?.length) {
+export const getDuplicateAttendees = (attendees?: VcalAttendeeProperty[]) => {
+    if (!attendees?.length) {
         return;
     }
-
-    const attendees = attendeesWithToken.map((attendee) => ({
-        token: attendee.parameters['x-pm-token'],
-        email: getAttendeeEmail(attendee),
-    }));
-    const duplicateAttendees = groupWith((a, b) => a.token === b.token, attendees).map((group) =>
-        group.map(({ email }) => email)
-    );
-
-    if (duplicateAttendees.length < attendees.length) {
-        return duplicateAttendees.filter((group) => group.length > 1);
+    if (getAttendeesHaveToken(attendees)) {
+        const attendeesWithToken = attendees.map((attendee) => ({
+            token: attendee.parameters['x-pm-token'],
+            email: getAttendeeEmail(attendee),
+        }));
+        const duplicateAttendees = groupWith((a, b) => a.token === b.token, attendeesWithToken).map((group) =>
+            group.map(({ email }) => email)
+        );
+        return duplicateAttendees.length < attendees.length
+            ? duplicateAttendees.filter((group) => group.length > 1)
+            : undefined;
     }
+    // not all attendees have token, so we're gonna canonize emails and compare based on that
+    const attendeesWithCanonicalEmail = attendees.map((attendee) => {
+        const email = getAttendeeEmail(attendee);
+        const canonicalEmail = canonizeEmailByGuess(email);
+        return { email, canonicalEmail };
+    });
+    const duplicateAttendees = groupWith(
+        (a, b) => a.canonicalEmail === b.canonicalEmail,
+        attendeesWithCanonicalEmail
+    ).map((group) => group.map(({ email }) => email));
+    return duplicateAttendees.length < attendees.length
+        ? duplicateAttendees.filter((group) => group.length > 1)
+        : undefined;
 };
