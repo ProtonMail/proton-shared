@@ -391,14 +391,16 @@ const getFormattedDateInfo = (vevent: VcalVeventComponent) => {
         };
     }
     const formattedStartDateTime = formatUTC(toUTCDate(dtstart.value), 'PPp', { locale: dateLocale });
-    const formattedStartEndTime = dtend
-        ? formatUTC(toUTCDate(dtstart.value), 'PPp', { locale: dateLocale })
-        : undefined;
-    const { offset } = getTimezoneOffset(propertyToUTCDate(dtstart), getPropertyTzid(dtstart) || 'UTC');
-    const formattedOffset = `GMT${formatTimezoneOffset(offset)}`;
+    const formattedEndDateTime = dtend ? formatUTC(toUTCDate(dtend.value), 'PPp', { locale: dateLocale }) : undefined;
+    const { offset: startOffset } = getTimezoneOffset(propertyToUTCDate(dtstart), getPropertyTzid(dtstart) || 'UTC');
+    const { offset: endOffset } = dtend
+        ? getTimezoneOffset(propertyToUTCDate(dtend), getPropertyTzid(dtstart) || 'UTC')
+        : { offset: 0 };
+    const formattedStartOffset = `GMT${formatTimezoneOffset(startOffset)}`;
+    const formattedEndOffset = `GMT${formatTimezoneOffset(endOffset)}`;
     return {
-        formattedStart: `${formattedStartDateTime} (${formattedOffset})`,
-        formattedEnd: formattedStartEndTime ? `${formattedStartDateTime} (${formattedOffset})` : undefined,
+        formattedStart: `${formattedStartDateTime} (${formattedStartOffset})`,
+        formattedEnd: formattedEndDateTime ? `${formattedEndDateTime} (${formattedEndOffset})` : undefined,
         isAllDay,
         isSingleAllDay,
     };
@@ -453,8 +455,8 @@ const getWhenText = (vevent: VcalVeventComponent) => {
             : c('Email body for invitation (date part)').t`When: ${formattedStart} - ${formattedEnd}`;
     }
     return formattedEnd
-        ? c('Email body for invitation (date part)').t`When: ${formattedStart}`
-        : c('Email body for invitation (date part)').t`When: ${formattedStart} - ${formattedEnd}`;
+        ? c('Email body for invitation (date part)').t`When: ${formattedStart} - ${formattedEnd}`
+        : c('Email body for invitation (date part)').t`When: ${formattedStart}`;
 };
 
 const getEmailBodyTexts = (vevent: VcalVeventComponent) => {
