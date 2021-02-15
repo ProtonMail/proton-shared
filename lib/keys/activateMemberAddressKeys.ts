@@ -1,5 +1,6 @@
 import { encryptPrivateKey } from 'pmcrypto';
-import { Address, Api, DecryptedKey, UserModel as tsUserModel } from '../interfaces';
+import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
+import { Address, Api, DecryptedKey, KeyTransparencyState, UserModel as tsUserModel } from '../interfaces';
 import { MEMBER_PRIVATE } from '../constants';
 import { getSignedKeyList } from './signedKeyList';
 import { activateKeyRoute } from '../api/keys';
@@ -20,9 +21,16 @@ interface Args {
     addressKeys: DecryptedKey[];
     keyPassword: string;
     api: Api;
+    keyTransparencyState?: KeyTransparencyState;
 }
 
-export const activateMemberAddressKeys = async ({ address, addressKeys, keyPassword, api }: Args) => {
+export const activateMemberAddressKeys = async ({
+    address,
+    addressKeys,
+    keyPassword,
+    api,
+    keyTransparencyState,
+}: Args) => {
     if (!addressKeys.length) {
         return;
     }
@@ -30,6 +38,7 @@ export const activateMemberAddressKeys = async ({ address, addressKeys, keyPassw
         throw new Error('Password required to generate keys');
     }
     const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, addressKeys);
+    let ktMessageObject: KTInfoToLS | undefined;
     for (const addressKey of addressKeys) {
         const { ID, privateKey } = addressKey;
         const Key = address.Keys.find(({ ID: otherID }) => otherID === ID);
@@ -39,6 +48,19 @@ export const activateMemberAddressKeys = async ({ address, addressKeys, keyPassw
         const encryptedPrivateKey = await encryptPrivateKey(privateKey, keyPassword);
         const SignedKeyList = await getSignedKeyList(activeKeys);
 
+        if (keyTransparencyState) {
+            ktMessageObject = await verifySelfAuditResult(
+                address,
+                SignedKeyList,
+                keyTransparencyState.ktSelfAuditResult,
+                keyTransparencyState.lastSelfAudit,
+                keyTransparencyState.isRunning,
+                api
+            );
+        }
+
         await api(activateKeyRoute({ ID, PrivateKey: encryptedPrivateKey, SignedKeyList }));
     }
+
+    return ktMessageObject;
 };

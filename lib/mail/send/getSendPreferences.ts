@@ -21,6 +21,7 @@ const getSendPreferences = (
         hasPinnedKeys,
         warnings,
         error,
+        publicKeyKTInfo,
     } = encryptionPreferences;
     const isEncryptedToOutside = isEO(message);
     // override encrypt if necessary
@@ -42,6 +43,7 @@ const getSendPreferences = (
         hasPinnedKeys,
         warnings,
         error,
+        publicKeyKTInfo,
     };
 };
 

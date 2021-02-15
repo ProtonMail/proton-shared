@@ -1,6 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
 import { createMemberAddressKeysLegacy, createMemberAddressKeysV2, getDecryptedMemberKey } from './memberKeys';
-import { Api, Address, Member, EncryptionConfig } from '../interfaces';
+import { Api, Address, Member, EncryptionConfig, KeyTransparencyState } from '../interfaces';
 import { getHasMigratedAddressKeys } from './keyMigration';
 
 type OnUpdateCallback = (ID: string, update: { status: 'loading' | 'error' | 'ok'; result?: string }) => void;
@@ -14,6 +14,7 @@ interface MissingKeysMemberProcessArguments {
     member: Member;
     memberAddresses: Address[];
     memberAddressesToGenerate: Address[];
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const missingKeysMemberProcess = async ({
@@ -25,6 +26,7 @@ export const missingKeysMemberProcess = async ({
     memberAddresses,
     memberAddressesToGenerate,
     organizationKey,
+    keyTransparencyState,
 }: MissingKeysMemberProcessArguments) => {
     const PrimaryKey = member.Keys.find(({ Primary }) => Primary === 1);
 
@@ -42,8 +44,9 @@ export const missingKeysMemberProcess = async ({
             try {
                 onUpdate(memberAddress.ID, { status: 'loading' });
 
+                let triplet;
                 if (hasMigratedAddressKeys) {
-                    await createMemberAddressKeysV2({
+                    triplet = await createMemberAddressKeysV2({
                         api,
                         member,
                         memberAddress,
@@ -51,9 +54,10 @@ export const missingKeysMemberProcess = async ({
                         encryptionConfig,
                         memberUserKey: primaryMemberUserKey,
                         organizationKey,
+                        keyTransparencyState,
                     });
                 } else {
-                    await createMemberAddressKeysLegacy({
+                    triplet = await createMemberAddressKeysLegacy({
                         api,
                         member,
                         memberAddress,
@@ -61,10 +65,12 @@ export const missingKeysMemberProcess = async ({
                         encryptionConfig,
                         memberUserKey: primaryMemberUserKey,
                         organizationKey,
+                        keyTransparencyState,
                     });
                 }
 
                 onUpdate(memberAddress.ID, { status: 'ok' });
+                return triplet;
             } catch (e) {
                 onUpdate(memberAddress.ID, { status: 'error', result: e.message });
             }

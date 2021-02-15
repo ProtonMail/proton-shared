@@ -3,6 +3,7 @@ import { Address } from './Address';
 import { CONTACT_MIME_TYPES, CONTACT_PGP_SCHEMES, MIME_TYPES, PGP_SCHEMES, RECIPIENT_TYPES } from '../constants';
 import { MailSettings } from './MailSettings';
 import { Key } from './Key';
+import { SignedKeyListEpochs } from './SignedKeyList';
 
 export interface PublicKeyWithPref {
     publicKey: OpenPGPKey;
@@ -22,7 +23,7 @@ export interface ApiKeysConfig {
     Code?: number;
     RecipientType?: RECIPIENT_TYPES;
     MIMEType?: MIME_TYPES;
-    SignedKeyList?: any[];
+    SignedKeyList?: SignedKeyListEpochs;
     Warnings?: string[];
     Errors?: string[];
 }

@@ -95,6 +95,12 @@ export const updatePromptPin = (PromptPin: number) => ({
     data: { PromptPin },
 });
 
+export const updateKT = (KT: number) => ({
+    url: 'mail/v4/settings/kt',
+    method: 'put',
+    data: { KT },
+});
+
 export const updateAutocrypt = (Autocrypt: any) => ({
     url: 'mail/v4/settings/autocrypt',
     method: 'put',

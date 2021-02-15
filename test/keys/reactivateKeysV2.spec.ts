@@ -278,7 +278,7 @@ describe('reactivate keys', () => {
             onReactivation,
         });
 
-        expect(onReactivation.calls.count()).toEqual(7);
+        expect(onReactivation.calls.count()).toEqual(9);
         expect(onReactivation.calls.allArgs()).toEqual([
             ['2', 'ok'],
             ['b', 'ok'],
@@ -286,7 +286,9 @@ describe('reactivate keys', () => {
             ['b2', 'ok'],
             ['b1', jasmine.any(Error)],
             ['c1', 'ok'],
+            ['c1', jasmine.any(Error)],
             ['c2', 'ok'],
+            ['c2', jasmine.any(Error)],
         ]);
 
         expect(api.calls.count()).toEqual(3);

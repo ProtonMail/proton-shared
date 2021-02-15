@@ -1,5 +1,6 @@
+import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
 import { KeyImportData, OnKeyImportCallback } from './interface';
-import { Address, Api, DecryptedKey } from '../../interfaces';
+import { Address, Api, DecryptedKey, KeyTransparencyState } from '../../interfaces';
 import { reformatAddressKey } from '../addressKeys';
 import { getSignedKeyList } from '../signedKeyList';
 import reactivateKeysProcessLegacy from '../reactivation/reactivateKeysProcessLegacy';
@@ -15,6 +16,7 @@ export interface ImportKeysProcessLegacyArguments {
     keyPassword: string;
     address: Address;
     addressKeys: DecryptedKey[];
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 const importKeysProcessLegacy = async ({
@@ -24,6 +26,7 @@ const importKeysProcessLegacy = async ({
     onImport,
     address,
     addressKeys,
+    keyTransparencyState,
 }: ImportKeysProcessLegacyArguments) => {
     const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, addressKeys);
     const inactiveKeys = await getInactiveKeys(address.Keys, activeKeys);
@@ -40,6 +43,7 @@ const importKeysProcessLegacy = async ({
 
     let mutableActiveKeys = activeKeys;
 
+    let ktMessageObject: KTInfoToLS | undefined;
     for (const keyImportRecord of keysToImport) {
         try {
             const { privateKey } = keyImportRecord;
@@ -56,6 +60,17 @@ const importKeysProcessLegacy = async ({
             });
             const updatedActiveKeys = [...mutableActiveKeys, newActiveKey];
             const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
+
+            if (keyTransparencyState) {
+                ktMessageObject = await verifySelfAuditResult(
+                    address,
+                    SignedKeyList,
+                    keyTransparencyState.ktSelfAuditResult,
+                    keyTransparencyState.lastSelfAudit,
+                    keyTransparencyState.isRunning,
+                    api
+                );
+            }
 
             const { Key } = await api(
                 createAddressKeyRoute({
@@ -76,7 +91,7 @@ const importKeysProcessLegacy = async ({
         }
     }
 
-    await reactivateKeysProcessLegacy({
+    const [ktMessageObjectFromReactivate] = await reactivateKeysProcessLegacy({
         api,
         keyPassword,
         keyReactivationRecords: [
@@ -88,6 +103,8 @@ const importKeysProcessLegacy = async ({
         ],
         onReactivation: onImport,
     });
+
+    return !ktMessageObjectFromReactivate ? ktMessageObject : ktMessageObjectFromReactivate;
 };
 
 export default importKeysProcessLegacy;

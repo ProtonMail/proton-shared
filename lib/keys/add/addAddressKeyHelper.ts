@@ -1,5 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { ActiveKey, Address, Api, EncryptionConfig } from '../../interfaces';
+import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
+import { ActiveKey, Address, Api, EncryptionConfig, KeyTransparencyState } from '../../interfaces';
 import { createAddressKeyRoute, createAddressKeyRouteV2 } from '../../api/keys';
 import { DEFAULT_ENCRYPTION_CONFIG, ENCRYPTION_CONFIGS } from '../../constants';
 import { generateAddressKey, generateAddressKeyTokens } from '../addressKeys';
@@ -12,6 +13,7 @@ interface CreateAddressKeyLegacyArguments {
     address: Address;
     passphrase: string;
     activeKeys: ActiveKey[];
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const createAddressKeyLegacy = async ({
@@ -20,6 +22,7 @@ export const createAddressKeyLegacy = async ({
     encryptionConfig = ENCRYPTION_CONFIGS[DEFAULT_ENCRYPTION_CONFIG],
     passphrase,
     activeKeys,
+    keyTransparencyState,
 }: CreateAddressKeyLegacyArguments) => {
     const { privateKey, privateKeyArmored } = await generateAddressKey({
         email: address.Email,
@@ -29,6 +32,18 @@ export const createAddressKeyLegacy = async ({
     const newActiveKey = await getActiveKeyObject(privateKey, { ID: 'tmp', primary: getPrimaryFlag(activeKeys) });
     const updatedActiveKeys = [...activeKeys, newActiveKey];
     const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
+
+    let ktMessageObject: KTInfoToLS | undefined;
+    if (keyTransparencyState) {
+        ktMessageObject = await verifySelfAuditResult(
+            address,
+            SignedKeyList,
+            keyTransparencyState.ktSelfAuditResult,
+            keyTransparencyState.lastSelfAudit,
+            keyTransparencyState.isRunning,
+            api
+        );
+    }
 
     const { Key } = await api(
         createAddressKeyRoute({
@@ -40,7 +55,7 @@ export const createAddressKeyLegacy = async ({
     );
     newActiveKey.ID = Key.ID;
 
-    return [newActiveKey, updatedActiveKeys] as const;
+    return [newActiveKey, updatedActiveKeys, ktMessageObject] as const;
 };
 
 interface CreateAddressKeyV2Arguments {
@@ -49,6 +64,7 @@ interface CreateAddressKeyV2Arguments {
     encryptionConfig?: EncryptionConfig;
     address: Address;
     activeKeys: ActiveKey[];
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const createAddressKeyV2 = async ({
@@ -57,6 +73,7 @@ export const createAddressKeyV2 = async ({
     encryptionConfig = ENCRYPTION_CONFIGS[DEFAULT_ENCRYPTION_CONFIG],
     address,
     activeKeys,
+    keyTransparencyState,
 }: CreateAddressKeyV2Arguments) => {
     const { token, encryptedToken, signature } = await generateAddressKeyTokens(userKey);
     const { privateKey, privateKeyArmored } = await generateAddressKey({
@@ -67,6 +84,18 @@ export const createAddressKeyV2 = async ({
     const newActiveKey = await getActiveKeyObject(privateKey, { ID: 'tmp', primary: getPrimaryFlag(activeKeys) });
     const updatedActiveKeys = [...activeKeys, newActiveKey];
     const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
+
+    let ktMessageObject: KTInfoToLS | undefined;
+    if (keyTransparencyState) {
+        ktMessageObject = await verifySelfAuditResult(
+            address,
+            SignedKeyList,
+            keyTransparencyState.ktSelfAuditResult,
+            keyTransparencyState.lastSelfAudit,
+            keyTransparencyState.isRunning,
+            api
+        );
+    }
 
     const { Key } = await api(
         createAddressKeyRouteV2({
@@ -80,5 +109,5 @@ export const createAddressKeyV2 = async ({
     );
     newActiveKey.ID = Key.ID;
 
-    return [newActiveKey, updatedActiveKeys] as const;
+    return [newActiveKey, updatedActiveKeys, ktMessageObject] as const;
 };

@@ -1,6 +1,6 @@
 import { createAddressKeyLegacy, createAddressKeyV2 } from './addAddressKeyHelper';
 import { getHasMigratedAddressKeys } from '../keyMigration';
-import { Address, Api, DecryptedKey, EncryptionConfig } from '../../interfaces';
+import { Address, Api, DecryptedKey, EncryptionConfig, KeyTransparencyState } from '../../interfaces';
 import { getActiveKeys } from '../getActiveKeys';
 import { getPrimaryKey } from '../getPrimaryKey';
 
@@ -12,6 +12,7 @@ interface AddAddressKeysProcessArguments {
     addresses: Address[];
     encryptionConfig: EncryptionConfig;
     keyPassword: string;
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const addAddressKeysProcess = async ({
@@ -22,6 +23,7 @@ export const addAddressKeysProcess = async ({
     addressKeys,
     userKeys,
     keyPassword,
+    keyTransparencyState,
 }: AddAddressKeysProcessArguments) => {
     const hasMigratedAddressKeys = getHasMigratedAddressKeys(addresses);
 
@@ -38,6 +40,7 @@ export const addAddressKeysProcess = async ({
             encryptionConfig,
             activeKeys,
             address,
+            keyTransparencyState,
         });
     }
 
@@ -47,5 +50,6 @@ export const addAddressKeysProcess = async ({
         encryptionConfig,
         passphrase: keyPassword,
         activeKeys,
+        keyTransparencyState,
     });
 };

@@ -37,6 +37,7 @@ export interface MailSettings {
     Sign: number;
     PGPScheme: PACKAGE_TYPE;
     PromptPin: number;
+    KT: number;
     Autocrypt: number;
     NumMessagePerPage: number;
     DraftMIMEType: DRAFT_MIME_TYPES;

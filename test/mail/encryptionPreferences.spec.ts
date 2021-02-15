@@ -126,6 +126,7 @@ describe('extractEncryptionPreferences for an internal user', () => {
             isContactSignatureVerified: undefined,
             contactSignatureTimestamp: undefined,
             emailAddressWarnings: undefined,
+            publicKeyKTInfo: undefined,
         });
     });
 
@@ -157,6 +158,7 @@ describe('extractEncryptionPreferences for an internal user', () => {
             isContactSignatureVerified: true,
             contactSignatureTimestamp: new Date(0),
             emailAddressWarnings: undefined,
+            publicKeyKTInfo: undefined,
         });
     });
 
@@ -189,6 +191,7 @@ describe('extractEncryptionPreferences for an internal user', () => {
             isContactSignatureVerified: true,
             contactSignatureTimestamp: new Date(0),
             emailAddressWarnings: undefined,
+            publicKeyKTInfo: undefined,
         });
     });
 

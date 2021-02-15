@@ -1,4 +1,5 @@
 import { decryptPrivateKey, encryptPrivateKey, OpenPGPKey } from 'pmcrypto';
+import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
 import {
     EncryptionConfig,
     Address as tsAddress,
@@ -6,6 +7,7 @@ import {
     Member as tsMember,
     DecryptedKey,
     Key as tsKey,
+    KeyTransparencyState,
 } from '../interfaces';
 import { generateKeySaltAndPassphrase } from './keys';
 import { generateAddressKey, generateAddressKeyTokens } from './addressKeys';
@@ -34,6 +36,7 @@ interface SetupMemberKeySharedArgumentsS {
     password: string;
     organizationKey: OpenPGPKey;
     encryptionConfig: EncryptionConfig;
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const setupMemberKeyLegacy = async ({
@@ -43,6 +46,7 @@ export const setupMemberKeyLegacy = async ({
     password,
     organizationKey,
     encryptionConfig,
+    keyTransparencyState,
 }: SetupMemberKeySharedArgumentsS) => {
     const { salt: keySalt, passphrase: memberMailboxPassword } = await generateKeySaltAndPassphrase(password);
 
@@ -59,6 +63,18 @@ export const setupMemberKeyLegacy = async ({
     const newActiveKey = await getActiveKeyObject(privateKey, { ID: 'tmp', primary: 1 });
     const updatedActiveKeys = [newActiveKey];
     const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
+
+    let ktMessageObject: KTInfoToLS | undefined;
+    if (keyTransparencyState) {
+        ktMessageObject = await verifySelfAuditResult(
+            address,
+            SignedKeyList,
+            keyTransparencyState.ktSelfAuditResult,
+            keyTransparencyState.lastSelfAudit,
+            keyTransparencyState.isRunning,
+            api
+        );
+    }
 
     const PrimaryKey = {
         UserKey: privateKeyArmored,
@@ -89,7 +105,11 @@ export const setupMemberKeyLegacy = async ({
 
     newActiveKey.ID = Key.ID;
 
-    return updatedActiveKeys;
+    const userPublicKey = {
+        publicKey: privateKey.toPublic() as OpenPGPKey,
+    };
+
+    return { updatedActiveKeys, userPublicKeys: [userPublicKey], ktMessageObject };
 };
 
 export const setupMemberKeyV2 = async ({
@@ -99,6 +119,7 @@ export const setupMemberKeyV2 = async ({
     password,
     organizationKey,
     encryptionConfig,
+    keyTransparencyState,
 }: SetupMemberKeySharedArgumentsS) => {
     const { salt: keySalt, passphrase: memberKeyPassword } = await generateKeySaltAndPassphrase(password);
 
@@ -125,6 +146,18 @@ export const setupMemberKeyV2 = async ({
     const newActiveKey = await getActiveKeyObject(addressPrivateKey, { ID: 'tmp', primary: 1 });
     const updatedActiveKeys = [newActiveKey];
     const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
+
+    let ktMessageObject: KTInfoToLS | undefined;
+    if (keyTransparencyState) {
+        ktMessageObject = await verifySelfAuditResult(
+            address,
+            SignedKeyList,
+            keyTransparencyState.ktSelfAuditResult,
+            keyTransparencyState.lastSelfAudit,
+            keyTransparencyState.isRunning,
+            api
+        );
+    }
 
     const {
         Member: {
@@ -156,7 +189,11 @@ export const setupMemberKeyV2 = async ({
 
     newActiveKey.ID = Key.ID;
 
-    return updatedActiveKeys;
+    const userPublicKey = {
+        publicKey: userPrivateKey.toPublic() as OpenPGPKey,
+    };
+
+    return { updatedActiveKeys, userPublicKeys: [userPublicKey], ktMessageObject };
 };
 
 interface SetupMemberKeyArguments extends SetupMemberKeySharedArgumentsS {
@@ -177,6 +214,7 @@ interface CreateMemberAddressKeysLegacyArguments {
     memberUserKey: OpenPGPKey;
     organizationKey: OpenPGPKey;
     encryptionConfig: EncryptionConfig;
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const createMemberAddressKeysLegacy = async ({
@@ -187,6 +225,7 @@ export const createMemberAddressKeysLegacy = async ({
     memberUserKey,
     organizationKey,
     encryptionConfig,
+    keyTransparencyState,
 }: CreateMemberAddressKeysLegacyArguments) => {
     const {
         privateKey,
@@ -206,6 +245,18 @@ export const createMemberAddressKeysLegacy = async ({
     const updatedActiveKeys = [...activeKeys, newActiveKey];
     const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
 
+    let ktMessageObject: KTInfoToLS | undefined;
+    if (keyTransparencyState) {
+        ktMessageObject = await verifySelfAuditResult(
+            memberAddress,
+            SignedKeyList,
+            keyTransparencyState.ktSelfAuditResult,
+            keyTransparencyState.lastSelfAudit,
+            keyTransparencyState.isRunning,
+            api
+        );
+    }
+
     const { primary } = newActiveKey;
 
     const { MemberKey } = await api(
@@ -223,7 +274,11 @@ export const createMemberAddressKeysLegacy = async ({
 
     newActiveKey.ID = MemberKey.ID;
 
-    return updatedActiveKeys;
+    const userPublicKey = {
+        publicKey: memberUserKey.toPublic() as OpenPGPKey,
+    };
+
+    return [updatedActiveKeys, [userPublicKey], ktMessageObject];
 };
 
 interface CreateMemberAddressKeysV2Arguments {
@@ -234,6 +289,7 @@ interface CreateMemberAddressKeysV2Arguments {
     memberUserKey: OpenPGPKey;
     organizationKey: OpenPGPKey;
     encryptionConfig: EncryptionConfig;
+    keyTransparencyState?: KeyTransparencyState;
 }
 
 export const createMemberAddressKeysV2 = async ({
@@ -244,6 +300,7 @@ export const createMemberAddressKeysV2 = async ({
     memberUserKey,
     organizationKey,
     encryptionConfig,
+    keyTransparencyState,
 }: CreateMemberAddressKeysV2Arguments) => {
     const { token, signature, organizationSignature, encryptedToken } = await generateAddressKeyTokens(
         memberUserKey,
@@ -264,6 +321,18 @@ export const createMemberAddressKeysV2 = async ({
     const updatedActiveKeys = [...activeKeys, newActiveKey];
     const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
 
+    let ktMessageObject: KTInfoToLS | undefined;
+    if (keyTransparencyState) {
+        ktMessageObject = await verifySelfAuditResult(
+            memberAddress,
+            SignedKeyList,
+            keyTransparencyState.ktSelfAuditResult,
+            keyTransparencyState.lastSelfAudit,
+            keyTransparencyState.isRunning,
+            api
+        );
+    }
+
     const { primary } = newActiveKey;
 
     const { MemberKey } = await api(
@@ -281,5 +350,9 @@ export const createMemberAddressKeysV2 = async ({
 
     newActiveKey.ID = MemberKey.ID;
 
-    return updatedActiveKeys;
+    const userPublicKey = {
+        publicKey: memberUserKey.toPublic() as OpenPGPKey,
+    };
+
+    return [updatedActiveKeys, [userPublicKey], ktMessageObject];
 };
