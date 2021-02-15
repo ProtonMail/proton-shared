@@ -1,5 +1,4 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
 import {
     Api,
     User as tsUser,
@@ -7,7 +6,7 @@ import {
     DecryptedKey,
     Address,
     ActiveKey,
-    KeyTransparencyState,
+    KeyTransparencyVerifier,
 } from '../../interfaces';
 import { KeyReactivationData, KeyReactivationRecord, OnKeyReactivationCallback } from './interface';
 import { getPrimaryKey } from '../getPrimaryKey';
@@ -30,7 +29,7 @@ interface ReactivateUserKeysArguments {
     onReactivation: OnKeyReactivationCallback;
     keysToReactivate: KeyReactivationData[];
     keyPassword: string;
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const reactivateUserKeys = async ({
@@ -42,7 +41,7 @@ export const reactivateUserKeys = async ({
     keysToReactivate,
     onReactivation,
     keyPassword,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: ReactivateUserKeysArguments) => {
     const keyReactivationDataMap = addressRecordsInV2Format.reduce<SimpleMap<KeyReactivationData>>((acc, record) => {
         record.keysToReactivate.forEach((keyData) => {
@@ -91,20 +90,7 @@ export const reactivateUserKeys = async ({
                 mutableAddresses.map(async (address) => {
                     const updatedSignedKeyList = addressReactivationPayload.SignedKeyLists[address.ID];
                     if (updatedSignedKeyList) {
-                        let ktMessageObject: KTInfoToLS | undefined;
-                        if (keyTransparencyState) {
-                            ktMessageObject = await verifySelfAuditResult(
-                                address,
-                                updatedSignedKeyList,
-                                keyTransparencyState.ktSelfAuditResult,
-                                keyTransparencyState.lastSelfAudit,
-                                keyTransparencyState.isRunning,
-                                api
-                            );
-                        }
-                        if (ktMessageObject) {
-                            ktMessageObjectsMap.set(ktMessageObject.addressID, ktMessageObject);
-                        }
+                        await keyTransparencyVerifier?.({ address, signedKeyList: updatedSignedKeyList });
                         return {
                             ...address,
                             SignedKeyList: updatedSignedKeyList,
@@ -162,7 +148,7 @@ interface ReactivateAddressKeysV2Arguments {
     userKey: OpenPGPKey;
     onReactivation: OnKeyReactivationCallback;
     keysToReactivate: KeyReactivationData[];
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const reactivateAddressKeysV2 = async ({
@@ -172,11 +158,10 @@ export const reactivateAddressKeysV2 = async ({
     keysToReactivate,
     onReactivation,
     userKey,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: ReactivateAddressKeysV2Arguments) => {
     let mutableActiveKeys = activeKeys;
 
-    let ktMessageObject: KTInfoToLS | undefined;
     for (const keyToReactivate of keysToReactivate) {
         const { id, Key, privateKey: decryptedPrivateKey } = keyToReactivate;
         const { ID, Flags } = Key;
@@ -202,16 +187,7 @@ export const reactivateAddressKeysV2 = async ({
             const updatedActiveKeys = [...mutableActiveKeys, newActiveKey];
             const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
 
-            if (keyTransparencyState) {
-                ktMessageObject = await verifySelfAuditResult(
-                    address,
-                    SignedKeyList,
-                    keyTransparencyState.ktSelfAuditResult,
-                    keyTransparencyState.lastSelfAudit,
-                    keyTransparencyState.isRunning,
-                    api
-                );
-            }
+            await keyTransparencyVerifier?.({ address, signedKeyList: SignedKeyList });
 
             await api(
                 reactiveLegacyAddressKeyRouteV2({
@@ -231,7 +207,7 @@ export const reactivateAddressKeysV2 = async ({
         }
     }
 
-    return [mutableActiveKeys, ktMessageObject];
+    return mutableActiveKeys;
 };
 
 export interface ReactivateKeysProcessV2Arguments {
@@ -242,7 +218,7 @@ export interface ReactivateKeysProcessV2Arguments {
     userKeys: DecryptedKey[];
     keyReactivationRecords: KeyReactivationRecord[];
     onReactivation: OnKeyReactivationCallback;
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 const reactivateKeysProcessV2 = async ({
@@ -253,7 +229,7 @@ const reactivateKeysProcessV2 = async ({
     keyPassword,
     addresses: oldAddresses,
     userKeys: oldUserKeys,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: ReactivateKeysProcessV2Arguments) => {
     const {
         userRecord,
@@ -347,24 +323,19 @@ const reactivateKeysProcessV2 = async ({
 
             const activeAddressKeys = await getActiveKeys(address.SignedKeyList, address.Keys, addressKeys);
 
-            const [, ktMessageObject] = await reactivateAddressKeysV2({
+            await reactivateAddressKeysV2({
                 api,
                 address,
                 activeKeys: activeAddressKeys,
                 userKey: primaryPrivateUserKey,
                 onReactivation,
                 keysToReactivate,
-                keyTransparencyState,
+                keyTransparencyVerifier,
             });
-            if (Object.getOwnPropertyNames(ktMessageObject).includes('message')) {
-                ktMessageObjectsMap.set(address.ID, ktMessageObject);
-            }
         } catch (e) {
             keysToReactivate.forEach(({ id }) => onReactivation(id, e));
         }
     }
-
-    return Array.from(ktMessageObjectsMap.values());
 };
 
 export default reactivateKeysProcessV2;

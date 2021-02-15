@@ -1,13 +1,13 @@
 import { getHasMigratedAddressKeys } from '../keyMigration';
 import importKeysProcessLegacy, { ImportKeysProcessLegacyArguments } from './importKeysProcessLegacy';
 import importKeysProcessV2, { ImportKeysProcessV2Arguments } from './importKeysProcessV2';
-import { Address, DecryptedKey, KeyTransparencyState } from '../../interfaces';
+import { Address, DecryptedKey, KeyTransparencyVerifier } from '../../interfaces';
 import { getPrimaryKey } from '../getPrimaryKey';
 
 interface Arguments extends Omit<ImportKeysProcessV2Arguments, 'userKey'>, ImportKeysProcessLegacyArguments {
     addresses: Address[];
     userKeys: DecryptedKey[];
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const importKeysProcess = async ({
@@ -19,7 +19,7 @@ export const importKeysProcess = async ({
     keyImportRecords,
     keyPassword,
     onImport,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: Arguments) => {
     const hasMigratedAddressKeys = getHasMigratedAddressKeys(addresses);
 
@@ -36,7 +36,7 @@ export const importKeysProcess = async ({
             addressKeys,
             onImport,
             userKey: primaryPrivateUserKey,
-            keyTransparencyState,
+            keyTransparencyVerifier,
         });
     }
 
@@ -47,6 +47,6 @@ export const importKeysProcess = async ({
         address,
         addressKeys,
         onImport,
-        keyTransparencyState,
+        keyTransparencyVerifier,
     });
 };

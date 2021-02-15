@@ -1,7 +1,6 @@
 import { OpenPGPKey } from 'pmcrypto';
-import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
 
-import { Address, Api, DecryptedKey, KeyTransparencyState } from '../../interfaces';
+import { Address, Api, DecryptedKey, KeyTransparencyVerifier } from '../../interfaces';
 import { KeyImportData, OnKeyImportCallback } from './interface';
 import { getActiveKeyObject, getActiveKeys, getPrimaryFlag } from '../getActiveKeys';
 import { getInactiveKeys } from '../getInactiveKeys';
@@ -19,7 +18,7 @@ export interface ImportKeysProcessV2Arguments {
     address: Address;
     addressKeys: DecryptedKey[];
     userKey: OpenPGPKey;
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 const importKeysProcessV2 = async ({
@@ -29,7 +28,7 @@ const importKeysProcessV2 = async ({
     address,
     addressKeys,
     userKey,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: ImportKeysProcessV2Arguments) => {
     const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, addressKeys);
     const inactiveKeys = await getInactiveKeys(address.Keys, activeKeys);
@@ -46,7 +45,6 @@ const importKeysProcessV2 = async ({
 
     let mutableActiveKeys = activeKeys;
 
-    let ktMessageObject: KTInfoToLS | undefined;
     for (const keyImportRecord of keysToImport) {
         try {
             const { privateKey } = keyImportRecord;
@@ -66,16 +64,7 @@ const importKeysProcessV2 = async ({
             const updatedActiveKeys = [...mutableActiveKeys, newActiveKey];
             const SignedKeyList = await getSignedKeyList(updatedActiveKeys);
 
-            if (keyTransparencyState) {
-                ktMessageObject = await verifySelfAuditResult(
-                    address,
-                    SignedKeyList,
-                    keyTransparencyState.ktSelfAuditResult,
-                    keyTransparencyState.lastSelfAudit,
-                    keyTransparencyState.isRunning,
-                    api
-                );
-            }
+            await keyTransparencyVerifier?.({ address, signedKeyList: SignedKeyList });
 
             const { Key } = await api(
                 createAddressKeyRouteV2({
@@ -99,20 +88,15 @@ const importKeysProcessV2 = async ({
         }
     }
 
-    let [, ktMessageObjectFromReactivate] = await reactivateAddressKeysV2({
+    await reactivateAddressKeysV2({
         api,
         address,
         activeKeys: mutableActiveKeys,
         userKey,
         keysToReactivate,
         onReactivation: onImport,
+        keyTransparencyVerifier,
     });
-
-    if (!Object.getOwnPropertyNames(ktMessageObjectFromReactivate).includes('message')) {
-        return ktMessageObject;
-    }
-    ktMessageObjectFromReactivate = ktMessageObjectFromReactivate as { message: string; addressID: string };
-    return ktMessageObjectFromReactivate.message !== '' ? ktMessageObjectFromReactivate : ktMessageObject;
 };
 
 export default importKeysProcessV2;
