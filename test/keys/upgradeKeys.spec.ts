@@ -68,7 +68,7 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
-            const { newKeyPassword } = await upgradeV2KeysHelper({
+            const newKeyPassword = await upgradeV2KeysHelper({
                 user: User,
                 addresses: Addresses,
                 loginPassword: keyPassword,
@@ -166,7 +166,7 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
-            const { newKeyPassword } = await upgradeV2KeysHelper({
+            const newKeyPassword = await upgradeV2KeysHelper({
                 user: User,
                 addresses: Addresses,
                 loginPassword: keyPassword,
@@ -241,7 +241,7 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
-            const { newKeyPassword } = await upgradeV2KeysHelper({
+            const newKeyPassword = await upgradeV2KeysHelper({
                 user: User,
                 addresses: Addresses,
                 loginPassword: '123',
@@ -315,7 +315,7 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
-            const { newKeyPassword } = await upgradeV2KeysHelper({
+            const newKeyPassword = await upgradeV2KeysHelper({
                 user: User,
                 addresses: Addresses,
                 loginPassword: '123',
@@ -386,7 +386,7 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
-            const { newKeyPassword } = await upgradeV2KeysHelper({
+            const newKeyPassword = await upgradeV2KeysHelper({
                 user: User,
                 addresses: Addresses,
                 loginPassword: keyPassword,
@@ -431,7 +431,7 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
-            const { newKeyPassword } = await upgradeV2KeysHelper({
+            const newKeyPassword = await upgradeV2KeysHelper({
                 user: User,
                 addresses: Addresses,
                 loginPassword: keyPassword,

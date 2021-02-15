@@ -277,7 +277,6 @@ const reactivateKeysProcessV2 = async ({
 
     let userKeys = oldUserKeys;
     let addresses = oldAddresses;
-    const ktMessageObjectsMap = new Map();
     if (userRecord) {
         try {
             const activeUserKeys = await getActiveKeys(null, user.Keys, userKeys);
@@ -290,12 +289,10 @@ const reactivateKeysProcessV2 = async ({
                 onReactivation,
                 keyPassword,
                 addressRecordsInV2Format,
+                keyTransparencyVerifier,
             });
             userKeys = userKeysReactivationResult.userKeys;
             addresses = userKeysReactivationResult.addresses;
-            userKeysReactivationResult.ktMessageObjectsMap.forEach((value, key) => {
-                ktMessageObjectsMap.set(key, value);
-            });
         } catch (e) {
             userRecord.keysToReactivate.forEach(({ id }) => onReactivation(id, e));
             addressRecordsInV2Format.forEach(({ keysToReactivate }) => {

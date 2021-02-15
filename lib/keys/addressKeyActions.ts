@@ -1,6 +1,5 @@
-import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
 import { removeKeyRoute, setKeyFlagsRoute, setKeyPrimaryRoute } from '../api/keys';
-import { Address, Api, DecryptedKey, KeyTransparencyState } from '../interfaces';
+import { Address, Api, DecryptedKey, KeyTransparencyVerifier } from '../interfaces';
 import { getSignedKeyList } from './signedKeyList';
 import { getActiveKeys } from './getActiveKeys';
 
@@ -9,7 +8,7 @@ export const setPrimaryAddressKey = async (
     address: Address,
     keys: DecryptedKey[],
     ID: string,
-    keyTransparencyState?: KeyTransparencyState
+    keyTransparencyVerifier?: KeyTransparencyVerifier
 ) => {
     const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, keys);
     const oldActiveKey = activeKeys.find(({ ID: otherID }) => ID === otherID);
@@ -26,21 +25,9 @@ export const setPrimaryAddressKey = async (
         .sort((a, b) => b.primary - a.primary);
     const signedKeyList = await getSignedKeyList(updatedActiveKeys);
 
-    let ktMessageObject: KTInfoToLS | undefined;
-    if (keyTransparencyState) {
-        ktMessageObject = await verifySelfAuditResult(
-            address,
-            signedKeyList,
-            keyTransparencyState.ktSelfAuditResult,
-            keyTransparencyState.lastSelfAudit,
-            keyTransparencyState.isRunning,
-            api
-        );
-    }
+    await keyTransparencyVerifier?.({ address, signedKeyList });
 
     await api(setKeyPrimaryRoute({ ID, SignedKeyList: signedKeyList }));
-
-    return ktMessageObject;
 };
 
 export const deleteAddressKey = async (
@@ -48,7 +35,7 @@ export const deleteAddressKey = async (
     address: Address,
     keys: DecryptedKey[],
     ID: string,
-    keyTransparencyState?: KeyTransparencyState
+    keyTransparencyVerifier?: KeyTransparencyVerifier
 ) => {
     const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, keys);
     const oldActiveKey = activeKeys.find(({ ID: otherID }) => ID === otherID);
@@ -58,21 +45,9 @@ export const deleteAddressKey = async (
     const updatedActiveKeys = activeKeys.filter(({ ID: otherID }) => ID !== otherID);
     const signedKeyList = await getSignedKeyList(updatedActiveKeys);
 
-    let ktMessageObject: KTInfoToLS | undefined;
-    if (keyTransparencyState) {
-        ktMessageObject = await verifySelfAuditResult(
-            address,
-            signedKeyList,
-            keyTransparencyState.ktSelfAuditResult,
-            keyTransparencyState.lastSelfAudit,
-            keyTransparencyState.isRunning,
-            api
-        );
-    }
+    await keyTransparencyVerifier?.({ address, signedKeyList });
 
     await api(removeKeyRoute({ ID, SignedKeyList: signedKeyList }));
-
-    return ktMessageObject;
 };
 
 export const setAddressKeyFlags = async (
@@ -81,7 +56,7 @@ export const setAddressKeyFlags = async (
     keys: DecryptedKey[],
     ID: string,
     flags: number,
-    keyTransparencyState?: KeyTransparencyState
+    keyTransparencyVerifier?: KeyTransparencyVerifier
 ) => {
     const activeKeys = await getActiveKeys(address.SignedKeyList, address.Keys, keys);
     const updatedActiveKeys = activeKeys.map((activeKey) => {
@@ -95,19 +70,7 @@ export const setAddressKeyFlags = async (
     });
     const signedKeyList = await getSignedKeyList(updatedActiveKeys);
 
-    let ktMessageObject: KTInfoToLS | undefined;
-    if (keyTransparencyState) {
-        ktMessageObject = await verifySelfAuditResult(
-            address,
-            signedKeyList,
-            keyTransparencyState.ktSelfAuditResult,
-            keyTransparencyState.lastSelfAudit,
-            keyTransparencyState.isRunning,
-            api
-        );
-    }
+    await keyTransparencyVerifier?.({ address, signedKeyList });
 
     await api(setKeyFlagsRoute({ ID, Flags: flags, SignedKeyList: signedKeyList }));
-
-    return ktMessageObject;
 };

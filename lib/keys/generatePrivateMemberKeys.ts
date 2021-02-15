@@ -1,4 +1,4 @@
-import { Address, Api, DecryptedKey, UserModel as tsUserModel, KeyTransparencyState } from '../interfaces';
+import { Address, Api, DecryptedKey, UserModel as tsUserModel, KeyTransparencyVerifier } from '../interfaces';
 import { ADDRESS_STATUS, MEMBER_PRIVATE } from '../constants';
 import { createAddressKeyLegacy, createAddressKeyV2 } from './add';
 import { getHasMigratedAddressKeys } from './keyMigration';
@@ -21,7 +21,7 @@ interface GenerateAllPrivateMemberKeys {
     userKeys: DecryptedKey[];
     api: Api;
     keyPassword: string;
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const generateAllPrivateMemberKeys = async ({
@@ -30,7 +30,7 @@ export const generateAllPrivateMemberKeys = async ({
     userKeys,
     keyPassword,
     api,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: GenerateAllPrivateMemberKeys) => {
     if (!keyPassword) {
         throw new Error('Password required to generate keys');
@@ -48,7 +48,7 @@ export const generateAllPrivateMemberKeys = async ({
                     userKey: primaryUserKey,
                     address,
                     activeKeys: [],
-                    keyTransparencyState,
+                    keyTransparencyVerifier,
                 });
             })
         );
@@ -61,7 +61,7 @@ export const generateAllPrivateMemberKeys = async ({
                 address,
                 passphrase: keyPassword,
                 activeKeys: [],
-                keyTransparencyState,
+                keyTransparencyVerifier,
             });
         })
     );

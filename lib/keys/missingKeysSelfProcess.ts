@@ -1,4 +1,4 @@
-import { Api, Address, EncryptionConfig, DecryptedKey, KeyTransparencyState } from '../interfaces';
+import { Api, Address, EncryptionConfig, DecryptedKey, KeyTransparencyVerifier } from '../interfaces';
 import { getHasMigratedAddressKeys } from './keyMigration';
 import { getPrimaryKey } from './getPrimaryKey';
 import { createAddressKeyLegacy, createAddressKeyV2 } from './add';
@@ -13,7 +13,7 @@ interface MissingKeysSelfProcessArguments {
     addressesToGenerate: Address[];
     password: string;
     onUpdate: OnUpdateCallback;
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const missingKeysSelfProcess = ({
@@ -24,7 +24,7 @@ export const missingKeysSelfProcess = ({
     addressesToGenerate,
     password,
     onUpdate,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: MissingKeysSelfProcessArguments) => {
     const hasMigratedAddressKeys = getHasMigratedAddressKeys(addresses);
     const primaryUserKey = getPrimaryKey(userKeys)?.privateKey;
@@ -37,30 +37,27 @@ export const missingKeysSelfProcess = ({
             try {
                 onUpdate(address.ID, { status: 'loading' });
 
-                let ktMessageObject;
                 if (hasMigratedAddressKeys) {
-                    [, , ktMessageObject] = await createAddressKeyV2({
+                    await createAddressKeyV2({
                         api,
                         address,
                         encryptionConfig,
                         userKey: primaryUserKey,
                         activeKeys: [],
-                        keyTransparencyState,
+                        keyTransparencyVerifier,
                     });
                 } else {
-                    [, , ktMessageObject] = await createAddressKeyLegacy({
+                    await createAddressKeyLegacy({
                         api,
                         address,
                         encryptionConfig,
                         passphrase: password,
                         activeKeys: [],
-                        keyTransparencyState,
+                        keyTransparencyVerifier,
                     });
                 }
 
                 onUpdate(address.ID, { status: 'ok' });
-
-                return ktMessageObject;
             } catch (e) {
                 onUpdate(address.ID, { status: 'error', result: e.message });
             }

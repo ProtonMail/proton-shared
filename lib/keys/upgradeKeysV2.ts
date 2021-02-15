@@ -1,6 +1,5 @@
 import { computeKeyPassword, generateKeySalt } from 'pm-srp';
 import { decryptPrivateKey, OpenPGPKey } from 'pmcrypto';
-import { verifySelfAuditResult, KTInfoToLS } from 'key-transparency-web-client';
 
 import {
     Address as tsAddress,
@@ -11,7 +10,7 @@ import {
     CachedOrganizationKey,
     DecryptedKey,
     SignedKeyList,
-    KeyTransparencyState,
+    KeyTransparencyVerifier,
 } from '../interfaces';
 import { getOrganizationKeys } from '../api/organization';
 import { hasAddressKeyMigration as originalHasAdressKeyMigration, USER_ROLES } from '../constants';
@@ -98,7 +97,7 @@ interface UpgradeV2KeysLegacyArgs {
         address: tsAddress;
         keys: DecryptedKey[];
     }[];
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const upgradeV2KeysLegacy = async ({
@@ -137,11 +136,11 @@ export const upgradeV2KeysLegacy = async ({
             credentials: { password: loginPassword },
             config,
         });
-        return { newKeyPassword, ktMessageObjects: [] };
+        return newKeyPassword;
     }
 
     await api(config);
-    return { newKeyPassword, ktMessageObjects: [] };
+    return newKeyPassword;
 };
 
 export const upgradeV2KeysV2 = async ({
@@ -152,10 +151,10 @@ export const upgradeV2KeysV2 = async ({
     clearKeyPassword,
     isOnePasswordMode,
     api,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: UpgradeV2KeysLegacyArgs) => {
     if (!userKeys.length) {
-        return {};
+        return;
     }
     const keySalt = generateKeySalt();
     const newKeyPassword: string = await computeKeyPassword(clearKeyPassword, keySalt);
@@ -188,20 +187,9 @@ export const upgradeV2KeysV2 = async ({
         })
     );
 
-    const ktMessageObjects = await Promise.all(
+    await Promise.all(
         reformattedAddressesKeys.map(async ({ address, signedKeyList }) => {
-            let ktMessageObject: KTInfoToLS | undefined;
-            if (keyTransparencyState) {
-                ktMessageObject = await verifySelfAuditResult(
-                    address,
-                    signedKeyList,
-                    keyTransparencyState.ktSelfAuditResult,
-                    keyTransparencyState.lastSelfAudit,
-                    keyTransparencyState.isRunning,
-                    api
-                );
-            }
-            return ktMessageObject;
+            await keyTransparencyVerifier?.({ address, signedKeyList });
         })
     );
 
@@ -228,11 +216,11 @@ export const upgradeV2KeysV2 = async ({
             credentials: { password: loginPassword },
             config,
         });
-        return { newKeyPassword, ktMessageObjects };
+        return newKeyPassword;
     }
 
     await api(config);
-    return { newKeyPassword, ktMessageObjects };
+    return newKeyPassword;
 };
 
 interface UpgradeV2KeysHelperArgs {
@@ -244,7 +232,7 @@ interface UpgradeV2KeysHelperArgs {
     api: Api;
     isOnePasswordMode?: boolean;
     hasAddressKeyMigration?: boolean;
-    keyTransparencyState?: KeyTransparencyState;
+    keyTransparencyVerifier?: KeyTransparencyVerifier;
 }
 
 export const upgradeV2KeysHelper = async ({
@@ -256,7 +244,7 @@ export const upgradeV2KeysHelper = async ({
     isOnePasswordMode,
     api,
     hasAddressKeyMigration = originalHasAdressKeyMigration,
-    keyTransparencyState,
+    keyTransparencyVerifier,
 }: UpgradeV2KeysHelperArgs) => {
     const userKeys = await getDecryptedUserKeys({ user, userKeys: user.Keys, keyPassword });
 
@@ -287,7 +275,7 @@ export const upgradeV2KeysHelper = async ({
     }
     // Not allowed signed into member
     if (user.OrganizationPrivateKey) {
-        return {};
+        return;
     }
 
     const userKeyMap = toMap(user.Keys, 'ID');
@@ -304,7 +292,7 @@ export const upgradeV2KeysHelper = async ({
     });
 
     if (!hasDecryptedUserKeysToUpgrade && !hasDecryptedAddressKeyToUpgrade) {
-        return {};
+        return;
     }
 
     if (hasAddressKeyMigration) {
@@ -316,7 +304,7 @@ export const upgradeV2KeysHelper = async ({
             loginPassword,
             clearKeyPassword,
             isOnePasswordMode,
-            keyTransparencyState,
+            keyTransparencyVerifier,
         });
     }
 
