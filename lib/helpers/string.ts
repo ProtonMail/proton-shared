@@ -113,6 +113,24 @@ export const getInitial = (value = '') => {
         .join('');
 };
 
+/**
+ * Extracts the initials from the first and last name
+ *
+ * @param fullName
+ */
+export const getInitials = (fullName = '') => {
+    const [first = '', ...rest] = fullName
+        .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '') // Remove specific punctuation
+        .replace(/\s{2,}/g, ' ')
+        .split(' ');
+    const last = rest.reverse()[0];
+
+    return [first, last]
+        .filter(Boolean)
+        .map((letter = '') => [...letter.toUpperCase()][0]) // We use the spread operator to support Unicode characters
+        .join('');
+};
+
 export const hasProtonDomain = (email = '') => {
     const protonmailRegex = /@(protonmail\.(com|ch)|pm\.me|)$/i;
     return protonmailRegex.test(email);
