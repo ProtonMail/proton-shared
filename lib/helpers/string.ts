@@ -100,20 +100,6 @@ export const truncateMore = ({ string = '', charsToDisplayStart = 0, charsToDisp
 };
 
 /**
- * Extract 2 first initials
- */
-export const getInitial = (value = '') => {
-    const [first = '', second = ''] = value
-        .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '') // Remove specific punctuation
-        .replace(/\s{2,}/g, ' ') // Remove any extra spaces
-        .split(' ');
-    return [first, second]
-        .filter(Boolean)
-        .map((letter = '') => [...letter.toUpperCase()][0]) // We use the spread operator to support Unicode characters
-        .join('');
-};
-
-/**
  * Extracts the initials from the first and last name
  *
  * @param fullName
