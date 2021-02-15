@@ -5,6 +5,7 @@ import {
     findLongestMatchingIndex,
     truncate,
     truncateMore,
+    getInitials,
 } from '../../lib/helpers/string';
 
 describe('string', () => {
@@ -60,6 +61,28 @@ describe('string', () => {
 
         it('should keep only character and number', () => {
             expect(getInitial('22 - Name')).toEqual('2N');
+        });
+    });
+
+    describe('getInitials', () => {
+        it('should handle empty parameter', () => {
+            expect(getInitials()).toEqual('');
+        });
+
+        it('should handle unique word', () => {
+            expect(getInitials('熊猫')).toEqual('熊');
+        });
+
+        it('should return 2 first initials and capitalize it', () => {
+            expect(getInitials('Lorem ipsum dolor sit amet')).toEqual('LA');
+        });
+
+        it('should handle emoji', () => {
+            expect(getInitials('🐼 Dog')).toEqual('🐼D');
+        });
+
+        it('should keep only character and number', () => {
+            expect(getInitials('22 - Name Mame')).toEqual('2M');
         });
     });
 
