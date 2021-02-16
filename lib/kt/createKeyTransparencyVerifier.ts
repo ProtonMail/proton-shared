@@ -1,5 +1,5 @@
 import { KTInfoToLS, ktSaveToLS, verifySelfAuditResult } from 'key-transparency-web-client';
-import { Api, DecryptedKey, KeyTransparencyState, KeyTransparencyVerifier } from '../interfaces';
+import { Api, KeyPair, KeyTransparencyState, KeyTransparencyVerifier } from '../interfaces';
 
 export const createKeyTransparencyVerifier = ({
     keyTransparencyState,
@@ -22,7 +22,7 @@ export const createKeyTransparencyVerifier = ({
         ktMessageObjects.push(ktMessageObject);
     };
 
-    const commit = async (userKeys: DecryptedKey[]) => {
+    const commit = async (userKeys: KeyPair[]) => {
         for (const ktMessageObject of ktMessageObjects) {
             await ktSaveToLS(ktMessageObject, userKeys, api);
         }

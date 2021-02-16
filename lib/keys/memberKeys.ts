@@ -7,6 +7,7 @@ import {
     DecryptedKey,
     Key as tsKey,
     KeyTransparencyVerifier,
+    KeyPair,
 } from '../interfaces';
 import { generateKeySaltAndPassphrase } from './keys';
 import { generateAddressKey, generateAddressKeyTokens } from './addressKeys';
@@ -94,10 +95,9 @@ export const setupMemberKeyLegacy = async ({
 
     newActiveKey.ID = Key.ID;
 
-    const userKey: DecryptedKey = {
-        ID: privateKey.getKeyId(),
-        privateKey: privateKey as OpenPGPKey,
-        publicKey: privateKey.toPublic() as OpenPGPKey,
+    const userKey: KeyPair = {
+        privateKey,
+        publicKey: privateKey.toPublic(),
     };
 
     return { updatedActiveKeys, userKeys: [userKey] };
@@ -170,10 +170,9 @@ export const setupMemberKeyV2 = async ({
 
     newActiveKey.ID = Key.ID;
 
-    const userKey: DecryptedKey = {
-        ID: userPrivateKey.getKeyId(),
-        privateKey: userPrivateKey as OpenPGPKey,
-        publicKey: userPrivateKey.toPublic() as OpenPGPKey,
+    const userKey: KeyPair = {
+        privateKey: userPrivateKey,
+        publicKey: userPrivateKey.toPublic(),
     };
 
     return { updatedActiveKeys, userKeys: [userKey] };

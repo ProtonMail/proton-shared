@@ -68,16 +68,17 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
-            const newKeyPassword = await upgradeV2KeysHelper({
-                user: User,
-                addresses: Addresses,
-                loginPassword: keyPassword,
-                keyPassword,
-                clearKeyPassword: keyPassword,
-                isOnePasswordMode: true,
-                api,
-                hasAddressKeyMigration: true,
-            });
+            const [newKeyPassword] =
+                (await upgradeV2KeysHelper({
+                    user: User,
+                    addresses: Addresses,
+                    loginPassword: keyPassword,
+                    keyPassword,
+                    clearKeyPassword: keyPassword,
+                    isOnePasswordMode: true,
+                    api,
+                    hasAddressKeyMigration: true,
+                })) || [];
             if (!newKeyPassword) {
                 throw new Error('Missing new password');
             }
@@ -166,16 +167,17 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve({ Modulus }), Promise.resolve());
-            const newKeyPassword = await upgradeV2KeysHelper({
-                user: User,
-                addresses: Addresses,
-                loginPassword: keyPassword,
-                keyPassword,
-                clearKeyPassword: keyPassword,
-                isOnePasswordMode: true,
-                api,
-                hasAddressKeyMigration: false,
-            });
+            const [newKeyPassword] =
+                (await upgradeV2KeysHelper({
+                    user: User,
+                    addresses: Addresses,
+                    loginPassword: keyPassword,
+                    keyPassword,
+                    clearKeyPassword: keyPassword,
+                    isOnePasswordMode: true,
+                    api,
+                    hasAddressKeyMigration: false,
+                })) || [];
             if (!newKeyPassword) {
                 throw new Error('Missing new password');
             }
@@ -241,16 +243,17 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
-            const newKeyPassword = await upgradeV2KeysHelper({
-                user: User,
-                addresses: Addresses,
-                loginPassword: '123',
-                keyPassword,
-                clearKeyPassword: keyPassword,
-                isOnePasswordMode: false,
-                api,
-                hasAddressKeyMigration: false,
-            });
+            const [newKeyPassword] =
+                (await upgradeV2KeysHelper({
+                    user: User,
+                    addresses: Addresses,
+                    loginPassword: '123',
+                    keyPassword,
+                    clearKeyPassword: keyPassword,
+                    isOnePasswordMode: false,
+                    api,
+                    hasAddressKeyMigration: false,
+                })) || [];
             expect(api.calls.all().length).toBe(1);
             if (!newKeyPassword) {
                 throw new Error('Missing password');
@@ -315,16 +318,17 @@ describe('upgrade keys v2', () => {
                 },
             ] as tsAddress[];
             const api = jasmine.createSpy('api').and.returnValues(Promise.resolve());
-            const newKeyPassword = await upgradeV2KeysHelper({
-                user: User,
-                addresses: Addresses,
-                loginPassword: '123',
-                keyPassword,
-                clearKeyPassword: keyPassword,
-                isOnePasswordMode: false,
-                api,
-                hasAddressKeyMigration: false,
-            });
+            const [newKeyPassword] =
+                (await upgradeV2KeysHelper({
+                    user: User,
+                    addresses: Addresses,
+                    loginPassword: '123',
+                    keyPassword,
+                    clearKeyPassword: keyPassword,
+                    isOnePasswordMode: false,
+                    api,
+                    hasAddressKeyMigration: false,
+                })) || [];
             if (!newKeyPassword) {
                 throw new Error('Missing password');
             }
