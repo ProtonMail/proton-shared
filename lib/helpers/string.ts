@@ -99,17 +99,12 @@ export const truncateMore = ({ string = '', charsToDisplayStart = 0, charsToDisp
     return strBegin + omission + strEnd;
 };
 
-/**
- * Extracts the initials from the first and last name
- *
- * @param fullName
- */
 export const getInitials = (fullName = '') => {
     const [first = '', ...rest] = fullName
         .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '') // Remove specific punctuation
         .replace(/\s{2,}/g, ' ')
         .split(' ');
-    const last = rest.reverse()[0];
+    const last = rest[rest.length - 1];
 
     return [first, last]
         .filter(Boolean)

@@ -46,6 +46,10 @@ describe('string', () => {
             expect(getInitials()).toEqual('');
         });
 
+        it('should handle single character', () => {
+            expect(getInitials('q')).toEqual('Q');
+        });
+
         it('should handle unique word', () => {
             expect(getInitials('熊猫')).toEqual('熊');
         });
