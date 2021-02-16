@@ -43,51 +43,20 @@ export const exportContact = async (cards: ContactCard[], userKeys: DecryptedKey
     return { properties, vcard: toICAL(properties).toString() };
 };
 
-export const exportContacts = async (
-    contactIDs: string[],
-    userKeys: DecryptedKey[],
-    signal: AbortSignal,
-    api: Api,
-    callbackSuccess?: (contactContent: string) => void,
-    callbackFailure?: (contactID: string) => void
-) => {
-    const apiWithAbort = (config: any) => api({ ...config, signal });
-    const results = { success: [] as { name: string; vcard: string }[], failures: [] as string[] };
-
-    for (const contactID of contactIDs) {
-        const {
-            Contact: { Cards },
-        } = (await apiWithAbort(getContact(contactID))) as { Contact: Contact };
-
-        if (signal.aborted) {
-            return results;
-        }
-        try {
+/**
+ * Exports contacts including api request and decryption
+ * Beware it requires all contacts in //, don't use this for more than 10 contacts
+ */
+export const exportContacts = (contactIDs: string[], userKeys: DecryptedKey[], api: Api) =>
+    Promise.all(
+        contactIDs.map(async (contactID) => {
+            const {
+                Contact: { Cards },
+            } = (await api(getContact(contactID))) as { Contact: Contact };
             const { properties, vcard } = await exportContact(Cards, userKeys);
-
-            // need to check again for signal.aborted because the abort
-            // may have taken place during await prepareContact
-            if (!signal.aborted) {
-                callbackSuccess?.(vcard);
-            }
-
-            results.success.push({ name: getFileName(properties), vcard });
-        } catch (error) {
-            // need to check again for signal.aborted because the abort
-            // may have taken place during await prepareContact
-            if (!signal.aborted) {
-                callbackFailure?.(contactID);
-            }
-
-            results.failures.push(contactID);
-        }
-
-        // avoid overloading API
-        await wait(API_SAFE_INTERVAL);
-    }
-
-    return results;
-};
+            return { name: getFileName(properties), vcard };
+        })
+    );
 
 /**
  * Export contacts from a labelID full featured with batch requests, callbacks, abort
