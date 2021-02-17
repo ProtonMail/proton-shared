@@ -434,11 +434,11 @@ export const generateEmailSubject = ({
                 : c('Email subject').t`Update for an event starting on ${formattedStart}`;
         }
         if (method === ICAL_METHOD.CANCEL) {
-            return c('Email subject').t`Cancellation of an event starting on ${formattedStart})`;
+            return c('Email subject').t`Cancellation of an event starting on ${formattedStart}`;
         }
         return isCreateEvent
-            ? c('Email subject').t`Invitation for an event starting on ${formattedStart})`
-            : c('Email subject').t`Update for an event starting on ${formattedStart})`;
+            ? c('Email subject').t`Invitation for an event starting on ${formattedStart}`
+            : c('Email subject').t`Update for an event starting on ${formattedStart}`;
     }
     if (method === ICAL_METHOD.REPLY) {
         const eventTitle = getDisplayTitle(vevent.summary?.value);
@@ -492,12 +492,12 @@ export const generateEmailBody = ({
     vevent,
     isCreateEvent,
     partstat,
-    displayName,
+    emailAddress,
 }: {
     method: ICAL_METHOD;
     vevent: VcalVeventComponent;
     isCreateEvent?: boolean;
-    displayName?: string;
+    emailAddress?: string;
     partstat?: ICAL_ATTENDEE_STATUS;
 }) => {
     const { eventTitle, eventDetailsText } = getEmailBodyTexts(vevent);
@@ -511,24 +511,23 @@ ${eventDetailsText}`;
 ${eventDetailsText}`;
     }
     if (method === ICAL_METHOD.CANCEL) {
-        return c('Email body for invitation').t`${eventTitle} has been cancelled.
-${eventDetailsText}`;
+        return c('Email body for invitation').t`${eventTitle} has been cancelled.`;
     }
     if (method === ICAL_METHOD.REPLY) {
-        if (!partstat || !displayName) {
+        if (!partstat || !emailAddress) {
             throw new Error('Missing parameters for reply body');
         }
         if (partstat === ICAL_ATTENDEE_STATUS.ACCEPTED) {
             return c('Email body for response to invitation')
-                .t`${displayName} has accepted your invitation to: ${eventTitle}`;
+                .t`${emailAddress} has accepted your invitation to: ${eventTitle}`;
         }
         if (partstat === ICAL_ATTENDEE_STATUS.TENTATIVE) {
             return c('Email body for response to invitation')
-                .t`${displayName} has tentatively accepted your invitation to: ${eventTitle}`;
+                .t`${emailAddress} has tentatively accepted your invitation to: ${eventTitle}`;
         }
         if (partstat === ICAL_ATTENDEE_STATUS.DECLINED) {
             return c('Email body for response to invitation')
-                .t`${displayName} has declined your invitation to: ${eventTitle}`;
+                .t`${emailAddress} has declined your invitation to: ${eventTitle}`;
         }
         throw new Error('Unanswered partstat');
     }
