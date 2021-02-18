@@ -45,7 +45,8 @@ export const getHostname = (url = '') => {
  * Return a param (native) map based on the search string
  */
 export const getSearchParams = (search: string): { [key: string]: string } => {
-    const params = new URLSearchParams(search);
+    const searchHash = search === '' ? '' : `?${search.slice(1)}`;
+    const params = new URLSearchParams(searchHash);
 
     const result: { [key: string]: string } = {};
 
@@ -65,7 +66,8 @@ export const changeSearchParams = (
     search: string,
     newParams: { [key: string]: string | undefined }
 ) => {
-    const params = new URLSearchParams(search);
+    const searchHash = search === '' ? '' : `?${search.slice(1)}`;
+    const params = new URLSearchParams(searchHash);
 
     Object.keys(newParams).forEach((key) => {
         if (newParams[key] === undefined) {
@@ -76,7 +78,7 @@ export const changeSearchParams = (
     });
 
     const queryString = params.toString();
-    const urlFragment = (queryString === '' ? '' : '?') + queryString;
+    const urlFragment = (queryString === '' ? '' : '#') + queryString;
 
     return pathname + urlFragment;
 };
