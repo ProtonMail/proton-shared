@@ -52,10 +52,8 @@ export const getContactKeyIds = async (contact: Contact, fromEncryption: boolean
  * Return first match of the keyWithIds in the keyIds list
  */
 export const matchKeys = (keysWithIds: KeyWithIds[], keyIdsToFind: KeyId[]) => {
-    const result = keysWithIds.find(
-        ({ ids }) =>
-            ids.filter((idFromKey) => keyIdsToFind.filter((keyIdToFind) => idFromKey.equals(keyIdToFind)).length > 0)
-                .length > 0
+    const result = keysWithIds.find(({ ids }) =>
+        ids.some((idFromKey) => keyIdsToFind.some((keyIdToFind) => idFromKey.equals(keyIdToFind)))
     );
 
     return result?.key;

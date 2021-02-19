@@ -37,7 +37,7 @@ export const dropDataEncryptedWithAKey = async (
                     if (card.Type === CONTACT_CARD_TYPE.SIGNED) {
                         const { signature } = await signMessage({
                             data: card.Data,
-                            privateKeys,
+                            privateKeys: [privateKeys[0]],
                             armor: true,
                             detached: true,
                         });
