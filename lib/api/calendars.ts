@@ -264,7 +264,7 @@ export const getCalendarAlarm = (calendarID: string, alarmID: string) => ({
 });
 
 export interface CreateCalendarEventSyncData {
-    Overwrite: 0 | 1;
+    Overwrite?: 0 | 1;
     Event: CreateCalendarEventData;
 }
 export interface DeleteCalendarEventSyncData {
@@ -275,6 +275,7 @@ export interface UpdateCalendarEventSyncData {
     Event?: Omit<CreateCalendarEventData, 'SharedKeyPacket' | 'CalendarKeyPacket'>;
 }
 export interface CreateLinkedCalendarEventsSyncData {
+    Overwrite: 0 | 1;
     Event: CreateLinkedCalendarEventData;
 }
 export interface SyncMultipleEventsData {

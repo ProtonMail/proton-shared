@@ -100,6 +100,8 @@ describe('calendar encryption', () => {
             privateKey: primaryCalendarKey,
             publicKey: primaryCalendarKey.toPublic(),
             signingKey: primaryCalendarKey, // Should be an address key
+            isCreateEvent: true,
+            isSwitchCalendar: false,
         });
         expect(data).toEqual({
             SharedKeyPacket:
@@ -166,9 +168,14 @@ describe('calendar encryption', () => {
             privateKey: primaryCalendarKey,
             publicKey,
             signingKey: addressKey,
+            isCreateEvent: true,
+            isSwitchCalendar: false,
         });
 
-        const [sharedSessionKey, calendarSessionKey] = await readSessionKeys(data, primaryCalendarKey);
+        const [sharedSessionKey, calendarSessionKey] = await readSessionKeys({
+            calendarEvent: data,
+            privateKeys: primaryCalendarKey,
+        });
         const {
             veventComponent: otherVeventComponent,
             verificationStatus: verificationStatusOther,

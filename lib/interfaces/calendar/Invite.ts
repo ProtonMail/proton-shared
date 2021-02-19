@@ -27,6 +27,11 @@ export interface SingleEditWidgetData {
     ids: string[];
 }
 
+export interface PmInviteData {
+    sharedEventID: string;
+    sharedSessionKey: string;
+}
+
 export interface Participant {
     vcalComponent: VcalAttendeeProperty | VcalOrganizerProperty;
     name: string;
