@@ -61,7 +61,7 @@ export const getApiErrorMessage = (e: Error) => {
         return message || c('Info').t`Servers are unreachable.`;
     }
     if (getIsTimeoutError(e)) {
-        return message || c('Error').t`Request timed out.`;
+        return message || c('Error').t`Request timed out. et boom`;
     }
     if (message) {
         return `${message}`;
