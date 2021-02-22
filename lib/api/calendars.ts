@@ -1,4 +1,4 @@
-import { RequireSome } from '../interfaces/utils';
+import { Nullable, RequireSome } from '../interfaces/utils';
 import { PaginationParams } from './interface';
 import { Attendee, Calendar, CalendarEventData, CalendarSettings, CalendarUserSettings } from '../interfaces/calendar';
 
@@ -322,4 +322,26 @@ export const syncMultipleEvents = (calendarID: string, data: SyncMultipleEventsD
     url: `${CALENDAR_V1}/${calendarID}/events/sync`,
     method: 'put',
     data,
+});
+
+export interface CreatePublicLinks {
+    AccessLevel: number;
+    CacheKeySalt: string;
+    CacheKeyHash: string;
+    EncryptedPassphrase: Nullable<string>;
+    EncryptedPurpose: Nullable<string>;
+    EncryptedCacheKey: string;
+    PassphraseID: Nullable<string>;
+}
+
+export const createPublicLink = (calendarID: string, data: CreatePublicLinks) => ({
+    url: `${CALENDAR_V1}/${calendarID}`,
+    // url: `calendar/v1/${calendarID}/urls`,
+    method: 'post',
+    data,
+});
+export const getPublicLinks = (calendarID: string) => ({
+    url: `${CALENDAR_V1}/${calendarID}`,
+    // url: `calendar/v1/${calendarID}/urls`,
+    method: 'get',
 });

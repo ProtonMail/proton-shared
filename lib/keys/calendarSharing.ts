@@ -2,8 +2,8 @@ import { generateKeySalt } from 'pm-srp';
 import { createMessage, decryptMessage, encryptMessage, generateSessionKey, OpenPGPKey } from 'pmcrypto';
 import { AES256 } from '../constants';
 import { hasBit } from '../helpers/bitset';
-import { uint8ArrayToBase64String, uint8ArrayToString } from '../helpers/encoding';
-import { getSHA256Base64String, getSHA256BinaryString, getSHA256String } from '../helpers/hash';
+import { uint8ArrayToBase64String } from '../helpers/encoding';
+import { getSHA256Base64String } from '../helpers/hash';
 import { CalendarKey, CalendarKeyFlags, Passphrase } from '../interfaces/calendar';
 import { decryptPassphrase } from './calendarKeys';
 
@@ -73,11 +73,11 @@ export const getDescryptedPassphrase = ({
         throw new Error('Member passphrase not found');
     }
 
-    const { Passphrase, Signature } = memberPassphrase;
+    const { Passphrase: armoredPassphrase, Signature: armoredSignature } = memberPassphrase;
 
     return decryptPassphrase({
-        armoredPassphrase: Passphrase,
-        armoredSignature: Signature,
+        armoredPassphrase,
+        armoredSignature,
         publicKeys,
         privateKeys,
     });
