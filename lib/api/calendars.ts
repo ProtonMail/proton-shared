@@ -335,13 +335,11 @@ export interface CreatePublicLinks {
 }
 
 export const createPublicLink = (calendarID: string, data: CreatePublicLinks) => ({
-    url: `${CALENDAR_V1}/${calendarID}`,
-    // url: `calendar/v1/${calendarID}/urls`,
+    url: `${CALENDAR_V1}/${calendarID}/urls`,
     method: 'post',
     data,
 });
 export const getPublicLinks = (calendarID: string) => ({
-    url: `${CALENDAR_V1}/${calendarID}`,
-    // url: `calendar/v1/${calendarID}/urls`,
+    url: `${CALENDAR_V1}/${calendarID}/urls`,
     method: 'get',
 });
