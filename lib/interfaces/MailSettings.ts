@@ -1,19 +1,21 @@
 import { DRAFT_MIME_TYPES } from '../constants';
 
+export interface AutoResponder {
+    StartTime: number;
+    EndTime: number;
+    Repeat: number;
+    DaysSelected: number[];
+    Subject: string;
+    Message: string;
+    IsEnabled: boolean;
+    Zone: string;
+}
+
 export interface MailSettings {
     DisplayName: string;
     Signature: string;
     Theme: string;
-    AutoResponder: {
-        StartTime: number;
-        Endtime: number;
-        Repeat: number;
-        DaysSelected: number[];
-        Subject: string;
-        Message: string;
-        IsEnabled: boolean;
-        Zone: string;
-    };
+    AutoResponder: AutoResponder;
     AutoSaveContacts: number;
     AutoWildcardSearch: number;
     ComposerMode: number;
