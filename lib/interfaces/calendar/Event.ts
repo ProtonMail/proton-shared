@@ -73,6 +73,11 @@ export interface SyncMultipleApiResponse {
     Responses: SyncMultipleApiResponses[];
 }
 
+export interface UpdatePersonalPartApiResponse {
+    Code: number;
+    Event: CalendarEvent;
+}
+
 export interface UpdatePartstatApiResponse {
     Code: number;
     Attendee: Attendee;

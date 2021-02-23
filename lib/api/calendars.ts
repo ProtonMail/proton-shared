@@ -179,6 +179,10 @@ export interface CreateCalendarEventData extends CreateCalendarEventBlobData {
 export interface CreateSingleCalendarEventData extends CreateCalendarEventData {
     MemberID: string;
 }
+export interface CreateSinglePersonalEventData {
+    MemberID: string;
+    PersonalEventContent?: Omit<CalendarEventData, 'Author'>;
+}
 export interface CreateLinkedCalendarEventData
     extends RequireSome<Partial<CreateCalendarEventData>, 'SharedKeyPacket'> {
     UID: string;
@@ -199,6 +203,12 @@ export const updateEvent = (calendarID: string, eventID: string, data: CreateSin
 export const deleteEvent = (calendarID: string, eventID: string) => ({
     url: `${CALENDAR_V1}/${calendarID}/events/${eventID}`,
     method: 'delete',
+});
+
+export const updatePersonalEventPart = (calendarID: string, eventID: string, data: CreateSinglePersonalEventData) => ({
+    url: `${CALENDAR_V1}/${calendarID}/events/${eventID}/personal`,
+    method: 'put',
+    data,
 });
 
 export const updateAttendeePartstat = (

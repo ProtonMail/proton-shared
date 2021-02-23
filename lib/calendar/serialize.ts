@@ -105,6 +105,20 @@ export const formatData = ({
 };
 
 /**
+ * Format just the personal data into what the API expects.
+ */
+export const formatPersonalData = (personalSignedPart?: SignPartResult) => {
+    if (!personalSignedPart) {
+        return;
+    }
+    return {
+        Type: SIGNED,
+        Data: personalSignedPart.data,
+        Signature: getArmoredSignatureString(personalSignedPart.signature),
+    };
+};
+
+/**
  * Split the properties of the component into parts.
  */
 const getParts = (eventComponent: VcalVeventComponent) => {
@@ -182,4 +196,19 @@ export const createCalendarEvent = async ({
         attendeesEncryptedPart,
         attendeesClearPart: attendeesPart[CLEAR_TEXT],
     });
+};
+
+/**
+ * Create just the personal event from an internal vcal component.
+ */
+interface CreatePersonalEventArguments {
+    eventComponent: VcalVeventComponent;
+    signingKey: OpenPGPKey;
+}
+export const createPersonalEvent = async ({ eventComponent, signingKey }: CreatePersonalEventArguments) => {
+    const { personalPart } = getParts(eventComponent);
+
+    const personalSignedPart = await signPart(personalPart[SIGNED], signingKey);
+
+    return formatPersonalData(personalSignedPart);
 };
