@@ -1,3 +1,5 @@
+import { getUnixTime } from 'date-fns';
+import { serverTime } from 'pmcrypto';
 import { c } from 'ttag';
 import { format as formatUTC } from '../../date-fns-utc';
 import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
@@ -8,6 +10,7 @@ import { dateLocale } from '../../i18n';
 import { Address, GetVTimezones } from '../../interfaces';
 import {
     Attendee,
+    CalendarEvent,
     CalendarSettings,
     Participant,
     SETTINGS_NOTIFICATION_TYPE,
@@ -21,7 +24,7 @@ import {
 import { ContactEmail } from '../../interfaces/contacts';
 import { RequireSome } from '../../interfaces/utils';
 import { formatSubject, RE_PREFIX } from '../../mail/messages';
-import { getAttendeeEmail } from '../attendees';
+import { getAttendeeEmail, toIcsPartstat } from '../attendees';
 import { ICAL_ATTENDEE_STATUS, ICAL_METHOD } from '../constants';
 import { getDisplayTitle } from '../helper';
 import { getIsRruleEqual } from '../rruleEqual';
@@ -35,7 +38,7 @@ import {
     getPropertyTzid,
     getSequence,
 } from '../vcalHelper';
-import { withDtstamp, withSummary } from '../veventHelper';
+import { getIsEventCancelled, withDtstamp, withSummary } from '../veventHelper';
 
 export const getParticipantHasAddressID = (
     participant: Participant
@@ -573,4 +576,67 @@ export const getUpdatedInviteVevent = (
         return { ...newVevent, attendee: withResetPartstatAttendees };
     }
     return { ...newVevent };
+};
+
+export const getResetParstatData = (singleEdits: CalendarEvent[], token: string, partstat: ICAL_ATTENDEE_STATUS) => {
+    const updateTime = getUnixTime(serverTime());
+    const updatePartstatData = singleEdits
+        .map((event) => {
+            if (getIsEventCancelled(event)) {
+                // no need to reset the partsat as it should have been done already
+                return;
+            }
+            const selfAttendee = event.Attendees.find(({ Token }) => Token === token);
+            if (!selfAttendee) {
+                return;
+            }
+            const oldPartstat = toIcsPartstat(selfAttendee.Status);
+            if ([ICAL_ATTENDEE_STATUS.NEEDS_ACTION, partstat].includes(oldPartstat)) {
+                // no need to reset the partstat as it's already reset or it coincides with the new partstat
+                return;
+            }
+            return {
+                attendeeID: selfAttendee.ID,
+                eventID: event.ID,
+                calendarID: event.CalendarID,
+                updateTime,
+                partstat: oldPartstat,
+            };
+        })
+        .filter(isTruthy);
+    const updatePersonalPartData = updatePartstatData
+        .map(({ eventID, calendarID, partstat }) => {
+            if (![ICAL_ATTENDEE_STATUS.ACCEPTED, ICAL_ATTENDEE_STATUS.TENTATIVE].includes(partstat)) {
+                // no need to reset the partstat as it's already reset or it coincides with the new partstat
+                return;
+            }
+            return { eventID, calendarID };
+        })
+        .filter(isTruthy);
+
+    return { updatePartstatData, updatePersonalPartData };
+};
+
+export const getHasNonCancelledSingleEdits = (singleEdits: CalendarEvent[]) => {
+    return singleEdits.some((event) => !getIsEventCancelled(event));
+};
+
+export const getMustResetPartstat = (singleEdits: CalendarEvent[], token?: string, partstat?: ICAL_ATTENDEE_STATUS) => {
+    if (!token || !partstat) {
+        return false;
+    }
+    return singleEdits.some((event) => {
+        if (getIsEventCancelled(event)) {
+            return false;
+        }
+        const selfAttendee = event.Attendees.find(({ Token }) => Token === token);
+        if (!selfAttendee) {
+            return false;
+        }
+        const oldPartstat = toIcsPartstat(selfAttendee.Status);
+        if ([ICAL_ATTENDEE_STATUS.NEEDS_ACTION, partstat].includes(oldPartstat)) {
+            return false;
+        }
+        return true;
+    });
 };

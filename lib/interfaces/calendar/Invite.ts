@@ -23,10 +23,6 @@ export interface CalendarWidgetData {
     calendarSettings?: CalendarSettings;
 }
 
-export interface SingleEditWidgetData {
-    ids: string[];
-}
-
 export interface PmInviteData {
     sharedEventID: string;
     sharedSessionKey: string;
