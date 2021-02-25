@@ -339,7 +339,27 @@ export const createPublicLink = (calendarID: string, data: CreatePublicLinks) =>
     method: 'post',
     data,
 });
+
 export const getPublicLinks = (calendarID: string) => ({
     url: `${CALENDAR_V1}/${calendarID}/urls`,
     method: 'get',
+});
+
+export const deletePublicLink = ({ calendarID, urlID }: { calendarID: string; urlID: string }) => ({
+    url: `${CALENDAR_V1}/${calendarID}/urls/${urlID}`,
+    method: 'delete',
+});
+
+export const editPublicLink = ({
+    calendarID,
+    urlID,
+    encryptedPurpose,
+}: {
+    calendarID: string;
+    urlID: string;
+    encryptedPurpose: string;
+}) => ({
+    url: `${CALENDAR_V1}/${calendarID}/urls/${urlID}`,
+    method: 'put',
+    data: { encryptedPurpose },
 });

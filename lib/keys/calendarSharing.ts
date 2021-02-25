@@ -1,11 +1,22 @@
-import { generateKeySalt } from 'pm-srp';
-import { createMessage, decryptMessage, encryptMessage, generateSessionKey, OpenPGPKey } from 'pmcrypto';
+import getRandomValues from 'get-random-values';
+import {
+    arrayToBinaryString,
+    createMessage,
+    decryptMessage,
+    encryptMessage,
+    generateSessionKey,
+    OpenPGPKey,
+} from 'pmcrypto';
 import { AES256 } from '../constants';
+import { encodeBase64 } from '../helpers/base64';
 import { hasBit } from '../helpers/bitset';
 import { uint8ArrayToBase64String } from '../helpers/encoding';
 import { getSHA256Base64String } from '../helpers/hash';
 import { CalendarKey, CalendarKeyFlags, Passphrase } from '../interfaces/calendar';
+import { Nullable } from '../interfaces/utils';
 import { decryptPassphrase } from './calendarKeys';
+
+export const generateRandomBits = (number: number) => getRandomValues(new Uint8Array(number / 8));
 
 export const keyCharAt = (key: string, i: number) => key.charCodeAt(Math.floor(i % key.length));
 
@@ -14,13 +25,16 @@ export const xorEncrypt = (key: string, data: string) =>
 
 export const decryptPurpose = async ({
     encryptedPurpose,
+    privateKeys,
     publicKeys,
 }: {
     encryptedPurpose: string;
+    privateKeys: OpenPGPKey[];
     publicKeys: OpenPGPKey[];
 }) =>
     decryptMessage({
         message: createMessage(encryptedPurpose),
+        privateKeys,
         publicKeys,
     });
 
@@ -92,7 +106,7 @@ export const generateEncryptedPassphrase = ({
 }) => uint8ArrayToBase64String(xorEncrypt(passphraseKey, decryptedPassphrase));
 
 export const generateCacheKey = async () => uint8ArrayToBase64String(await generateSessionKey(AES256));
-export const generateCacheKeySalt = () => generateKeySalt();
+export const generateCacheKeySalt = () => encodeBase64(arrayToBinaryString(generateRandomBits(64)));
 
 export const getCacheKeyHash = async ({ cacheKey, cacheKeySalt }: { cacheKey: string; cacheKeySalt: string }) =>
     getSHA256Base64String(`${cacheKeySalt}${cacheKey}`);
@@ -122,6 +136,20 @@ export const submitData = () => {
     //
 };
 
-export const buildLink = () => {
-    //
+export const buildLink = async ({
+    urlID,
+    accessLevel,
+    passphraseKey,
+    cacheKey,
+}: {
+    urlID: string;
+    accessLevel: number;
+    passphraseKey: Nullable<string>;
+    cacheKey: string;
+}) => {
+    if (accessLevel === 1 && passphraseKey) {
+        return `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics?CacheKey=${cacheKey}&PassphraseKey=${passphraseKey}`;
+    }
+
+    return `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics?CacheKey=${cacheKey}`;
 };
