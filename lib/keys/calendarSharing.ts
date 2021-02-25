@@ -41,11 +41,9 @@ export const decryptPurpose = async ({
 export const generateEncryptedPurpose = async ({
     purpose,
     publicKeys,
-}: // privateKeys,
-{
+}: {
     purpose?: string;
     publicKeys: OpenPGPKey[];
-    // privateKeys: OpenPGPKey[];
 }) => {
     if (!purpose) {
         return null;
@@ -55,7 +53,6 @@ export const generateEncryptedPurpose = async ({
         await encryptMessage({
             message: createMessage(purpose),
             publicKeys,
-            // privateKeys,
         })
     ).data;
 };
