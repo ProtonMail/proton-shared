@@ -7,6 +7,7 @@ import {
     generateSessionKey,
     OpenPGPKey,
 } from 'pmcrypto';
+import { ACCESS_LEVEL } from '../calendar/interface';
 import { AES256 } from '../constants';
 import { encodeBase64 } from '../helpers/base64';
 import { hasBit } from '../helpers/bitset';
@@ -140,11 +141,11 @@ export const buildLink = async ({
     cacheKey,
 }: {
     urlID: string;
-    accessLevel: number;
+    accessLevel: ACCESS_LEVEL;
     passphraseKey: Nullable<string>;
     cacheKey: string;
 }) => {
-    if (accessLevel === 1 && passphraseKey) {
+    if (accessLevel === ACCESS_LEVEL.Full && passphraseKey) {
         return `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics?CacheKey=${cacheKey}&PassphraseKey=${passphraseKey}`;
     }
 
