@@ -105,6 +105,10 @@ export const getParticipant = ({
     return result;
 };
 
+export const generateUpdateTime = () => {
+    return getUnixTime(serverTime());
+};
+
 interface CreateInviteVeventParams {
     method: ICAL_METHOD;
     attendeesTo?: VcalAttendeeProperty[];
@@ -578,9 +582,13 @@ export const getUpdatedInviteVevent = (
     return { ...newVevent };
 };
 
-export const getResetParstatData = (singleEdits: CalendarEvent[], token: string, partstat: ICAL_ATTENDEE_STATUS) => {
-    const updateTime = getUnixTime(serverTime());
-    const updatePartstatData = singleEdits
+export const getResetPartstatActions = (
+    singleEdits: CalendarEvent[],
+    token: string,
+    partstat: ICAL_ATTENDEE_STATUS
+) => {
+    const updateTime = generateUpdateTime();
+    const updatePartstatActions = singleEdits
         .map((event) => {
             if (getIsEventCancelled(event)) {
                 // no need to reset the partsat as it should have been done already
@@ -600,21 +608,22 @@ export const getResetParstatData = (singleEdits: CalendarEvent[], token: string,
                 eventID: event.ID,
                 calendarID: event.CalendarID,
                 updateTime,
-                partstat: oldPartstat,
+                partstat: ICAL_ATTENDEE_STATUS.NEEDS_ACTION,
+                oldPartstat,
             };
         })
         .filter(isTruthy);
-    const updatePersonalPartData = updatePartstatData
-        .map(({ eventID, calendarID, partstat }) => {
-            if (![ICAL_ATTENDEE_STATUS.ACCEPTED, ICAL_ATTENDEE_STATUS.TENTATIVE].includes(partstat)) {
-                // no need to reset the partstat as it's already reset or it coincides with the new partstat
+    const updatePersonalPartActions = updatePartstatActions
+        .map(({ eventID, calendarID, oldPartstat }) => {
+            if (![ICAL_ATTENDEE_STATUS.ACCEPTED, ICAL_ATTENDEE_STATUS.TENTATIVE].includes(oldPartstat)) {
+                // we only drop alarms for events that were accepted or tentatively accepted
                 return;
             }
             return { eventID, calendarID };
         })
         .filter(isTruthy);
 
-    return { updatePartstatData, updatePersonalPartData };
+    return { updatePartstatActions, updatePersonalPartActions };
 };
 
 export const getHasNonCancelledSingleEdits = (singleEdits: CalendarEvent[]) => {
