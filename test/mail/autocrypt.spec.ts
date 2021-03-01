@@ -32,7 +32,7 @@ describe('autocrypt  helper', () => {
     });
 
     it('should not parse an unknown sender', () => {
-        const result = `addr=unknown@yahoo.com; prefer-encrypt=none; keydata=${validKeyData.base64}`;
+        const result = `addr=unknown@yahoo.com; prefer-encrypt=mutual; keydata=${validKeyData.base64}`;
         expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual(undefined);
     });
 });
