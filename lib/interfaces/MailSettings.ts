@@ -1,4 +1,4 @@
-import { DRAFT_MIME_TYPES } from '../constants';
+import { DRAFT_MIME_TYPES, PACKAGE_TYPE } from '../constants';
 
 export interface AutoResponder {
     StartTime: number;
@@ -35,7 +35,7 @@ export interface MailSettings {
     RightToLeft: number;
     AttachPublicKey: number;
     Sign: number;
-    PGPScheme: number;
+    PGPScheme: PACKAGE_TYPE;
     PromptPin: number;
     Autocrypt: number;
     NumMessagePerPage: number;
