@@ -609,18 +609,11 @@ export const getResetPartstatActions = (
                 calendarID: event.CalendarID,
                 updateTime,
                 partstat: ICAL_ATTENDEE_STATUS.NEEDS_ACTION,
-                oldPartstat,
             };
         })
         .filter(isTruthy);
     const updatePersonalPartActions = updatePartstatActions
-        .map(({ eventID, calendarID, oldPartstat }) => {
-            if (![ICAL_ATTENDEE_STATUS.ACCEPTED, ICAL_ATTENDEE_STATUS.TENTATIVE].includes(oldPartstat)) {
-                // we only drop alarms for events that were accepted or tentatively accepted
-                return;
-            }
-            return { eventID, calendarID };
-        })
+        .map(({ eventID, calendarID }) => ({ eventID, calendarID }))
         .filter(isTruthy);
 
     return { updatePartstatActions, updatePersonalPartActions };
