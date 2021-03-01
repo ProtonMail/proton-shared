@@ -8,7 +8,7 @@ export interface AutocryptHeader {
     addr: string;
     keydata: Uint8Array;
     'prefer-encrypt'?: 'mutual';
-
+    // Non-critical optional fields
     [_key: string]: undefined | string | Uint8Array;
 }
 
