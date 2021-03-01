@@ -48,3 +48,9 @@ export const encodeBase64URL = (str: string) => {
 export const decodeBase64URL = (str: string) => {
     return decodeBase64((str + '==='.slice((str.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
 };
+
+export const uint8ArrayTPaddedBase64URLString = (array: Uint8Array) => {
+    const encoded = encodeBase64URL(uint8ArrayToString(array));
+
+    return encoded + '='.repeat(4 - (encoded.length % 4));
+};
