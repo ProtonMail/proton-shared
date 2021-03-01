@@ -16,12 +16,22 @@ describe('autocrypt  helper', () => {
         });
     });
 
+    it('should parse a valid string with non-critical fields', () => {
+        const result = `addr=test@yahoo.com; _other=test; prefer-encrypt=mutual; keydata=${validKeyData.base64}`;
+        expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual({
+            addr: 'test@yahoo.com',
+            _other: 'test',
+            'prefer-encrypt': 'mutual',
+            keydata: validKeyData.uint8array,
+        });
+    });
+
     it('should not parse invalid base64 keydata', () => {
         const result = `addr=test@yahoo.com; prefer-encrypt=mutual; keydata=a`;
         expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual(undefined);
     });
 
-    it('should not parse an invalid string that contains critical unknown attributes', () => {
+    it('should not parse an invalid string that contains critical unknown fields', () => {
         const result = `addr=test@yahoo.com; other=test; prefer-encrypt=mutual; keydata=${validKeyData.base64}`;
         expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual(undefined);
     });
