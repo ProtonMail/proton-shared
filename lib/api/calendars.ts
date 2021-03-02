@@ -358,7 +358,7 @@ export const editPublicLink = ({
 }: {
     calendarID: string;
     urlID: string;
-    encryptedPurpose: string;
+    encryptedPurpose: Nullable<string>;
 }) => ({
     url: `${CALENDAR_V1}/${calendarID}/urls/${urlID}`,
     method: 'put',

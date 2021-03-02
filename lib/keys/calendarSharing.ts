@@ -11,7 +11,7 @@ import {
 import { ACCESS_LEVEL } from '../calendar/interface';
 import { AES256 } from '../constants';
 import { encodeBase64 } from '../helpers/base64';
-import { uint8ArrayToBase64String, uint8ArrayTPaddedBase64URLString } from '../helpers/encoding';
+import { stringToUint8Array, uint8ArrayToString, uint8ArrayTPaddedBase64URLString } from '../helpers/encoding';
 import { getSHA256Base64String } from '../helpers/hash';
 import { Nullable } from '../interfaces/utils';
 
@@ -19,16 +19,24 @@ export const generateRandomBits = (number: number) => getRandomValues(new Uint8A
 
 export const keyCharAt = (key: string, i: number) => key.charCodeAt(Math.floor(i % key.length));
 
-export const xorEncrypt = (key: string, data: string) =>
-    Uint8Array.from(data.split('').map((character, index) => character.charCodeAt(0) ^ keyCharAt(key, index)));
+const xorEncrypt = (key: string, data: string) => {
+    let result = '';
 
-export const xorDecrypt = (key: string, data: string) =>
-    data
-        .split('')
-        .map((character, i) => {
-            return String.fromCharCode(character.charCodeAt(0) ^ keyCharAt(key, i));
-        })
-        .join('');
+    for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(keyCharAt(key, i) ^ data.charCodeAt(i));
+    }
+    return result;
+};
+
+export const xorDecrypt = (key: string, data: string) => {
+    let result = '';
+
+    for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(keyCharAt(key, i) ^ data.charCodeAt(i));
+    }
+
+    return result;
+};
 
 export const decryptPurpose = async ({
     encryptedPurpose,
@@ -67,9 +75,9 @@ export const generateEncryptedPassphrase = ({
     passphraseKey,
     decryptedPassphrase,
 }: {
-    passphraseKey: string;
+    passphraseKey: Uint8Array;
     decryptedPassphrase: string;
-}) => uint8ArrayToBase64String(xorEncrypt(passphraseKey, decryptedPassphrase));
+}) => encodeBase64(xorEncrypt(uint8ArrayToString(passphraseKey), atob(decryptedPassphrase)));
 
 export const generateCacheKey = async () => uint8ArrayTPaddedBase64URLString(await generateSessionKey(AES256));
 export const generateCacheKeySalt = () => encodeBase64(arrayToBinaryString(generateRandomBits(64)));
@@ -111,7 +119,12 @@ export const getPassphraseKey = ({
 }: {
     encryptedPassphrase: Nullable<string>;
     calendarPassphrase: string;
-}) => (encryptedPassphrase ? xorDecrypt(calendarPassphrase, encryptedPassphrase) : null);
+}) => (encryptedPassphrase ? stringToUint8Array(xorDecrypt(calendarPassphrase, encryptedPassphrase)) : null);
+// OR maybe base64StringToUint8Array
+
+export const encodePassphraseKey = (passphraseKey: Uint8Array) => {
+    return uint8ArrayTPaddedBase64URLString(passphraseKey);
+};
 
 export const buildLink = async ({
     urlID,
@@ -121,13 +134,15 @@ export const buildLink = async ({
 }: {
     urlID: string;
     accessLevel: ACCESS_LEVEL;
-    passphraseKey: Nullable<string>;
+    passphraseKey: Nullable<Uint8Array>;
     cacheKey: string;
 }) => {
     const encodedCacheKey = encodeURIComponent(cacheKey);
 
     if (accessLevel === ACCESS_LEVEL.Full && passphraseKey) {
-        return `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics?CacheKey=${encodedCacheKey}&PassphraseKey=${passphraseKey}`;
+        return `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics?CacheKey=${encodedCacheKey}&PassphraseKey=${encodePassphraseKey(
+            passphraseKey
+        )}`;
     }
 
     return `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics?CacheKey=${encodedCacheKey}`;
