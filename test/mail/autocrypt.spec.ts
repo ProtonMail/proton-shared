@@ -26,6 +26,16 @@ describe('autocrypt  helper', () => {
         });
     });
 
+    it('should not parse a valid string that does not contain prefer-encrypt', () => {
+        const result = `addr=test@yahoo.com; keydata=${validKeyData.base64}`;
+        expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual(undefined);
+    });
+
+    it('should not parse a valid string that contains an invalid prefer-encrypt', () => {
+        const result = `addr=test@yahoo.com; _other=test; prefer-encrypt=none; keydata=${validKeyData.base64}`;
+        expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual(undefined);
+    });
+
     it('should not parse invalid base64 keydata', () => {
         const result = `addr=test@yahoo.com; prefer-encrypt=mutual; keydata=a`;
         expect(getParsedAutocryptHeader(result, 'test@yahoo.com')).toEqual(undefined);

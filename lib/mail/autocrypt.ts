@@ -61,7 +61,8 @@ export const getParsedAutocryptHeader = (header = '', sender = ''): AutocryptHea
     }
 
     // The prefer-encrypt attribute is optional and can only occur with the value mutual.
-    if (result['prefer-encrypt'] && result['prefer-encrypt'] !== 'mutual') {
+    // Its presence in the Autocrypt header indicates an agreement to enable encryption by default.
+    if (result['prefer-encrypt'] !== 'mutual') {
         return;
     }
 
