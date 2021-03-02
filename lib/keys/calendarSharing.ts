@@ -22,6 +22,14 @@ export const keyCharAt = (key: string, i: number) => key.charCodeAt(Math.floor(i
 export const xorEncrypt = (key: string, data: string) =>
     Uint8Array.from(data.split('').map((character, index) => character.charCodeAt(0) ^ keyCharAt(key, index)));
 
+export const xorDecrypt = (key: string, data: string) =>
+    data
+        .split('')
+        .map((character, i) => {
+            return String.fromCharCode(character.charCodeAt(0) ^ keyCharAt(key, i));
+        })
+        .join('');
+
 export const decryptPurpose = async ({
     encryptedPurpose,
     privateKeys,
@@ -82,6 +90,28 @@ export const generateEncryptedCacheKey = async ({
             publicKeys,
         })
     ).data;
+
+export const decryptCacheKey = async ({
+    encryptedCacheKey,
+    privateKeys,
+}: {
+    encryptedCacheKey: string;
+    privateKeys: OpenPGPKey[];
+}) =>
+    (
+        await decryptMessage({
+            message: await getMessage(encryptedCacheKey),
+            privateKeys,
+        })
+    ).data;
+
+export const getPassphraseKey = ({
+    encryptedPassphrase,
+    calendarPassphrase,
+}: {
+    encryptedPassphrase: Nullable<string>;
+    calendarPassphrase: string;
+}) => (encryptedPassphrase ? xorDecrypt(calendarPassphrase, encryptedPassphrase) : null);
 
 export const buildLink = async ({
     urlID,
