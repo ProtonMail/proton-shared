@@ -1,11 +1,10 @@
-import { getUnixTime } from 'date-fns';
-import { serverTime } from 'pmcrypto';
 import { c } from 'ttag';
 import { format as formatUTC } from '../../date-fns-utc';
 import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
 import { canonizeEmail, canonizeEmailByGuess, canonizeInternalEmail } from '../../helpers/email';
 import isTruthy from '../../helpers/isTruthy';
 import { omit, pick } from '../../helpers/object';
+import { getCurrentUnixTimestamp } from '../../helpers/time';
 import { dateLocale } from '../../i18n';
 import { Address, GetVTimezones } from '../../interfaces';
 import {
@@ -103,10 +102,6 @@ export const getParticipant = ({
         result.attendeeIndex = index;
     }
     return result;
-};
-
-export const generateUpdateTime = () => {
-    return getUnixTime(serverTime());
 };
 
 interface CreateInviteVeventParams {
@@ -587,7 +582,7 @@ export const getResetPartstatActions = (
     token: string,
     partstat: ICAL_ATTENDEE_STATUS
 ) => {
-    const updateTime = generateUpdateTime();
+    const updateTime = getCurrentUnixTimestamp();
     const updatePartstatActions = singleEdits
         .map((event) => {
             if (getIsEventCancelled(event)) {

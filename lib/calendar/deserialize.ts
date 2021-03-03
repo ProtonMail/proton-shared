@@ -37,11 +37,11 @@ export const readSessionKeys = async ({
     calendarEvent?: CalendarEvent;
     privateKeys?: OpenPGPKey | OpenPGPKey[];
 }) => {
-    const sharedsessionKey = decryptedSharedKeyPacket
-        ? { algorithm: AES256, data: base64StringToUint8Array(decryptedSharedKeyPacket) }
-        : await readSessionKey(calendarEvent?.SharedKeyPacket, privateKeys);
-    const calendarSessionKey = await readSessionKey(calendarEvent?.CalendarKeyPacket, privateKeys);
-    return [sharedsessionKey, calendarSessionKey];
+    const sharedsessionKeyPromise = decryptedSharedKeyPacket
+        ? Promise.resolve({ algorithm: AES256, data: base64StringToUint8Array(decryptedSharedKeyPacket) })
+        : readSessionKey(calendarEvent?.SharedKeyPacket, privateKeys);
+    const calendarSessionKeyPromise = readSessionKey(calendarEvent?.CalendarKeyPacket, privateKeys);
+    return Promise.all([sharedsessionKeyPromise, calendarSessionKeyPromise]);
 };
 
 /**

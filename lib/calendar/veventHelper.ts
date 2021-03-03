@@ -58,14 +58,14 @@ export const getReadableCard = (cards: CalendarEventData[]) => {
 export const getIsEventCancelled = (event: CalendarEvent) => {
     const calendarClearTextPart = getReadableCard(event.CalendarEvents);
     if (!calendarClearTextPart) {
-        return undefined;
+        return;
     }
     const vcalPart = parse(calendarClearTextPart.Data);
     const vevent = getIsCalendar(vcalPart) ? vcalPart.components?.find(getIsEventComponent) : undefined;
-    if (vevent) {
-        return getEventStatus(vevent) === ICAL_EVENT_STATUS.CANCELLED;
+    if (!vevent) {
+        return;
     }
-    return undefined;
+    return getEventStatus(vevent) === ICAL_EVENT_STATUS.CANCELLED;
 };
 
 export const withUid = <T>(properties: VcalVeventComponent & T): VcalVeventComponent & T => {
