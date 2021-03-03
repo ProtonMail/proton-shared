@@ -11,7 +11,7 @@ import {
 import { ACCESS_LEVEL } from '../calendar/interface';
 import { AES256 } from '../constants';
 import { encodeBase64 } from '../helpers/base64';
-import { stringToUint8Array, uint8ArrayToString, uint8ArrayTPaddedBase64URLString } from '../helpers/encoding';
+import { stringToUint8Array, uint8ArrayToString, uint8ArrayToPaddedBase64URLString } from '../helpers/encoding';
 import { getSHA256Base64String } from '../helpers/hash';
 import { Nullable } from '../interfaces/utils';
 
@@ -79,7 +79,7 @@ export const generateEncryptedPassphrase = ({
     decryptedPassphrase: string;
 }) => encodeBase64(xorEncrypt(uint8ArrayToString(passphraseKey), atob(decryptedPassphrase)));
 
-export const generateCacheKey = async () => uint8ArrayTPaddedBase64URLString(await generateSessionKey(AES256));
+export const generateCacheKey = async () => uint8ArrayToPaddedBase64URLString(await generateSessionKey(AES256));
 export const generateCacheKeySalt = () => encodeBase64(arrayToBinaryString(generateRandomBits(64)));
 
 export const getCacheKeyHash = async ({ cacheKey, cacheKeySalt }: { cacheKey: string; cacheKeySalt: string }) =>
@@ -120,10 +120,9 @@ export const getPassphraseKey = ({
     encryptedPassphrase: Nullable<string>;
     calendarPassphrase: string;
 }) => (encryptedPassphrase ? stringToUint8Array(xorDecrypt(calendarPassphrase, encryptedPassphrase)) : null);
-// OR maybe base64StringToUint8Array
 
 export const encodePassphraseKey = (passphraseKey: Uint8Array) => {
-    return uint8ArrayTPaddedBase64URLString(passphraseKey);
+    return uint8ArrayToPaddedBase64URLString(passphraseKey);
 };
 
 export const buildLink = async ({
