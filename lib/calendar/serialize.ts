@@ -1,8 +1,7 @@
 import { OpenPGPKey, OpenPGPSignature, SessionKey } from 'pmcrypto';
-import { CreateCalendarEventBlobData } from '../api/calendars';
+import { CalendarEventBlobData } from '../api/calendars';
 import { uint8ArrayToBase64String } from '../helpers/encoding';
 import { RequireSome } from '../interfaces/utils';
-
 import { getVeventParts } from './veventHelper';
 import { createSessionKey, encryptPart, getEncryptedSessionKey, signPart } from './encrypt';
 import { CALENDAR_CARD_TYPE } from './constants';
@@ -16,16 +15,20 @@ const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR_TEXT } = CALENDAR_CARD_TYPE;
 // Wrong typings in openpgp.d.ts...
 const getArmoredSignatureString = (signature: OpenPGPSignature) => (signature.armor() as unknown) as string;
 
+export const getHasSharedEventContent = (
+    data: Partial<CalendarEventBlobData>
+): data is RequireSome<CalendarEventBlobData, 'SharedEventContent'> => !!data.SharedEventContent;
+
 export const getHasSharedKeyPacket = (
-    data: CreateCalendarEventBlobData
-): data is RequireSome<CreateCalendarEventBlobData, 'SharedKeyPacket'> => !!data.SharedKeyPacket;
+    data: CalendarEventBlobData
+): data is RequireSome<CalendarEventBlobData, 'SharedKeyPacket'> => !!data.SharedKeyPacket;
 
 /**
  * Format the data into what the API expects.
  */
 interface FormatDataArguments {
-    sharedSignedPart: SignPartResult;
-    sharedEncryptedPart: EncryptPartResult;
+    sharedSignedPart?: SignPartResult;
+    sharedEncryptedPart?: EncryptPartResult;
     sharedSessionKey?: Uint8Array;
     calendarSignedPart?: SignPartResult;
     calendarEncryptedPart?: EncryptPartResult;
@@ -47,19 +50,21 @@ export const formatData = ({
 }: FormatDataArguments) => {
     return {
         SharedKeyPacket: sharedSessionKey ? uint8ArrayToBase64String(sharedSessionKey) : undefined,
-        SharedEventContent: [
-            // Shared part should always exists
-            {
-                Type: SIGNED,
-                Data: sharedSignedPart.data,
-                Signature: getArmoredSignatureString(sharedSignedPart.signature),
-            },
-            {
-                Type: ENCRYPTED_AND_SIGNED,
-                Data: uint8ArrayToBase64String(sharedEncryptedPart.dataPacket),
-                Signature: getArmoredSignatureString(sharedEncryptedPart.signature),
-            },
-        ],
+        SharedEventContent:
+            sharedSignedPart && sharedEncryptedPart
+                ? [
+                      {
+                          Type: SIGNED,
+                          Data: sharedSignedPart.data,
+                          Signature: getArmoredSignatureString(sharedSignedPart.signature),
+                      },
+                      {
+                          Type: ENCRYPTED_AND_SIGNED,
+                          Data: uint8ArrayToBase64String(sharedEncryptedPart.dataPacket),
+                          Signature: getArmoredSignatureString(sharedEncryptedPart.signature),
+                      },
+                  ]
+                : undefined,
         CalendarKeyPacket:
             calendarEncryptedPart && calendarSessionKey ? uint8ArrayToBase64String(calendarSessionKey) : undefined,
         CalendarEventContent:
@@ -140,6 +145,7 @@ interface CreateCalendarEventArguments {
     calendarSessionKey?: SessionKey;
     isCreateEvent: boolean;
     isSwitchCalendar: boolean;
+    isInvitation?: boolean;
 }
 export const createCalendarEvent = async ({
     eventComponent,
@@ -150,10 +156,12 @@ export const createCalendarEvent = async ({
     calendarSessionKey: oldCalendarSessionKey,
     isCreateEvent,
     isSwitchCalendar,
+    isInvitation,
 }: CreateCalendarEventArguments) => {
     const { sharedPart, calendarPart, personalPart, attendeesPart } = getParts(eventComponent);
 
     const isCreateOrSwitchCalendar = isCreateEvent || isSwitchCalendar;
+    const isSwitchCalendarOfInvitation = isSwitchCalendar && isInvitation;
     // If there is no encrypted calendar part, a calendar session key is not needed.
     const shouldHaveCalendarKey = !!calendarPart[ENCRYPTED_AND_SIGNED];
 
@@ -177,12 +185,18 @@ export const createCalendarEvent = async ({
             ? getEncryptedSessionKey(calendarSessionKey, privateKey)
             : undefined,
         isCreateOrSwitchCalendar ? getEncryptedSessionKey(sharedSessionKey, privateKey) : undefined,
-        signPart(sharedPart[SIGNED], signingKey),
-        encryptPart(sharedPart[ENCRYPTED_AND_SIGNED], signingKey, sharedSessionKey),
+        // attendees are not allowed to change the SharedEventContent, so they shouldn't send it (API will complain otherwise)
+        isSwitchCalendarOfInvitation ? undefined : signPart(sharedPart[SIGNED], signingKey),
+        isSwitchCalendarOfInvitation
+            ? undefined
+            : encryptPart(sharedPart[ENCRYPTED_AND_SIGNED], signingKey, sharedSessionKey),
         signPart(calendarPart[SIGNED], signingKey),
         calendarSessionKey && encryptPart(calendarPart[ENCRYPTED_AND_SIGNED], signingKey, calendarSessionKey),
         signPart(personalPart[SIGNED], signingKey),
-        encryptPart(attendeesPart[ENCRYPTED_AND_SIGNED], signingKey, sharedSessionKey),
+        // attendees are not allowed to change the SharedEventContent, so they shouldn't send it (API will complain otherwise)
+        isSwitchCalendarOfInvitation
+            ? undefined
+            : encryptPart(attendeesPart[ENCRYPTED_AND_SIGNED], signingKey, sharedSessionKey),
     ]);
 
     return formatData({
@@ -194,7 +208,7 @@ export const createCalendarEvent = async ({
         calendarSessionKey: encryptedCalendarSessionKey,
         personalSignedPart,
         attendeesEncryptedPart,
-        attendeesClearPart: attendeesPart[CLEAR_TEXT],
+        attendeesClearPart: isSwitchCalendarOfInvitation ? undefined : attendeesPart[CLEAR_TEXT],
     });
 };
 

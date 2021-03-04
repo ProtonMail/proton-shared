@@ -210,7 +210,7 @@ export const findAttendee = (email: string, attendees: VcalAttendeeProperty[] = 
     return { index, attendee };
 };
 
-export function getSelfAddressData({
+export const getSelfAddressData = ({
     isOrganizer,
     organizer,
     attendees = [],
@@ -220,7 +220,7 @@ export function getSelfAddressData({
     organizer?: VcalOrganizerProperty;
     attendees?: VcalAttendeeProperty[];
     addresses?: Address[];
-}) {
+}) => {
     if (isOrganizer) {
         if (!organizer) {
             // old events will not have organizer
@@ -307,7 +307,7 @@ export function getSelfAddressData({
         selfAddress: selfDisabledAddress,
         selfAttendeeIndex: selfDisabledAttendeeIndex,
     };
-}
+};
 
 export const getInvitedEventWithAlarms = (
     vevent: VcalVeventComponent,
