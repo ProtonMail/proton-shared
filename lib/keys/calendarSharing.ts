@@ -19,22 +19,12 @@ export const generateRandomBits = (number: number) => getRandomValues(new Uint8A
 
 export const keyCharAt = (key: string, i: number) => key.charCodeAt(Math.floor(i % key.length));
 
-const xorEncrypt = (key: string, data: string) => {
+const xor = (key: string, data: string) => {
     let result = '';
 
     for (let i = 0; i < data.length; i++) {
         result += String.fromCharCode(keyCharAt(key, i) ^ data.charCodeAt(i));
     }
-    return result;
-};
-
-export const xorDecrypt = (key: string, data: string) => {
-    let result = '';
-
-    for (let i = 0; i < data.length; i++) {
-        result += String.fromCharCode(keyCharAt(key, i) ^ data.charCodeAt(i));
-    }
-
     return result;
 };
 
@@ -77,7 +67,7 @@ export const generateEncryptedPassphrase = ({
 }: {
     passphraseKey: Uint8Array;
     decryptedPassphrase: string;
-}) => encodeBase64(xorEncrypt(uint8ArrayToString(passphraseKey), atob(decryptedPassphrase)));
+}) => encodeBase64(xor(uint8ArrayToString(passphraseKey), atob(decryptedPassphrase)));
 
 export const generateCacheKey = async () => uint8ArrayToPaddedBase64URLString(await generateSessionKey(AES256));
 export const generateCacheKeySalt = () => encodeBase64(arrayToBinaryString(generateRandomBits(64)));
@@ -119,7 +109,7 @@ export const getPassphraseKey = ({
 }: {
     encryptedPassphrase: Nullable<string>;
     calendarPassphrase: string;
-}) => (encryptedPassphrase ? stringToUint8Array(xorDecrypt(calendarPassphrase, encryptedPassphrase)) : null);
+}) => (encryptedPassphrase ? stringToUint8Array(xor(calendarPassphrase, encryptedPassphrase)) : null);
 
 export const encodePassphraseKey = (passphraseKey: Uint8Array) => {
     return uint8ArrayToPaddedBase64URLString(passphraseKey);
