@@ -6,7 +6,7 @@ export interface Folder {
     Expanded: number;
     Type: number;
     Order: number;
-    ParentID?: string;
+    ParentID?: number | string;
     Notify: number;
 }
 
