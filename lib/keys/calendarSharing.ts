@@ -14,7 +14,6 @@ import { stringToUint8Array, uint8ArrayToString, uint8ArrayToPaddedBase64URLStri
 import { getSHA256Base64String } from '../helpers/hash';
 import { Nullable } from '../interfaces/utils';
 
-export const generateRandomBits = (number: number) => getRandomValues(new Uint8Array(number / 8));
 export const generateRandomBytes = (number: number) => getRandomValues(new Uint8Array(number));
 
 export const keyCharAt = (key: string, i: number) => key.charCodeAt(Math.floor(i % key.length));
