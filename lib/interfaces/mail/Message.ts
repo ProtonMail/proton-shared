@@ -24,18 +24,15 @@ export interface UnsubscribeMethods {
     OneClick?: 'OneClick';
 }
 
-export interface Message {
+export interface MessageForSearch {
     ID: string;
     Order: number;
     ConversationID: string;
     Subject: string;
     Unread: number;
     Sender: Recipient;
-    SenderAddress: string;
-    SenderName: string;
+    AddressID: string;
     Flags: number;
-    Type: number;
-    IsEncrypted: number;
     IsReplied: number;
     IsRepliedAll: number;
     IsForwarded: number;
@@ -46,7 +43,14 @@ export interface Message {
     Size: number;
     NumAttachments: number;
     ExpirationTime?: number;
-    AddressID: string;
+    LabelIDs: string[];
+}
+
+export interface Message extends MessageForSearch {
+    SenderAddress: string;
+    SenderName: string;
+    Type: number;
+    IsEncrypted: number;
     ExternalID: string;
     Body: any;
     MIMEType: MIME_TYPES;
@@ -55,7 +59,6 @@ export interface Message {
     ReplyTo: Recipient;
     ReplyTos: Recipient[];
     Attachments: Attachment[];
-    LabelIDs: string[];
 
     Password?: string;
     PasswordHint?: string;
