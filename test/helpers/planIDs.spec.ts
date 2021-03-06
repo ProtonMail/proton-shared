@@ -49,15 +49,15 @@ const MOCK_PLANS = [
 
 describe('removeService', () => {
     it('should remove visionary', () => {
-        expect(removeService({ visionary: 1 }, MOCK_PLANS, PLAN_SERVICES.VPN)).toEqual({});
+        expect(clearPlanIDs(removeService({ visionary: 1 }, MOCK_PLANS, PLAN_SERVICES.VPN))).toEqual({});
     });
 
     it('should keep mail', () => {
-        expect(removeService({ plus: 1 }, MOCK_PLANS, PLAN_SERVICES.VPN)).toEqual({ plus: 1 });
+        expect(clearPlanIDs(removeService({ plus: 1 }, MOCK_PLANS, PLAN_SERVICES.VPN))).toEqual({ plus: 1 });
     });
 
     it('should remove mail', () => {
-        expect(removeService({ plus: 1 }, MOCK_PLANS, PLAN_SERVICES.MAIL)).toEqual({});
+        expect(clearPlanIDs(removeService({ plus: 1 }, MOCK_PLANS, PLAN_SERVICES.MAIL))).toEqual({});
     });
 });
 
