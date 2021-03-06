@@ -35,10 +35,11 @@ export const base64StringToUint8Array = (string: string) => stringToUint8Array(d
  * @dev This function will fail if the argument contains characters which are not in this alphabet
  * @dev This encoding works by converting groups of three "bytes" into groups of four base64 characters (2 ** 6 ** 4 is also three bytes)
  * @dev Therefore, if the argument string has a length not divisible by three, the returned string will be padded with one or two '=' characters
- * @dev WE REMOVE THE PADDING CHARACTERS
  */
-export const encodeBase64URL = (str: string) => {
-    return encodeBase64(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+export const encodeBase64URL = (str: string, removePadding: boolean = true) => {
+    const base64String = encodeBase64(str).replace(/\+/g, '-').replace(/\//g, '_');
+
+    return removePadding ? base64String.replace(/=/g, '') : base64String;
 };
 
 /**
@@ -49,8 +50,5 @@ export const decodeBase64URL = (str: string) => {
     return decodeBase64((str + '==='.slice((str.length + 3) % 4)).replace(/-/g, '+').replace(/_/g, '/'));
 };
 
-export const uint8ArrayToPaddedBase64URLString = (array: Uint8Array) => {
-    const encoded = encodeBase64URL(uint8ArrayToString(array));
-
-    return encoded + '='.repeat(4 - (encoded.length % 4));
-};
+export const uint8ArrayToPaddedBase64URLString = (array: Uint8Array) =>
+    encodeBase64URL(uint8ArrayToString(array), false);

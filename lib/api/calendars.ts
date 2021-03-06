@@ -1,7 +1,7 @@
 import { Nullable, RequireSome } from '../interfaces/utils';
 import { PaginationParams } from './interface';
 import { Attendee, Calendar, CalendarEventData, CalendarSettings, CalendarUserSettings } from '../interfaces/calendar';
-import { AccessLevel } from '../calendar/interface';
+import { ACCESS_LEVEL } from '../calendar/interface';
 
 const CALENDAR_V1 = 'calendar/v1';
 
@@ -326,7 +326,7 @@ export const syncMultipleEvents = (calendarID: string, data: SyncMultipleEventsD
 });
 
 export interface CreatePublicLinks {
-    AccessLevel: AccessLevel;
+    AccessLevel: ACCESS_LEVEL;
     CacheKeySalt: string;
     CacheKeyHash: string;
     EncryptedPassphrase: Nullable<string>;

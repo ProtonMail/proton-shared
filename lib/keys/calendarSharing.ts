@@ -1,4 +1,3 @@
-import getRandomValues from 'get-random-values';
 import {
     arrayToBinaryString,
     createMessage,
@@ -8,34 +7,11 @@ import {
     getMessage,
     OpenPGPKey,
 } from 'pmcrypto';
-import { AccessLevel } from '../calendar/interface';
+import { ACCESS_LEVEL } from '../calendar/interface';
 import { encodeBase64 } from '../helpers/base64';
 import { stringToUint8Array, uint8ArrayToString, uint8ArrayToPaddedBase64URLString } from '../helpers/encoding';
-import { getSHA256Base64String } from '../helpers/hash';
+import { getSHA256Base64String, generateRandomBytes, xorEncryptDecrypt } from '../helpers/crypto';
 import { Nullable } from '../interfaces/utils';
-
-export const generateRandomBytes = (number: number) => getRandomValues(new Uint8Array(number));
-
-export const keyCharAt = (key: string, i: number) => key.charCodeAt(Math.floor(i % key.length));
-
-const xor = (key: string, data: string) => {
-    const Uint8Key = stringToUint8Array(key);
-    const Uint8Data = stringToUint8Array(data);
-
-    const xored = new Uint8Array(Uint8Data.length);
-
-    for (let j = 0; j < Uint8Data.length; j++) {
-        xored[j] = +Uint8Key[j] ^ +Uint8Data[j];
-    }
-
-    // Strip off padding
-    let unpaddedLength = Uint8Data.length;
-    while (unpaddedLength > 0 && xored[unpaddedLength - 1] === 0) {
-        unpaddedLength--;
-    }
-
-    return uint8ArrayToString(xored.slice(0, unpaddedLength));
-};
 
 export const decryptPurpose = async ({
     encryptedPurpose,
@@ -76,12 +52,15 @@ export const generateEncryptedPassphrase = ({
 }: {
     passphraseKey: Uint8Array;
     decryptedPassphrase: string;
-}) => encodeBase64(xor(uint8ArrayToString(passphraseKey), atob(decryptedPassphrase)));
+}) =>
+    encodeBase64(
+        xorEncryptDecrypt({ key: uint8ArrayToString(passphraseKey), data: decodeBase64(decryptedPassphrase) })
+    );
 
-export const generateCacheKey = async () => uint8ArrayToPaddedBase64URLString(generateRandomBytes(16));
+export const generateCacheKey = () => uint8ArrayToPaddedBase64URLString(generateRandomBytes(16));
 export const generateCacheKeySalt = () => encodeBase64(arrayToBinaryString(generateRandomBytes(8)));
 
-export const getCacheKeyHash = async ({ cacheKey, cacheKeySalt }: { cacheKey: string; cacheKeySalt: string }) =>
+export const getCacheKeyHash = ({ cacheKey, cacheKeySalt }: { cacheKey: string; cacheKeySalt: string }) =>
     getSHA256Base64String(`${cacheKeySalt}${cacheKey}`);
 
 export const generateEncryptedCacheKey = async ({
@@ -123,29 +102,29 @@ export const getPassphraseKey = ({
         return null;
     }
 
-    return stringToUint8Array(xor(atob(calendarPassphrase), decodeBase64(encryptedPassphrase)));
+    return stringToUint8Array(
+        xorEncryptDecrypt({ key: decodeBase64(calendarPassphrase), data: decodeBase64(encryptedPassphrase) })
+    );
 };
 
-export const encodePassphraseKey = (passphraseKey: Uint8Array) => {
-    return uint8ArrayToPaddedBase64URLString(passphraseKey);
-};
-
-export const buildLink = async ({
+export const buildLink = ({
     urlID,
     accessLevel,
     passphraseKey,
     cacheKey,
 }: {
     urlID: string;
-    accessLevel: AccessLevel;
+    accessLevel: ACCESS_LEVEL;
     passphraseKey: Nullable<Uint8Array>;
     cacheKey: string;
 }) => {
     const baseURL = `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics`;
     const encodedCacheKey = encodeURIComponent(cacheKey);
 
-    if (accessLevel === AccessLevel.Full && passphraseKey) {
-        return `${baseURL}?CacheKey=${encodedCacheKey}&PassphraseKey=${encodePassphraseKey(passphraseKey)}`;
+    if (accessLevel === ACCESS_LEVEL.FULL && passphraseKey) {
+        return `${baseURL}?CacheKey=${encodedCacheKey}&PassphraseKey=${uint8ArrayToPaddedBase64URLString(
+            passphraseKey
+        )}`;
     }
 
     return `${baseURL}?CacheKey=${encodedCacheKey}`;
