@@ -19,5 +19,12 @@ describe('encoding', () => {
                 expect(decodeBase64URL(encodeBase64URL(string))).toEqual(string);
             });
         });
+
+        it('should keep padding when told to', () => {
+            const string = 'dogs';
+
+            expect(encodeBase64URL(string)).toEqual('ZG9ncw');
+            expect(encodeBase64URL(string, false)).toEqual('ZG9ncw==');
+        });
     });
 });
