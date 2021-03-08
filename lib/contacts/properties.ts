@@ -8,20 +8,54 @@ const FIELDS_WITH_PREF = ['fn', 'email', 'tel', 'adr', 'key'];
 /**
  * Given a vCard field, return true if we take into consideration its PREF parameters
  */
-export const hasPref = (field: string): boolean => FIELDS_WITH_PREF.includes(field);
+export const hasPref = (field: string) => FIELDS_WITH_PREF.includes(field);
 
 /**
  * For a vCard contact, check if it contains categories
  */
-export const hasCategories = (vcardContact: ContactProperties): boolean => {
+export const hasCategories = (vcardContact: ContactProperties) => {
     return vcardContact.some(({ field, value }) => value && field === 'categories');
 };
 
 /**
  * For a list of vCard contacts, check if any contains categories
  */
-export const haveCategories = (vcardContacts: ContactProperties[]): boolean => {
+export const haveCategories = (vcardContacts: ContactProperties[]) => {
     return vcardContacts.some((contact) => hasCategories(contact));
+};
+
+/**
+ * Extract emails from a vCard contact
+ */
+export const getContactEmails = (properties: ContactProperties) => {
+    return properties
+        .filter(({ field }) => field === 'email')
+        .map(({ value, group }) => {
+            if (!group) {
+                throw new Error('Email properties should have a group');
+            }
+            return {
+                email: Array.isArray(value) ? value[0] : value,
+                group,
+            };
+        });
+};
+
+/**
+ * Extract categories from a vCard contact
+ */
+export const getContactCategories = (properties: ContactProperties) => {
+    return properties
+        .filter(({ field }) => field === 'categories')
+        .map(({ value, group }) => {
+            if (Array.isArray(value)) {
+                return group
+                    ? value.map((singleValue) => ({ name: singleValue, group }))
+                    : value.map((singleValue) => ({ name: singleValue }));
+            }
+            return group ? { name: value, group } : { name: value };
+        })
+        .flat();
 };
 
 /**
@@ -147,26 +181,13 @@ export const addGroup = (properties: ContactProperties = []) => {
     });
 };
 
-type ValueProperty = string | string[];
-
 /**
  * Given a contact and a field, get its preferred value
  */
-export const getPreferredValue = (properties: ContactProperties, field: string): ValueProperty | undefined => {
+export const getPreferredValue = (properties: ContactProperties, field: string) => {
     const filteredProperties = properties.filter(({ field: f }) => f === field);
     if (!filteredProperties.length) {
-        return undefined;
+        return;
     }
     return filteredProperties.sort(sortByPref)[0].value;
-};
-
-/**
- * Given a contact and a field, get all the values for it (which can appear several times in the array)
- * @param {Array<Object>}   properties
- * @param {String}          field
- *
- * @return {String,Array}
- */
-export const getAllValues = (properties: ContactProperties, field: string): ValueProperty[] => {
-    return properties.filter(({ field: f }) => f === field).map(({ value }) => value);
 };
