@@ -36,7 +36,7 @@ export const base64StringToUint8Array = (string: string) => stringToUint8Array(d
  * @dev This encoding works by converting groups of three "bytes" into groups of four base64 characters (2 ** 6 ** 4 is also three bytes)
  * @dev Therefore, if the argument string has a length not divisible by three, the returned string will be padded with one or two '=' characters
  */
-export const encodeBase64URL = (str: string, removePadding: boolean = true) => {
+export const encodeBase64URL = (str: string, removePadding = true) => {
     const base64String = encodeBase64(str).replace(/\+/g, '-').replace(/\//g, '_');
 
     return removePadding ? base64String.replace(/=/g, '') : base64String;
