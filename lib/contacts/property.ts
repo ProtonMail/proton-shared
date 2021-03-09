@@ -93,10 +93,13 @@ export const getType = (types: string | string[] = []): string => {
 
 /**
  * Transform an array value for the field 'adr' into a string to be displayed
+ * adr input type is willingly chaotic here
+ * some contacts can have adr entries with strange format, we have to deal with any possibility
  */
-export const formatAdr = (adr: string[] = []): string => {
+export const formatAdr = (adr: (number | string | string[])[] = []): string => {
     return adr
         .filter(isTruthy)
-        .map((value) => value.trim())
+        .flat()
+        .map((value) => String(value).trim())
         .join(', ');
 };
