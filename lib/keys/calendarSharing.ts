@@ -122,9 +122,9 @@ export const buildLink = ({
     const encodedCacheKey = encodeURIComponent(cacheKey);
 
     if (accessLevel === ACCESS_LEVEL.FULL && passphraseKey) {
-        return `${baseURL}?CacheKey=${encodedCacheKey}&PassphraseKey=${uint8ArrayToPaddedBase64URLString(
-            passphraseKey
-        )}`;
+        const encodedPassphraseKey = encodeURIComponent(uint8ArrayToPaddedBase64URLString(passphraseKey));
+
+        return `${baseURL}?CacheKey=${encodedCacheKey}&PassphraseKey=${encodedPassphraseKey}`;
     }
 
     return `${baseURL}?CacheKey=${encodedCacheKey}`;
