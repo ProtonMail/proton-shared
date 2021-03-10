@@ -25,7 +25,7 @@ END:VCARD`)
         expect(getContactEmails(properties)).toEqual(result);
     });
 
-    it('should throw if contact emails properties do not contain a gruop', async () => {
+    it('should not complain if contact emails properties do not contain a group', async () => {
         const properties = addPref(
             parse(`BEGIN:VCARD
 VERSION:4.0
@@ -39,7 +39,11 @@ CATEGORIES:TRAVEL AGENT
 CATEGORIES:INTERNET,IETF,INDUSTRY,INFORMATION TECHNOLOGY
 END:VCARD`)
         );
-        expect(() => getContactEmails(properties)).toThrow();
+        const result = [
+            { email: 'jdoe@example.com', group: 'item1' },
+            { email: 'jdoeeeee@example.com', group: 'item2' },
+        ];
+        expect(getContactEmails(properties)).toEqual(result);
     });
 });
 

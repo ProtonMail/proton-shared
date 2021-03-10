@@ -25,23 +25,6 @@ export const haveCategories = (vcardContacts: ContactProperties[]) => {
 };
 
 /**
- * Extract emails from a vCard contact
- */
-export const getContactEmails = (properties: ContactProperties) => {
-    return properties
-        .filter(({ field }) => field === 'email')
-        .map(({ value, group }) => {
-            if (!group) {
-                throw new Error('Email properties should have a group');
-            }
-            return {
-                email: Array.isArray(value) ? value[0] : value,
-                group,
-            };
-        });
-};
-
-/**
  * Extract categories from a vCard contact
  */
 export const getContactCategories = (properties: ContactProperties) => {
@@ -190,4 +173,21 @@ export const getPreferredValue = (properties: ContactProperties, field: string) 
         return;
     }
     return filteredProperties.sort(sortByPref)[0].value;
+};
+
+/**
+ * Extract emails from a vCard contact
+ */
+export const getContactEmails = (properties: ContactProperties) => {
+    return addGroup(properties)
+        .filter(({ field }) => field === 'email')
+        .map(({ value, group }) => {
+            if (!group) {
+                throw new Error('Email properties should have a group');
+            }
+            return {
+                email: Array.isArray(value) ? value[0] : value,
+                group,
+            };
+        });
 };
