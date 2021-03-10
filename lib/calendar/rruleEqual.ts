@@ -1,5 +1,4 @@
 import { FREQUENCY } from './constants';
-import { WeekStartsOn } from './interface';
 import {
     VcalDateOrDateTimeValue,
     VcalDays,
@@ -80,15 +79,14 @@ const isUntilEqual = (oldUntil?: VcalDateOrDateTimeValue, newUntil?: VcalDateOrD
 
 /**
  * Determine if two recurring rules are equal up to re-writing.
- * WKST can be passed separately for the second recurring rule
  */
-export const getIsRruleEqual = (oldRrule?: VcalRruleProperty, newRrule?: VcalRruleProperty, wkst?: WeekStartsOn) => {
+export const getIsRruleEqual = (oldRrule?: VcalRruleProperty, newRrule?: VcalRruleProperty) => {
     const oldValue = oldRrule?.value;
     const newValue = newRrule?.value;
     if (newValue && oldValue) {
         // we "normalize" the rrules first (i.e. remove maybeArrayComparisonKeys in case they are redundant)
         const normalizedOldValue = getNormalizedRrule(oldValue);
-        const normalizedNewValue = getNormalizedRrule(newValue, wkst);
+        const normalizedNewValue = getNormalizedRrule(newValue);
         // Compare array values separately because they can be possibly unsorted...
         const oldWithoutMaybeArrays = omit(normalizedOldValue, [...maybeArrayComparisonKeys, 'until']);
         const newWithoutMaybeArrays = omit(normalizedNewValue, [...maybeArrayComparisonKeys, 'until']);
