@@ -1,7 +1,4 @@
 import { BASE_SIZE } from '../constants';
-import { SETTINGS_NOTIFICATION_TYPE } from '../interfaces/calendar';
-import { fromTriggerString } from './vcal';
-import { triggerToModel } from '../helpers/notificationModel';
 
 export enum CALENDAR_CARD_TYPE {
     CLEAR_TEXT = 0,
@@ -242,38 +239,6 @@ export const ALL_DAY_INPUT_ID = 'event-allday-input';
 export const DATE_INPUT_ID = 'event-date-input';
 export const PARTICIPANTS_INPUT_ID = 'event-participants-input';
 
-export const DEFAULT_PART_DAY_NOTIFICATIONS = [
-    {
-        Type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
-        Trigger: '-PT15M',
-    },
-];
-
-export const DEFAULT_FULL_DAY_NOTIFICATIONS = [
-    {
-        Type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
-        Trigger: '-PT15H',
-    },
-];
-
-export const DEFAULT_PART_DAY_NOTIFICATION = {
-    id: '1',
-    ...triggerToModel({
-        isAllDay: false,
-        type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
-        trigger: fromTriggerString('-PT15M'),
-    }),
-};
-
-export const DEFAULT_FULL_DAY_NOTIFICATION = {
-    id: '2',
-    ...triggerToModel({
-        isAllDay: true,
-        type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
-        trigger: fromTriggerString('-PT15H'),
-    }),
-};
-
 export enum IMPORT_ERROR_TYPE {
     NO_FILE_SELECTED,
     NO_ICS_FILE,
@@ -285,4 +250,53 @@ export enum IMPORT_ERROR_TYPE {
     INVALID_METHOD,
     NO_EVENTS,
     TOO_MANY_EVENTS,
+}
+
+export const SHARED_SIGNED_FIELDS = [
+    'uid',
+    'dtstamp',
+    'dtstart',
+    'dtend',
+    'recurrence-id',
+    'rrule',
+    'exdate',
+    'organizer',
+    'sequence',
+] as const;
+export const SHARED_ENCRYPTED_FIELDS = ['uid', 'dtstamp', 'created', 'description', 'summary', 'location'] as const;
+
+export const CALENDAR_SIGNED_FIELDS = ['uid', 'dtstamp', 'status', 'transp'] as const;
+export const CALENDAR_ENCRYPTED_FIELDS = ['uid', 'dtstamp', 'comment'] as const;
+
+export const USER_SIGNED_FIELDS = ['uid', 'dtstamp'] as const;
+export const USER_ENCRYPTED_FIELDS = [] as const;
+
+export const ATTENDEES_SIGNED_FIELDS = [] as const;
+export const ATTENDEES_ENCRYPTED_FIELDS = ['uid', 'attendee'] as const;
+
+export const REQUIRED_SET = new Set(['uid', 'dtstamp'] as const);
+
+// Set of taken keys to put the rest
+export const TAKEN_KEYS = [
+    ...new Set([
+        ...SHARED_SIGNED_FIELDS,
+        ...SHARED_ENCRYPTED_FIELDS,
+        ...CALENDAR_SIGNED_FIELDS,
+        ...CALENDAR_ENCRYPTED_FIELDS,
+        ...USER_SIGNED_FIELDS,
+        ...USER_ENCRYPTED_FIELDS,
+        ...ATTENDEES_ENCRYPTED_FIELDS,
+        ...ATTENDEES_SIGNED_FIELDS,
+    ]),
+] as const;
+
+export enum SETTINGS_NOTIFICATION_TYPE {
+    EMAIL = 0,
+    DEVICE = 1,
+}
+
+export enum EVENT_VERIFICATION_STATUS {
+    SUCCESSFUL = 1,
+    NOT_VERIFIED = 0,
+    FAILED = -1,
 }

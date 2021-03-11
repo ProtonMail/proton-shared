@@ -2,6 +2,7 @@ import { Member } from './Member';
 import { Passphrase } from './Passphrase';
 import { CalendarKey } from './CalendarKey';
 import { NotificationModel } from './Notification';
+import { SETTINGS_NOTIFICATION_TYPE } from '../../calendar/constants';
 
 export interface Calendar {
     ID: string;
@@ -31,11 +32,6 @@ export interface CalendarUserSettings {
     ViewPreference: SETTINGS_VIEW;
 }
 
-export enum SETTINGS_NOTIFICATION_TYPE {
-    EMAIL = 0,
-    DEVICE = 1,
-}
-
 export interface CalendarNotificationSettings {
     Type: SETTINGS_NOTIFICATION_TYPE;
     Trigger: string;
@@ -61,7 +57,7 @@ export interface CalendarAddressOptions {
     text: string;
 }
 
-export interface CalendarViewModel {
+export interface CalendarViewModelFull {
     calendarID: string;
     name: string;
     display: boolean;

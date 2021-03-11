@@ -1,5 +1,5 @@
 import { OpenPGPSignature } from 'pmcrypto';
-import { VcalAttendeeProperty, VcalAttendeePropertyParameters } from '../interfaces/calendar/VcalModel';
+import { VcalAttendeeProperty, VcalAttendeePropertyParameters } from '../interfaces/calendar';
 import { ATTENDEE_STATUS_API } from './constants';
 
 export interface EncryptPartResult {
@@ -10,12 +10,6 @@ export interface EncryptPartResult {
 export interface SignPartResult {
     data: string;
     signature: OpenPGPSignature;
-}
-
-export enum EVENT_VERIFICATION_STATUS {
-    SUCCESSFUL = 1,
-    NOT_VERIFIED = 0,
-    FAILED = -1,
 }
 
 export interface AttendeeClearPartResult {

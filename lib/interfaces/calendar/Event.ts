@@ -11,13 +11,13 @@ import {
     ICAL_ATTENDEE_STATUS,
     ICAL_ATTENDEE_RSVP,
     ICAL_EVENT_STATUS,
+    SHARED_SIGNED_FIELDS,
+    EVENT_VERIFICATION_STATUS,
 } from '../../calendar/constants';
-import { EVENT_VERIFICATION_STATUS } from '../../calendar/interface';
 import { Address } from '../index';
 import { VcalRrulePropertyValue, VcalVeventComponent } from './VcalModel';
 import { NotificationModel } from './Notification';
 import { pick } from '../../helpers/object';
-import { SHARED_SIGNED_FIELDS } from '../../calendar/veventHelper';
 
 export interface CalendarEventData {
     Type: CALENDAR_CARD_TYPE;

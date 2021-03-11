@@ -1,5 +1,4 @@
-import { SETTINGS_NOTIFICATION_TYPE } from './Calendar';
-import { NOTIFICATION_UNITS, NOTIFICATION_WHEN } from '../../calendar/constants';
+import { NOTIFICATION_UNITS, NOTIFICATION_WHEN, SETTINGS_NOTIFICATION_TYPE } from '../../calendar/constants';
 
 export interface NotificationModel {
     id: string;
