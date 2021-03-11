@@ -2,6 +2,7 @@ import { FREQUENCY } from './constants';
 import {
     VcalDateOrDateTimeValue,
     VcalDays,
+    VcalDaysKeys,
     VcalRruleProperty,
     VcalRrulePropertyValue,
 } from '../interfaces/calendar/VcalModel';
@@ -86,8 +87,8 @@ export const getIsRruleEqual = (oldRrule?: VcalRruleProperty, newRrule?: VcalRru
     const newValue = getRruleValue(newRrule);
     if (ignoreWkst && oldValue && newValue) {
         // To ignore WKST, we just set it to 'MO' in both RRULEs
-        oldValue.wkst = 'MO';
-        newValue.wkst = 'MO';
+        oldValue.wkst = VcalDays[VcalDays.MO] as VcalDaysKeys;
+        newValue.wkst = VcalDays[VcalDays.MO] as VcalDaysKeys;
     }
     if (newValue && oldValue) {
         // we "normalize" the rrules first (i.e. remove maybeArrayComparisonKeys in case they are redundant)
