@@ -13,7 +13,6 @@ import { propertyToUTCDate } from '../calendar/vcalConverter';
 import { getDisplayTitle } from '../calendar/helper';
 import { convertUTCDateTimeToZone, fromUTCDate, getTimezoneOffset, toUTCDate } from '../date/timezone';
 import { getIsAllDay, getIsDateTimeValue, getIsPropertyAllDay } from '../calendar/vcalHelper';
-import getAlarmMessageText from '../../../proton-calendar/src/app/helpers/getAlarmMessageText';
 import { getMillisecondsFromTriggerString } from '../calendar/vcal';
 import { DAY, HOUR, MINUTE, WEEK } from '../constants';
 import { DateTimeValue } from '../../../proton-calendar/src/app/interfaces/DateTime';
@@ -22,6 +21,7 @@ import { NotificationModel } from '../interfaces/calendar/Notification';
 import { getValarmTrigger } from './getValarmTrigger';
 import { omit } from './object';
 import { uniqueBy } from './array';
+import getAlarmMessageText from './getAlarmMessageText';
 
 /**
  * Given a raw event, (optionally) its starting date, the date now and a timezone id,
