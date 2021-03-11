@@ -10,6 +10,7 @@ import isDeepEqual from '../helpers/isDeepEqual';
 import { omit } from '../helpers/object';
 import { toUTCDate } from '../date/timezone';
 import { isSameDay } from '../date-fns-utc';
+import { getRruleValue } from './rrule';
 import { withRruleWkst } from './rruleWkst';
 import { dayToNumericDay } from './vcalConverter';
 
@@ -80,9 +81,14 @@ const isUntilEqual = (oldUntil?: VcalDateOrDateTimeValue, newUntil?: VcalDateOrD
 /**
  * Determine if two recurring rules are equal up to re-writing.
  */
-export const getIsRruleEqual = (oldRrule?: VcalRruleProperty, newRrule?: VcalRruleProperty) => {
-    const oldValue = oldRrule?.value;
-    const newValue = newRrule?.value;
+export const getIsRruleEqual = (oldRrule?: VcalRruleProperty, newRrule?: VcalRruleProperty, ignoreWkst = false) => {
+    const oldValue = getRruleValue(oldRrule);
+    const newValue = getRruleValue(newRrule);
+    if (ignoreWkst && oldValue && newValue) {
+        // To ignore WKST, we just set it to 'MO' in both RRULEs
+        oldValue.wkst = 'MO';
+        newValue.wkst = 'MO';
+    }
     if (newValue && oldValue) {
         // we "normalize" the rrules first (i.e. remove maybeArrayComparisonKeys in case they are redundant)
         const normalizedOldValue = getNormalizedRrule(oldValue);
