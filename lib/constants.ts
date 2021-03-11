@@ -41,6 +41,7 @@ export const APPS_CONFIGURATION = {
         name: 'Proton Account',
         clientID: 'WebAccount',
         icon: 'protonaccount',
+        settingsSlug: 'account',
     },
     [APPS.PROTONMAIL]: {
         publicPath: '',
@@ -48,6 +49,7 @@ export const APPS_CONFIGURATION = {
         name: 'ProtonMail',
         clientID: 'WebMail',
         icon: 'protonmail',
+        settingsSlug: 'mail',
     },
     [APPS.PROTONCONTACTS]: {
         publicPath: '/contacts',
@@ -55,6 +57,7 @@ export const APPS_CONFIGURATION = {
         name: 'ProtonContacts',
         clientID: 'WebContacts',
         icon: 'protoncontacts',
+        settingsSlug: 'contacts',
     },
     [APPS.PROTONDRIVE]: {
         publicPath: '/drive',
@@ -62,6 +65,7 @@ export const APPS_CONFIGURATION = {
         name: 'ProtonDrive',
         clientID: 'WebDrive',
         icon: 'protondrive',
+        settingsSlug: 'drive',
     },
     [APPS.PROTONCALENDAR]: {
         publicPath: '/calendar',
@@ -69,6 +73,7 @@ export const APPS_CONFIGURATION = {
         name: 'ProtonCalendar',
         clientID: 'WebCalendar',
         icon: 'protoncalendar',
+        settingsSlug: 'calendar',
     },
     [APPS.PROTONVPN_SETTINGS]: {
         publicPath: '',
@@ -76,6 +81,7 @@ export const APPS_CONFIGURATION = {
         name: 'ProtonVPN',
         clientID: 'WebVPNSettings',
         icon: 'protonvpn',
+        settingsSlug: 'vpn',
     },
     [APPS.PROTONADMIN]: {
         publicPath: '',
@@ -83,6 +89,7 @@ export const APPS_CONFIGURATION = {
         name: '',
         clientID: 'WebAdmin',
         icon: '',
+        settingsSlug: '',
     },
 } as const;
 export type APP_KEYS = keyof typeof APPS;
