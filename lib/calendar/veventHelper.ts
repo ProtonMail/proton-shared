@@ -1,14 +1,21 @@
 import { fromUTCDate } from '../date/timezone';
 import { omit, pick } from '../helpers/object';
-import { CalendarEventData } from '../interfaces/calendar';
-import { VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar/VcalModel';
+import { CalendarEventData, VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar';
 import { RequireOnly } from '../interfaces/utils';
 import { fromInternalAttendee } from './attendees';
-import { CALENDAR_CARD_TYPE } from './constants';
+// import { CALENDAR_CARD_TYPE } from './constants';
 import { generateUID, hasMoreThan, wrap } from './helper';
 import { AttendeeClearPartResult, AttendeePart } from './interface';
 import { serialize } from './vcal';
 import { dateTimeToProperty } from './vcalConverter';
+
+// FIXME: temporary duplication to avoid lexical scope error, likely circular deps
+enum CALENDAR_CARD_TYPE {
+    CLEAR_TEXT = 0,
+    ENCRYPTED = 1,
+    SIGNED = 2,
+    ENCRYPTED_AND_SIGNED = 3,
+}
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR_TEXT } = CALENDAR_CARD_TYPE;
 

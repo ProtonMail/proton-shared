@@ -1,3 +1,8 @@
+import { BASE_SIZE } from '../constants';
+import { SETTINGS_NOTIFICATION_TYPE } from '../interfaces/calendar';
+import { fromTriggerString } from './vcal';
+import { triggerToModel } from '../helpers/notificationModel';
+
 export enum CALENDAR_CARD_TYPE {
     CLEAR_TEXT = 0,
     ENCRYPTED = 1,
@@ -152,3 +157,132 @@ export enum END_TYPE {
 
 export const ICAL_EXTENSIONS = ['ics', 'ical', 'ifb', 'icalendar'];
 export const ICAL_MIME_TYPE = 'text/calendar';
+
+export const DEFAULT_CALENDAR = {
+    name: 'My calendar',
+    color: '#657ee4',
+    description: '',
+};
+
+export enum VIEWS {
+    DAY = 1,
+    WEEK,
+    MONTH,
+    YEAR,
+    AGENDA,
+    CUSTOM,
+}
+
+export const MINUTE = 60;
+export const HOUR = MINUTE * 60;
+export const DAY = HOUR * 24;
+export const WEEK = DAY * 7;
+
+export enum NOTIFICATION_WHEN {
+    BEFORE = '-',
+    AFTER = '',
+}
+
+export enum NOTIFICATION_UNITS {
+    WEEK = 1,
+    DAY = 2,
+    HOURS = 3,
+    MINUTES = 4,
+}
+
+export const NOTIFICATION_UNITS_MAX = {
+    [NOTIFICATION_UNITS.WEEK]: 1000 - 1,
+    [NOTIFICATION_UNITS.DAY]: 7000 - 1,
+    [NOTIFICATION_UNITS.HOURS]: 1000 - 1,
+    [NOTIFICATION_UNITS.MINUTES]: 10000 - 1,
+};
+
+export const DEFAULT_EVENT_DURATION = 30;
+
+export const COLORS = {
+    BLACK: '#000',
+    WHITE: '#FFF',
+};
+
+export const MAX_DEFAULT_NOTIFICATIONS = 5;
+export const MAX_NOTIFICATIONS = 10;
+
+export enum SAVE_CONFIRMATION_TYPES {
+    SINGLE = 1,
+    RECURRING,
+}
+
+export enum DELETE_CONFIRMATION_TYPES {
+    SINGLE = 1,
+    RECURRING,
+}
+
+export enum RECURRING_TYPES {
+    ALL = 1,
+    FUTURE,
+    SINGLE,
+}
+
+export const MAX_IMPORT_EVENTS = 15000;
+export const MAX_IMPORT_EVENTS_STRING = "15'000";
+export const MAX_IMPORT_FILE_SIZE = 10 * BASE_SIZE ** 2;
+export const MAX_IMPORT_FILE_SIZE_STRING = '10 MB';
+export const MAX_UID_CHARS_DISPLAY = 43;
+export const MAX_FILENAME_CHARS_DISPLAY = 100;
+export const IMPORT_CALENDAR_FAQ_URL =
+    'https://protonmail.com/support/knowledge-base/import-calendar-to-protoncalendar';
+
+export const TITLE_INPUT_ID = 'event-title-input';
+export const FREQUENCY_INPUT_ID = 'event-frequency-input';
+export const LOCATION_INPUT_ID = 'event-location-input';
+export const NOTIFICATION_INPUT_ID = 'event-notification-input';
+export const CALENDAR_INPUT_ID = 'event-calendar-input';
+export const DESCRIPTION_INPUT_ID = 'event-description-input';
+export const ALL_DAY_INPUT_ID = 'event-allday-input';
+export const DATE_INPUT_ID = 'event-date-input';
+export const PARTICIPANTS_INPUT_ID = 'event-participants-input';
+
+export const DEFAULT_PART_DAY_NOTIFICATIONS = [
+    {
+        Type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
+        Trigger: '-PT15M',
+    },
+];
+
+export const DEFAULT_FULL_DAY_NOTIFICATIONS = [
+    {
+        Type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
+        Trigger: '-PT15H',
+    },
+];
+
+export const DEFAULT_PART_DAY_NOTIFICATION = {
+    id: '1',
+    ...triggerToModel({
+        isAllDay: false,
+        type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
+        trigger: fromTriggerString('-PT15M'),
+    }),
+};
+
+export const DEFAULT_FULL_DAY_NOTIFICATION = {
+    id: '2',
+    ...triggerToModel({
+        isAllDay: true,
+        type: SETTINGS_NOTIFICATION_TYPE.DEVICE,
+        trigger: fromTriggerString('-PT15H'),
+    }),
+};
+
+export enum IMPORT_ERROR_TYPE {
+    NO_FILE_SELECTED,
+    NO_ICS_FILE,
+    FILE_EMPTY,
+    FILE_TOO_BIG,
+    FILE_CORRUPTED,
+    INVALID_CALENDAR,
+    INVALID_VERSION,
+    INVALID_METHOD,
+    NO_EVENTS,
+    TOO_MANY_EVENTS,
+}

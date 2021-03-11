@@ -1,6 +1,7 @@
 import { Member } from './Member';
 import { Passphrase } from './Passphrase';
 import { CalendarKey } from './CalendarKey';
+import { NotificationModel } from './Notification';
 
 export interface Calendar {
     ID: string;
@@ -53,4 +54,29 @@ export interface CalendarBootstrap {
     Passphrase: Passphrase;
     Members: Member[];
     CalendarSettings: CalendarSettings;
+}
+
+export interface CalendarAddressOptions {
+    value: string;
+    text: string;
+}
+
+export interface CalendarViewModel {
+    calendarID: string;
+    name: string;
+    display: boolean;
+    description: string;
+    color: string;
+    addressID: string;
+    addressOptions: CalendarAddressOptions[];
+    duration: number;
+    defaultPartDayNotification: NotificationModel;
+    defaultFullDayNotification: NotificationModel;
+    partDayNotifications: NotificationModel[];
+    fullDayNotifications: NotificationModel[];
+}
+
+export interface CalendarErrors {
+    name?: string;
+    description?: string;
 }
