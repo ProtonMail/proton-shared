@@ -1,5 +1,5 @@
 export * from './Alarm';
-// export * from './Attendee';
+export * from './Attendee';
 export * from './Calendar';
 export * from './CalendarKey';
 export * from './Date';
@@ -10,5 +10,6 @@ export * from './Import';
 export * from './Invite';
 export * from './Member';
 export * from './Notification';
+export * from './PartResult';
 export * from './Passphrase';
 export * from './VcalModel';

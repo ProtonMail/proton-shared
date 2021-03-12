@@ -4,8 +4,8 @@ import {
     CalendarEventData,
     VcalValarmComponent,
     VcalVeventComponent,
-    // AttendeeClearPartResult,
-    // AttendeePart,
+    AttendeeClearPartResult,
+    AttendeePart,
 } from '../interfaces/calendar';
 import { RequireOnly } from '../interfaces/utils';
 import { fromInternalAttendee } from './attendees';
@@ -23,7 +23,6 @@ import {
 import { serialize } from './vcal';
 import { dateTimeToProperty } from './vcalConverter';
 import { generateUID, hasMoreThan, wrap } from './helper';
-import { AttendeeClearPartResult, AttendeePart } from '../interfaces/calendar/Attendee';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR_TEXT } = CALENDAR_CARD_TYPE;
 
