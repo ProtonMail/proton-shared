@@ -308,6 +308,9 @@ export const getIsRruleSupported = (rruleProperty?: VcalRrulePropertyValue, isIn
         if (isLongArray(bymonthday) || isLongArray(bymonth) || isLongArray(byyearday)) {
             return false;
         }
+        if (bymonthday && !bymonth) {
+            return false;
+        }
         return true;
     }
     return false;
