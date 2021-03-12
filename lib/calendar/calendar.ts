@@ -1,6 +1,6 @@
 import { hasBit } from '../helpers/bitset';
-import { CALENDAR_FLAGS, MAX_CALENDARS_PER_USER } from './constants';
-import { Calendar, CalendarUserSettings, SETTINGS_VIEW } from '../interfaces/calendar';
+import { CALENDAR_FLAGS, MAX_CALENDARS_PER_USER, SETTINGS_VIEW } from './constants';
+import { Calendar, CalendarUserSettings } from '../interfaces/calendar';
 
 export const getIsCalendarActive = ({ Flags } = { Flags: 0 }) => {
     return hasBit(Flags, CALENDAR_FLAGS.ACTIVE);

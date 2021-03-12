@@ -300,3 +300,11 @@ export enum EVENT_VERIFICATION_STATUS {
     NOT_VERIFIED = 0,
     FAILED = -1,
 }
+
+export enum SETTINGS_VIEW {
+    DAY = 0,
+    WEEK = 1,
+    MONTH = 2,
+    YEAR = 3,
+    PLANNING = 4,
+}
