@@ -1,6 +1,6 @@
 import { transformBeforeAt } from './trigger';
 import { NOTIFICATION_UNITS, NOTIFICATION_WHEN, SETTINGS_NOTIFICATION_TYPE } from '../calendar/constants';
-import { NotificationModel } from '../interfaces/calendar';
+import { NotificationModel, VcalDurationValue } from '../interfaces/calendar';
 
 const getInt = (value: any) => parseInt(value, 10) || 0;
 
