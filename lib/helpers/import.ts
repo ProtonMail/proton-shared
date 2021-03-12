@@ -2,7 +2,6 @@ import { c } from 'ttag';
 import { addDays } from 'date-fns';
 
 import { dedupeAlarmsWithNormalizedTriggers, getSupportedAlarm } from './alarms';
-import { EncryptedEvent, VcalCalendarComponentOrError } from '../../../proton-calendar/src/app/interfaces/Import';
 import { readFileAsString } from './file';
 import {
     getHasDtStart,
@@ -31,6 +30,8 @@ import formatUTC from '../date-fns-utc/format';
 import { convertUTCDateTimeToZone, getSupportedTimezone, toUTCDate } from '../date/timezone';
 import {
     CalendarEvent,
+    EncryptedEvent,
+    VcalCalendarComponentOrError,
     VcalDateOrDateTimeProperty,
     VcalFloatingDateTimeProperty,
     VcalValarmComponent,

@@ -8,6 +8,8 @@ import {
     VcalValarmComponent,
     VcalValarmRelativeComponent,
     VcalVeventComponent,
+    DateTimeValue,
+    NotificationModel,
 } from '../interfaces/calendar';
 import { propertyToUTCDate } from '../calendar/vcalConverter';
 import { getDisplayTitle } from '../calendar/helper';
@@ -15,9 +17,7 @@ import { convertUTCDateTimeToZone, fromUTCDate, getTimezoneOffset, toUTCDate } f
 import { getIsAllDay, getIsDateTimeValue, getIsPropertyAllDay } from '../calendar/vcalHelper';
 import { getMillisecondsFromTriggerString } from '../calendar/vcal';
 import { DAY, HOUR, MINUTE, WEEK } from '../constants';
-import { DateTimeValue } from '../../../proton-calendar/src/app/interfaces/DateTime';
 import { NOTIFICATION_UNITS, NOTIFICATION_UNITS_MAX, NOTIFICATION_WHEN } from '../calendar/constants';
-import { NotificationModel } from '../interfaces/calendar/Notification';
 import { getValarmTrigger } from './getValarmTrigger';
 import { omit } from './object';
 import { uniqueBy } from './array';

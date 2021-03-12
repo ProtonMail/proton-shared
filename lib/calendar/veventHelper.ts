@@ -1,6 +1,12 @@
 import { fromUTCDate } from '../date/timezone';
 import { omit, pick } from '../helpers/object';
-import { CalendarEventData, VcalValarmComponent, VcalVeventComponent } from '../interfaces/calendar';
+import {
+    CalendarEventData,
+    VcalValarmComponent,
+    VcalVeventComponent,
+    // AttendeeClearPartResult,
+    // AttendeePart,
+} from '../interfaces/calendar';
 import { RequireOnly } from '../interfaces/utils';
 import { fromInternalAttendee } from './attendees';
 import {
@@ -14,10 +20,10 @@ import {
     USER_ENCRYPTED_FIELDS,
     USER_SIGNED_FIELDS,
 } from './constants';
-import { AttendeeClearPartResult, AttendeePart } from './interface';
 import { serialize } from './vcal';
 import { dateTimeToProperty } from './vcalConverter';
 import { generateUID, hasMoreThan, wrap } from './helper';
+import { AttendeeClearPartResult, AttendeePart } from '../interfaces/calendar/Attendee';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR_TEXT } = CALENDAR_CARD_TYPE;
 

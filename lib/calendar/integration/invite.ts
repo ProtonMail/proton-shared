@@ -10,7 +10,6 @@ import {
     Attendee,
     CalendarSettings,
     Participant,
-    SETTINGS_NOTIFICATION_TYPE,
     VcalAttendeeProperty,
     VcalOrganizerProperty,
     VcalValarmComponent,
@@ -22,7 +21,7 @@ import { ContactEmail } from '../../interfaces/contacts';
 import { RequireSome } from '../../interfaces/utils';
 import { formatSubject, RE_PREFIX } from '../../mail/messages';
 import { getAttendeeEmail } from '../attendees';
-import { ICAL_ATTENDEE_STATUS, ICAL_METHOD } from '../constants';
+import { ICAL_ATTENDEE_STATUS, ICAL_METHOD, SETTINGS_NOTIFICATION_TYPE } from '../constants';
 import { getDisplayTitle } from '../helper';
 import { getIsRruleEqual } from '../rruleEqual';
 import { fromTriggerString, serialize } from '../vcal';

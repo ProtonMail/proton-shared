@@ -13,8 +13,8 @@ import {
     VcalOrganizerProperty,
     VcalVeventComponent,
     Participant,
+    DateTime,
 } from '../interfaces/calendar';
-import { DateTime } from '../interfaces/calendar/Date';
 
 import { getAttendeeEmail } from './attendees';
 import { getIsPropertyAllDay, getPropertyTzid } from './vcalHelper';

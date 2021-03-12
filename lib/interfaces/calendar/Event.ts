@@ -14,10 +14,11 @@ import {
     SHARED_SIGNED_FIELDS,
     EVENT_VERIFICATION_STATUS,
 } from '../../calendar/constants';
-import { Address } from '../index';
+import { Address } from '../Address';
 import { VcalRrulePropertyValue, VcalVeventComponent } from './VcalModel';
 import { NotificationModel } from './Notification';
 import { pick } from '../../helpers/object';
+import { formatData } from '../../calendar/formatData';
 
 export interface CalendarEventData {
     Type: CALENDAR_CARD_TYPE;
@@ -231,3 +232,12 @@ export interface EventModelReadView extends EventModelView {
 
 const sharedPick = (x: VcalVeventComponent) => pick(x, [...SHARED_SIGNED_FIELDS, 'component']);
 export type SharedVcalVeventComponent = ReturnType<typeof sharedPick>;
+
+export interface EncryptedEvent {
+    component: VcalVeventComponent;
+    data: ReturnType<typeof formatData>;
+}
+
+export interface StoredEncryptedEvent extends EncryptedEvent {
+    response: SyncMultipleApiResponses;
+}

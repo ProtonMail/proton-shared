@@ -1,12 +1,16 @@
 import { c } from 'ttag';
-import { IMPORT_ERROR_TYPE } from './constants';
-import { truncate } from '../helpers/string';
+
 import {
-    CALENDAR_APP_NAME,
+    IMPORT_ERROR_TYPE,
     MAX_FILENAME_CHARS_DISPLAY,
     MAX_IMPORT_EVENTS_STRING,
     MAX_IMPORT_FILE_SIZE_STRING,
-} from '../../../proton-calendar/src/app/constants';
+} from './constants';
+import { truncate } from '../helpers/string';
+import { getAppName } from '../apps/helper';
+import { APPS } from '../constants';
+
+const CALENDAR_APP_NAME = getAppName(APPS.PROTONCALENDAR);
 
 const getErrorMessage = (errorType: IMPORT_ERROR_TYPE, filename = '') => {
     const formattedFilename = `"${truncate(filename, MAX_FILENAME_CHARS_DISPLAY)}"`;

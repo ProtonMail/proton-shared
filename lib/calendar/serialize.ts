@@ -1,109 +1,19 @@
-import { OpenPGPKey, OpenPGPSignature, SessionKey } from 'pmcrypto';
+import { OpenPGPKey, SessionKey } from 'pmcrypto';
 import { CreateCalendarEventBlobData } from '../api/calendars';
-import { uint8ArrayToBase64String } from '../helpers/encoding';
 import { RequireSome } from '../interfaces/utils';
 
 import { CALENDAR_CARD_TYPE } from './constants';
 import { getVeventParts } from './veventHelper';
 import { createSessionKey, encryptPart, getEncryptedSessionKey, signPart } from './encrypt';
 import { VcalVeventComponent } from '../interfaces/calendar';
-import { AttendeeClearPartResult, EncryptPartResult, SignPartResult } from './interface';
-import isTruthy from '../helpers/isTruthy';
 import { getIsEventComponent } from './vcalHelper';
+import { formatData } from './formatData';
 
 const { ENCRYPTED_AND_SIGNED, SIGNED, CLEAR_TEXT } = CALENDAR_CARD_TYPE;
-
-// Wrong typings in openpgp.d.ts...
-const getArmoredSignatureString = (signature: OpenPGPSignature) => (signature.armor() as unknown) as string;
 
 export const getHasSharedKeyPacket = (
     data: CreateCalendarEventBlobData
 ): data is RequireSome<CreateCalendarEventBlobData, 'SharedKeyPacket'> => !!data.SharedKeyPacket;
-
-/**
- * Format the data into what the API expects.
- */
-interface FormatDataArguments {
-    sharedSignedPart: SignPartResult;
-    sharedEncryptedPart: EncryptPartResult;
-    sharedSessionKey?: Uint8Array;
-    calendarSignedPart?: SignPartResult;
-    calendarEncryptedPart?: EncryptPartResult;
-    calendarSessionKey?: Uint8Array;
-    personalSignedPart?: SignPartResult;
-    attendeesEncryptedPart?: EncryptPartResult;
-    attendeesClearPart?: AttendeeClearPartResult[];
-}
-export const formatData = ({
-    sharedSignedPart,
-    sharedEncryptedPart,
-    sharedSessionKey,
-    calendarSignedPart,
-    calendarEncryptedPart,
-    calendarSessionKey,
-    personalSignedPart,
-    attendeesEncryptedPart,
-    attendeesClearPart,
-}: FormatDataArguments) => {
-    return {
-        SharedKeyPacket: sharedSessionKey ? uint8ArrayToBase64String(sharedSessionKey) : undefined,
-        SharedEventContent: [
-            // Shared part should always exists
-            {
-                Type: SIGNED,
-                Data: sharedSignedPart.data,
-                Signature: getArmoredSignatureString(sharedSignedPart.signature),
-            },
-            {
-                Type: ENCRYPTED_AND_SIGNED,
-                Data: uint8ArrayToBase64String(sharedEncryptedPart.dataPacket),
-                Signature: getArmoredSignatureString(sharedEncryptedPart.signature),
-            },
-        ],
-        CalendarKeyPacket:
-            calendarEncryptedPart && calendarSessionKey ? uint8ArrayToBase64String(calendarSessionKey) : undefined,
-        CalendarEventContent:
-            calendarSignedPart || calendarEncryptedPart
-                ? [
-                      // Calendar parts are optional
-                      calendarSignedPart && {
-                          Type: SIGNED,
-                          Data: calendarSignedPart.data,
-                          Signature: getArmoredSignatureString(calendarSignedPart.signature),
-                      },
-                      calendarEncryptedPart && {
-                          Type: ENCRYPTED_AND_SIGNED,
-                          Data: uint8ArrayToBase64String(calendarEncryptedPart.dataPacket),
-                          Signature: getArmoredSignatureString(calendarEncryptedPart.signature),
-                      },
-                  ].filter(isTruthy)
-                : undefined,
-        // Personal part is optional
-        PersonalEventContent: personalSignedPart
-            ? {
-                  Type: SIGNED,
-                  Data: personalSignedPart.data,
-                  Signature: getArmoredSignatureString(personalSignedPart.signature),
-              }
-            : undefined,
-        AttendeesEventContent: attendeesEncryptedPart
-            ? [
-                  {
-                      Type: ENCRYPTED_AND_SIGNED,
-                      Data: uint8ArrayToBase64String(attendeesEncryptedPart.dataPacket),
-                      Signature: getArmoredSignatureString(attendeesEncryptedPart.signature),
-                  },
-              ]
-            : undefined,
-        Attendees: attendeesClearPart
-            ? attendeesClearPart.map(({ token, status, permissions }) => ({
-                  Token: token,
-                  Permissions: permissions,
-                  Status: status,
-              }))
-            : undefined,
-    };
-};
 
 /**
  * Split the properties of the component into parts.
