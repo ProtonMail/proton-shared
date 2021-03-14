@@ -300,6 +300,11 @@ export const getIsRruleSupported = (rruleProperty?: VcalRrulePropertyValue, isIn
             return false;
         }
         if (isInvitation) {
+            if (bymonthday && !bymonth) {
+                // These RRULEs are problematic as ICAL.js does not expand them properly.
+                // The API will reject them, so we want to block them as well
+                return false;
+            }
             return !rruleProperties.some((property) => !SUPPORTED_RRULE_PROPERTIES_INVITATION.includes(property));
         }
         if (rruleProperties.some((property) => !SUPPORTED_RRULE_PROPERTIES_YEARLY.includes(property))) {
