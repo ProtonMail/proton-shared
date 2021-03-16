@@ -14,7 +14,6 @@ import { isSameDay } from '../date-fns-utc';
 import { getRruleValue } from './rrule';
 import { withRruleWkst } from './rruleWkst';
 import { dayToNumericDay } from './vcalConverter';
-import { WeekStartsOn } from '../date-fns-utc/interface';
 
 const maybeArrayComparisonKeys = [
     'byday',
