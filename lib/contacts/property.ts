@@ -27,7 +27,7 @@ export const cleanMultipleValue = (value: string = '') => {
         .replace(BACKSLASH_SEMICOLON_REGEX, ANIMALS)
         .split(';')
         .map((value) => value.replace(SPECIAL_CHARACTER_REGEX, '\\;'))
-        .map((value) => unescapeValue(value));
+        .map((value) => unescapeVcardValue(value));
 };
 
 /**
