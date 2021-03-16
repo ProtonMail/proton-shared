@@ -11,7 +11,7 @@ const SPECIAL_CHARACTER_REGEX = /🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼/gi;
  * If extended is a Boolean === true, we can unescape : too.
  * ex: for a base64
  */
-export const unescapeValue = (value: string = '', extended: boolean = false) => {
+export const unescapeValue = (value = '', extended = false) => {
     // If we do map(unescapeValue) we still want the default unescape
     const reg = extended !== true ? UNESCAPE_REGEX : UNESCAPE_EXTENDED_REGEX;
     return value.replace(reg, (val) => val.substr(1));
