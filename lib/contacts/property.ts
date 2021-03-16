@@ -63,6 +63,9 @@ export const getValue = (property: any, field: string): string | string[] => {
         return val.toString();
     });
 
+    // In some rare situations, ICAL can miss the multiple value nature of an adr field
+    // It has been reproduced after a contact import from iOS including the address in a group
+    // For that specific case, we have to split values manually
     if (field === 'adr' && typeof value === 'string') {
         value = cleanMultipleValue(value);
     }
