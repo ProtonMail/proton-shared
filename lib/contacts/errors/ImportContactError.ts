@@ -8,7 +8,7 @@ export enum IMPORT_CONTACT_ERROR_TYPE {
 
 const getErrorMessage = (errorType: IMPORT_CONTACT_ERROR_TYPE, externalError?: Error) => {
     if (errorType === IMPORT_CONTACT_ERROR_TYPE.UNSUPPORTED_VCARD_VERSION) {
-        return c('Error importing contact').t`'vCard versions < 4.0 not supported'`;
+        return c('Error importing contact').t`vCard versions < 3.0 not supported`;
     }
     if (errorType === IMPORT_CONTACT_ERROR_TYPE.ENCRYPTION_ERROR) {
         return c('Error importing contact').t`Encryption failed`;

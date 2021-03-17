@@ -49,7 +49,7 @@ export const getContactId = (vcardOrContactProperties: string | ContactPropertie
 };
 
 export const getSupportedContact = (vcard: string) => {
-    if (vcard.includes('VERSION:2.1') || vcard.includes('VERSION:3.0')) {
+    if (vcard.includes('VERSION:2.1')) {
         const contactId = getContactId(vcard);
         return new ImportContactError(IMPORT_CONTACT_ERROR_TYPE.UNSUPPORTED_VCARD_VERSION, contactId);
     }
