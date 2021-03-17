@@ -123,14 +123,13 @@ interface FormatterProps {
     name: string;
 }
 type GetTimeZoneOptions = (
-    date?: Date,
+    date: Date,
     options?: { formatter?: (a1: FormatterProps) => string }
 ) => {
     text: string;
     value: string;
     key: number;
 }[];
-
 /**
  * Get a list of all IANA time zones that we support
  * @return {Array<Object>}      [{ text: 'Africa/Nairobi: UTC +03:00', value: 'Africa/Nairobi'}, ...]

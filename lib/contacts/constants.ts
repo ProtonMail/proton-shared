@@ -1,6 +1,3 @@
-// BACK-END DATA
-import { BASE_SIZE } from '../constants';
-
 export const VCARD_KEY_FIELDS = ['key', 'x-pm-mimetype', 'x-pm-encrypt', 'x-pm-sign', 'x-pm-scheme', 'x-pm-tls'];
 export const CLEAR_FIELDS = ['version', 'prodid', 'categories'];
 export const SIGNED_FIELDS = ['version', 'prodid', 'fn', 'uid', 'email'].concat(VCARD_KEY_FIELDS);
@@ -61,7 +58,7 @@ export const CONTACT_IMG_SIZE = 180;
 export const API_SAFE_INTERVAL = 100; // API request limit: 100 requests / 10 seconds, so 1 request every 100 ms is safe
 export const QUERY_EXPORT_MAX_PAGESIZE = 50; // in GET API route /contacts/export
 // Manual limit on number of imported contacts to be sent to the API, so that the response does not take too long
-export const ADD_CONTACTS_MAX_SIZE = 10;
+export const ADD_CONTACTS_MAX_SIZE = 100;
 
 // FRONT-END RESTRICTIONS
 export const MAX_SIMULTANEOUS_CONTACTS_ENCRYPT = 5;

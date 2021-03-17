@@ -10,7 +10,7 @@ export const get = (Type: number) => ({
 
 interface PartialLabelOrderArgument {
     LabelIDs: string[];
-    ParentID?: string | number;
+    ParentID?: string;
 }
 interface LabelOrderArgument extends PartialLabelOrderArgument {
     Type: number;
