@@ -69,12 +69,14 @@ export const getParticipant = ({
         vcalComponent: participant,
         name: participantName,
         emailAddress,
-        partstat: getAttendeePartstat(participant),
         displayName: isYou ? c('Participant name').t`You` : displayName,
         displayEmail: emailAddress,
     };
-    const { role, email, 'x-pm-token': token } = (participant as VcalAttendeeProperty).parameters || {};
+    const { partstat, role, email, 'x-pm-token': token } = (participant as VcalAttendeeProperty).parameters || {};
     const calendarAttendee = token ? calendarAttendees?.find(({ Token }) => Token === token) : undefined;
+    if (partstat) {
+        result.partstat = getAttendeePartstat(participant);
+    }
     if (role) {
         result.role = getAttendeeRole(participant);
     }
