@@ -1,21 +1,19 @@
-import { DRAFT_MIME_TYPES, PACKAGE_TYPE } from '../constants';
-
-export interface AutoResponder {
-    StartTime: number;
-    EndTime: number;
-    Repeat: number;
-    DaysSelected: number[];
-    Subject: string;
-    Message: string;
-    IsEnabled: boolean;
-    Zone: string;
-}
+import { DRAFT_MIME_TYPES } from '../constants';
 
 export interface MailSettings {
     DisplayName: string;
     Signature: string;
     Theme: string;
-    AutoResponder: AutoResponder;
+    AutoResponder: {
+        StartTime: number;
+        Endtime: number;
+        Repeat: number;
+        DaysSelected: number[];
+        Subject: string;
+        Message: string;
+        IsEnabled: boolean;
+        Zone: string;
+    };
     AutoSaveContacts: number;
     AutoWildcardSearch: number;
     ComposerMode: number;
@@ -35,7 +33,7 @@ export interface MailSettings {
     RightToLeft: number;
     AttachPublicKey: number;
     Sign: number;
-    PGPScheme: PACKAGE_TYPE;
+    PGPScheme: number;
     PromptPin: number;
     Autocrypt: number;
     NumMessagePerPage: number;
