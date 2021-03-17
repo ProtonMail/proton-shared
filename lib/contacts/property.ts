@@ -70,6 +70,14 @@ export const getValue = (property: any, field: string): string | string[] => {
         value = cleanMultipleValue(value);
     }
 
+    // If one of the adr sections contains unescaped `,`
+    // ICAL will return a value of type (string | string[])[]
+    // Which we don't support later in the code
+    // Until we do, we flatten the value by joining these entries
+    if (field === 'adr') {
+        value = (value as (string | string[])[]).map((entry) => (Array.isArray(entry) ? entry.join(', ') : entry));
+    }
+
     return value;
 };
 
@@ -93,13 +101,10 @@ export const getType = (types: string | string[] = []): string => {
 
 /**
  * Transform an array value for the field 'adr' into a string to be displayed
- * adr input type is willingly chaotic here
- * some contacts can have adr entries with strange format, we have to deal with any possibility
  */
-export const formatAdr = (adr: (number | string | string[])[] = []): string => {
+export const formatAdr = (adr: string[] = []): string => {
     return adr
         .filter(isTruthy)
-        .flat()
-        .map((value) => String(value).trim())
+        .map((value) => value.trim())
         .join(', ');
 };
