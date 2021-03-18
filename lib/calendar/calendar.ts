@@ -1,5 +1,5 @@
 import { hasBit } from '../helpers/bitset';
-import { CALENDAR_FLAGS, MAX_CALENDARS_PER_USER } from './constants';
+import { CALENDAR_FLAGS, MAX_CALENDARS_PER_FREE_USER, MAX_CALENDARS_PER_USER } from './constants';
 import { Calendar } from '../interfaces/calendar';
 
 export const getIsCalendarActive = ({ Flags } = { Flags: 0 }) => {
@@ -40,6 +40,8 @@ export const getCanCreateCalendar = (
     return totalActionableCalendars < MAX_CALENDARS_PER_USER;
 };
 
-export const getMaxUserCalendarsDisabled = (disabledCalendars: Calendar[]) => {
-    return disabledCalendars.length === MAX_CALENDARS_PER_USER;
+export const getMaxUserCalendarsDisabled = (disabledCalendars: Calendar[], isFree: boolean) => {
+    const calendarLimit = isFree ? MAX_CALENDARS_PER_FREE_USER : MAX_CALENDARS_PER_USER;
+
+    return disabledCalendars.length === calendarLimit;
 };
