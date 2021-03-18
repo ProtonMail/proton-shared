@@ -11,6 +11,7 @@ import isDeepEqual from '../helpers/isDeepEqual';
 import { omit } from '../helpers/object';
 import { toUTCDate } from '../date/timezone';
 import { isSameDay } from '../date-fns-utc';
+import { getRruleValue } from './rrule';
 import { withRruleWkst } from './rruleWkst';
 import { dayToNumericDay } from './vcalConverter';
 
