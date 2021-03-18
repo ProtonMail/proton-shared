@@ -1,4 +1,4 @@
-import { transformBeforeAt } from './trigger';
+import { transformBeforeAt } from '../calendar/trigger';
 import { NOTIFICATION_UNITS, NOTIFICATION_WHEN, SETTINGS_NOTIFICATION_TYPE } from '../calendar/constants';
 import { NotificationModel, VcalDurationValue } from '../interfaces/calendar';
 

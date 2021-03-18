@@ -1,4 +1,4 @@
-import { filterFutureNotifications } from './alarms';
+import { filterFutureNotifications } from '../calendar/alarms';
 import { CalendarNotificationSettings } from '../interfaces/calendar';
 import { triggerToModel } from './notificationModel';
 import { fromTriggerString } from '../calendar/vcal';

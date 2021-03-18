@@ -1,4 +1,4 @@
-import { NOTIFICATION_UNITS, NOTIFICATION_WHEN } from '../calendar/constants';
+import { NOTIFICATION_UNITS, NOTIFICATION_WHEN } from './constants';
 import { transformBeforeAt } from './trigger';
 import { NotificationModel } from '../interfaces/calendar/Notification';
 

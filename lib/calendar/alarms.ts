@@ -1,5 +1,5 @@
 import { differenceInMinutes } from 'date-fns';
-import { truncate } from './string';
+import { truncate } from '../helpers/string';
 import {
     VcalDateOrDateTimeProperty,
     VcalDateTimeProperty,
@@ -11,16 +11,16 @@ import {
     DateTimeValue,
     NotificationModel,
 } from '../interfaces/calendar';
-import { propertyToUTCDate } from '../calendar/vcalConverter';
-import { getDisplayTitle } from '../calendar/helper';
+import { propertyToUTCDate } from './vcalConverter';
+import { getDisplayTitle } from './helper';
 import { convertUTCDateTimeToZone, fromUTCDate, getTimezoneOffset, toUTCDate } from '../date/timezone';
-import { getIsAllDay, getIsDateTimeValue, getIsPropertyAllDay } from '../calendar/vcalHelper';
-import { getMillisecondsFromTriggerString } from '../calendar/vcal';
+import { getIsAllDay, getIsDateTimeValue, getIsPropertyAllDay } from './vcalHelper';
+import { getMillisecondsFromTriggerString } from './vcal';
 import { DAY, HOUR, MINUTE, WEEK } from '../constants';
-import { NOTIFICATION_UNITS, NOTIFICATION_UNITS_MAX, NOTIFICATION_WHEN } from '../calendar/constants';
+import { NOTIFICATION_UNITS, NOTIFICATION_UNITS_MAX, NOTIFICATION_WHEN } from './constants';
 import { getValarmTrigger } from './getValarmTrigger';
-import { omit } from './object';
-import { uniqueBy } from './array';
+import { omit } from '../helpers/object';
+import { uniqueBy } from '../helpers/array';
 import getAlarmMessageText from './getAlarmMessageText';
 
 /**

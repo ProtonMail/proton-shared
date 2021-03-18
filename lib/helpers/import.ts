@@ -1,7 +1,7 @@
 import { c } from 'ttag';
 import { addDays } from 'date-fns';
 
-import { dedupeAlarmsWithNormalizedTriggers, getSupportedAlarm } from './alarms';
+import { dedupeAlarmsWithNormalizedTriggers, getSupportedAlarm } from '../calendar/alarms';
 import { readFileAsString } from './file';
 import {
     getHasDtStart,
