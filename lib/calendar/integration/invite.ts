@@ -389,7 +389,7 @@ const getFormattedDateInfo = (vevent: VcalVeventComponent, options: Options = { 
             isSingleAllDay,
         };
     }
-    const formattedStartDateTime = formatUTC(toUTCDate(dtstart.value), 'cccc PPPp', { locale: dateLocale });
+    const formattedStartDateTime = formatUTC(toUTCDate(dtstart.value), 'cccc PPPp', options);
     const formattedEndDateTime = dtend
         ? formatUTC(toUTCDate(dtend.value), 'cccc PPPp', { locale: dateLocale })
         : undefined;
