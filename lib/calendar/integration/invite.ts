@@ -1,5 +1,5 @@
 import { c } from 'ttag';
-import { format as formatUTC } from '../../date-fns-utc';
+import { addDays, format as formatUTC } from '../../date-fns-utc';
 import { Options } from '../../date-fns-utc/format';
 import { formatTimezoneOffset, getTimezoneOffset, toUTCDate } from '../../date/timezone';
 import { canonizeEmail, canonizeEmailByGuess, canonizeInternalEmail } from '../../helpers/email';
@@ -384,7 +384,7 @@ const getFormattedDateInfo = (vevent: VcalVeventComponent, options: Options = { 
     if (isAllDay) {
         return {
             formattedStart: formatUTC(toUTCDate(dtstart.value), 'cccc PPP', options),
-            formattedEnd: dtend ? formatUTC(toUTCDate(dtend.value), 'cccc PPP', options) : undefined,
+            formattedEnd: dtend ? formatUTC(addDays(toUTCDate(dtend.value), -1), 'cccc PPP', options) : undefined,
             isAllDay,
             isSingleAllDay,
         };

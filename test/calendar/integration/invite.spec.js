@@ -312,7 +312,7 @@ Description: I am a good description`;
             },
         };
         const expected = `(no title) has been updated.
-When: Sunday March 22nd, 2020 - Tuesday March 24th, 2020`;
+When: Sunday March 22nd, 2020 - Monday March 23rd, 2020`;
         expect(
             generateEmailBody({
                 vevent,
@@ -338,7 +338,7 @@ When: Sunday March 22nd, 2020 - Tuesday March 24th, 2020`;
             description: { value: 'I am a good description' },
         };
         const expected = `Watch movie has been updated.
-When: Sunday March 22nd, 2020 - Tuesday March 24th, 2020
+When: Sunday March 22nd, 2020 - Monday March 23rd, 2020
 Where: asd
 Description: I am a good description`;
         expect(
