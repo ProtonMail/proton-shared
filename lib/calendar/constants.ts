@@ -1,4 +1,7 @@
-import { BASE_SIZE } from '../constants';
+import { APPS, BASE_SIZE } from '../constants';
+import { getAppName } from '../apps/helper';
+
+export const CALENDAR_APP_NAME = getAppName(APPS.PROTONCALENDAR);
 
 export enum CALENDAR_CARD_TYPE {
     CLEAR_TEXT = 0,

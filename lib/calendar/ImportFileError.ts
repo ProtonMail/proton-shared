@@ -5,12 +5,9 @@ import {
     MAX_FILENAME_CHARS_DISPLAY,
     MAX_IMPORT_EVENTS_STRING,
     MAX_IMPORT_FILE_SIZE_STRING,
+    CALENDAR_APP_NAME,
 } from './constants';
 import { truncate } from '../helpers/string';
-import { getAppName } from '../apps/helper';
-import { APPS } from '../constants';
-
-const CALENDAR_APP_NAME = getAppName(APPS.PROTONCALENDAR);
 
 const getErrorMessage = (errorType: IMPORT_ERROR_TYPE, filename = '') => {
     const formattedFilename = `"${truncate(filename, MAX_FILENAME_CHARS_DISPLAY)}"`;
