@@ -1,6 +1,6 @@
 import { hasBit } from '../helpers/bitset';
-import { CALENDAR_FLAGS, MAX_CALENDARS_PER_USER } from './constants';
-import { Calendar } from '../interfaces/calendar';
+import { CALENDAR_FLAGS, MAX_CALENDARS_PER_USER, SETTINGS_VIEW } from './constants';
+import { Calendar, CalendarUserSettings } from '../interfaces/calendar';
 
 export const getIsCalendarActive = ({ Flags } = { Flags: 0 }) => {
     return hasBit(Flags, CALENDAR_FLAGS.ACTIVE);
@@ -42,4 +42,15 @@ export const getCanCreateCalendar = (
 
 export const getMaxUserCalendarsDisabled = (disabledCalendars: Calendar[]) => {
     return disabledCalendars.length === MAX_CALENDARS_PER_USER;
+};
+
+export const DEFAULT_CALENDAR_USER_SETTINGS: CalendarUserSettings = {
+    WeekLength: 7,
+    DisplayWeekNumber: 0,
+    DefaultCalendarID: null,
+    AutoDetectPrimaryTimezone: 0,
+    PrimaryTimezone: 'Europe/Zurich',
+    DisplaySecondaryTimezone: 0,
+    SecondaryTimezone: undefined,
+    ViewPreference: SETTINGS_VIEW.WEEK,
 };
