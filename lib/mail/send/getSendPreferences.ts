@@ -14,7 +14,7 @@ const getSendPreferences = (
 ): SendPreferences => {
     const {
         encrypt,
-        sign,
+
         sendKey,
         isSendKeyPinned,
         hasApiKeys,
@@ -27,13 +27,13 @@ const getSendPreferences = (
     const newEncrypt = encrypt || isEncryptedToOutside;
     // override sign if necessary
     // (i.e. when the contact sign preference is false and the user toggles "Sign" on the composer)
-    const newSign = isEncryptedToOutside ? false : sign || isSign(message);
+    const sign = isEncryptedToOutside ? false : isSign(message);
     // cast PGP scheme into what API expects. Override if necessary
-    const { pgpScheme, mimeType } = getPGPSchemeAndMimeType({ ...encryptionPreferences, sign: newSign }, message);
+    const { pgpScheme, mimeType } = getPGPSchemeAndMimeType({ ...encryptionPreferences, sign }, message);
 
     return {
         encrypt: newEncrypt,
-        sign: newSign,
+        sign,
         pgpScheme,
         mimeType,
         publicKeys: sendKey ? [sendKey] : undefined,
