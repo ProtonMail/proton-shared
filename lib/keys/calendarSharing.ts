@@ -7,7 +7,7 @@ import {
     getMessage,
     OpenPGPKey,
 } from 'pmcrypto';
-import { ACCESS_LEVEL } from '../calendar/interface';
+import { ACCESS_LEVEL } from '../interfaces/calendar';
 import { encodeBase64 } from '../helpers/base64';
 import { stringToUint8Array, uint8ArrayToString, uint8ArrayToPaddedBase64URLString } from '../helpers/encoding';
 import { getSHA256Base64String, generateRandomBytes, xorEncryptDecrypt } from '../helpers/crypto';
