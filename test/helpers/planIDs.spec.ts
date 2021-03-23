@@ -99,7 +99,7 @@ describe('hasPlanIDs', () => {
         ).toBeTrue();
     });
 
-    it('should return true if plan IDs are set', () => {
+    it('should return false if plan IDs are not set', () => {
         expect(
             hasPlanIDs({
                 [PLANS.PROFESSIONAL]: 0,
