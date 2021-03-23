@@ -1,7 +1,13 @@
 import { Nullable, RequireSome } from '../interfaces/utils';
 import { PaginationParams } from './interface';
-import { Attendee, Calendar, CalendarEventData, CalendarSettings, CalendarUserSettings } from '../interfaces/calendar';
-import { ACCESS_LEVEL } from '../calendar/interface';
+import {
+    Attendee,
+    Calendar,
+    CalendarEventData,
+    CalendarSettings,
+    CalendarUserSettings,
+    ACCESS_LEVEL,
+} from '../interfaces/calendar';
 
 const CALENDAR_V1 = 'calendar/v1';
 
