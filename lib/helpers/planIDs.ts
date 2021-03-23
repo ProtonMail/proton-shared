@@ -21,17 +21,16 @@ export const clearPlanIDs = (planIDs: PlanIDs) => {
 
 export const removeService = (planIDs: PlanIDs, plans: Plan[], service: PLAN_SERVICES = PLAN_SERVICES.MAIL) => {
     const plansMap = toMap(plans);
-    return clearPlanIDs(
-        Object.entries(planIDs).reduce<PlanIDs>((acc, [planID = '']) => {
-            const { Services } = plansMap[planID];
+    return Object.entries(planIDs).reduce<PlanIDs>((acc, [planID = '', quantity = 0]) => {
+        const { Services } = plansMap[planID];
 
-            if (hasBit(Services, service)) {
-                acc[planID] = 0;
-            }
-
+        if (hasBit(Services, service)) {
             return acc;
-        }, planIDs)
-    );
+        }
+
+        acc[planID] = quantity;
+        return acc;
+    }, {});
 };
 
 const getAddonQuantity = (plan: Plan | undefined, used = 0, key: MaxKeys, addon: Plan) => {
