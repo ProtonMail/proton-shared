@@ -159,6 +159,17 @@ export const switchPlan = ({
     return {};
 };
 
+export const setQuantity = (planIDs: PlanIDs, planID: string, newQuantity: number) => {
+    const { [planID]: removedPlan, ...restPlanIDs } = planIDs;
+    if (!newQuantity || newQuantity <= 0) {
+        return restPlanIDs;
+    }
+    return {
+        ...restPlanIDs,
+        [planID]: newQuantity,
+    };
+};
+
 export const getTotal = ({
     plans = [],
     planIDs = {},

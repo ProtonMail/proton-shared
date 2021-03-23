@@ -1,4 +1,4 @@
-import { removeService, switchPlan, clearPlanIDs, hasPlanIDs } from '../../lib/helpers/planIDs';
+import { removeService, switchPlan, clearPlanIDs, hasPlanIDs, setQuantity } from '../../lib/helpers/planIDs';
 import { PLAN_SERVICES, PLANS, ADDON_NAMES } from '../../lib/constants';
 import { Organization, Plan } from '../../lib/interfaces';
 
@@ -111,6 +111,36 @@ describe('hasPlanIDs', () => {
             })
         ).toBeFalse();
         expect(hasPlanIDs({})).toBeFalse();
+    });
+});
+
+describe('setQuantity', () => {
+    it('should set plan id quantity', () => {
+        expect(
+            setQuantity(
+                {
+                    [PLANS.PROFESSIONAL]: 1,
+                },
+                PLANS.PROFESSIONAL,
+                0
+            )
+        ).toEqual({});
+        expect(
+            setQuantity(
+                {
+                    [PLANS.PROFESSIONAL]: 1,
+                    [ADDON_NAMES.ADDRESS]: 1,
+                },
+                ADDON_NAMES.ADDRESS,
+                0
+            )
+        ).toEqual({
+            [PLANS.PROFESSIONAL]: 1,
+        });
+        expect(setQuantity({}, ADDON_NAMES.ADDRESS, 0)).toEqual({});
+        expect(setQuantity({}, ADDON_NAMES.ADDRESS, 1)).toEqual({
+            [ADDON_NAMES.ADDRESS]: 1,
+        });
     });
 });
 
