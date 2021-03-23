@@ -19,7 +19,7 @@ export const getPGPScheme = (
     if (!encrypt && isEO(message)) {
         return SEND_EO;
     }
-    if (sign) {
+    if (encrypt || sign) {
         return scheme === PGP_SCHEMES.PGP_INLINE ? SEND_PGP_INLINE : SEND_PGP_MIME;
     }
     return SEND_CLEAR;
