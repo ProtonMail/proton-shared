@@ -1,4 +1,4 @@
-import { removeService, switchPlan, clearPlanIDs } from '../../lib/helpers/planIDs';
+import { removeService, switchPlan, clearPlanIDs, hasPlanIDs } from '../../lib/helpers/planIDs';
 import { PLAN_SERVICES, PLANS, ADDON_NAMES } from '../../lib/constants';
 import { Organization, Plan } from '../../lib/interfaces';
 
@@ -60,6 +60,57 @@ describe('removeService', () => {
 
     it('should remove mail', () => {
         expect(removeService({ plus: 1 }, MOCK_PLANS, PLAN_SERVICES.MAIL)).toEqual({});
+    });
+});
+
+describe('hasPlanIDs', () => {
+    it('should return true if plan IDs are set', () => {
+        expect(
+            hasPlanIDs({
+                [PLANS.PROFESSIONAL]: 1,
+                [PLANS.VPNPLUS]: 0,
+                [ADDON_NAMES.VPN]: 3,
+            })
+        ).toBeTrue();
+
+        expect(
+            hasPlanIDs({
+                [PLANS.PROFESSIONAL]: 1,
+            })
+        ).toBeTrue();
+
+        expect(
+            hasPlanIDs({
+                [PLANS.PROFESSIONAL]: 1,
+            })
+        ).toBeTrue();
+
+        expect(
+            hasPlanIDs({
+                [PLANS.PROFESSIONAL]: 1,
+                [ADDON_NAMES.VPN]: -1,
+            })
+        ).toBeTrue();
+
+        expect(
+            hasPlanIDs({
+                [ADDON_NAMES.VPN]: 1,
+            })
+        ).toBeTrue();
+    });
+
+    it('should return true if plan IDs are set', () => {
+        expect(
+            hasPlanIDs({
+                [PLANS.PROFESSIONAL]: 0,
+            })
+        ).toBeFalse();
+        expect(
+            hasPlanIDs({
+                [PLANS.PROFESSIONAL]: -1,
+            })
+        ).toBeFalse();
+        expect(hasPlanIDs({})).toBeFalse();
     });
 });
 

@@ -7,7 +7,7 @@ import { toMap, omit } from './object';
 const { PLUS, VPNPLUS, VPNBASIC, VISIONARY, PROFESSIONAL } = PLANS;
 const { VPN, SPACE, MEMBER, ADDRESS, DOMAIN } = ADDON_NAMES;
 
-export const hasPlanIDs = (planIDs = {}) => Object.keys(planIDs).length > 0;
+export const hasPlanIDs = (planIDs: PlanIDs) => Object.values(planIDs).some((quantity) => quantity > 0);
 
 export const clearPlanIDs = (planIDs: PlanIDs) => {
     return Object.entries(planIDs).reduce<PlanIDs>((acc, [planID, quantity = 0]) => {
