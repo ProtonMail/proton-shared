@@ -8,6 +8,7 @@ export interface Key {
     Fingerprints: string[];
     PublicKey: string; // armored key
     Version: number;
+    Active: 1 | 0;
     Activation?: string;
     PrivateKey: string; // armored key
     Token?: string;
