@@ -167,8 +167,8 @@ const eventManager = ({
 
                 await Promise.all(listeners.notify(result));
 
-                const { More } = result;
-                setEventID(result[eventIDKey]);
+                const { More, [eventIDKey]: nextEventID } = result;
+                setEventID(nextEventID);
                 setRetryIndex(0);
 
                 if (!More) {
