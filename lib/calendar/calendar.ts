@@ -30,14 +30,16 @@ export const getDefaultCalendar = (calendars: Calendar[] = [], defaultCalendarID
 export const getCanCreateCalendar = (
     activeCalendars: Calendar[],
     disabledCalendars: Calendar[],
-    calendars: Calendar[]
+    calendars: Calendar[],
+    isFree: boolean
 ) => {
     const totalActionableCalendars = activeCalendars.length + disabledCalendars.length;
     if (totalActionableCalendars < calendars.length) {
         // calendar keys need to be reactivated before being able to create a calendar
         return false;
     }
-    return totalActionableCalendars < MAX_CALENDARS_PER_USER;
+    const calendarLimit = isFree ? MAX_CALENDARS_PER_FREE_USER : MAX_CALENDARS_PER_USER;
+    return totalActionableCalendars < calendarLimit;
 };
 
 export const getMaxUserCalendarsDisabled = (disabledCalendars: Calendar[], isFree: boolean) => {
