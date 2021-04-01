@@ -14,6 +14,7 @@ export interface CalendarURL {
     EncryptedPurpose: Nullable<string>;
     EncryptedCacheKey: string;
     EncryptedPassphrase: Nullable<string>;
+    CreateTime: number;
 }
 
 export interface CalendarUrlResponse {
