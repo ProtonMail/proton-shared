@@ -42,7 +42,9 @@ export const getContactCategories = (properties: ContactProperties) => {
 };
 
 /**
- * Make sure we keep only valid properties. In case adr property is badly formatted, re-format
+ * Make sure we keep only valid properties.
+ * * In case adr property is badly formatted, re-format
+ * * Split multi-valued categories properties, otherwise ICAL.js does not handle them
  */
 export const sanitizeProperties = (properties: ContactProperties = []): ContactProperties => {
     /*
@@ -57,13 +59,20 @@ export const sanitizeProperties = (properties: ContactProperties = []): ContactP
         })
         .map((property) => {
             const { field, value } = property;
-            if (field !== 'adr' || Array.isArray(value)) {
-                return property;
+            if (field === 'adr' && !Array.isArray(value)) {
+                // assume the bad formatting used commas instead of semicolons
+                const newValue = value.split(',').slice(0, 6);
+                return { ...property, value: newValue };
             }
-            // assume the bad formatting used commas instead of semicolons
-            const newValue = value.split(',').slice(0, 6);
-            return { ...property, value: newValue };
-        });
+            if (field === 'categories' && Array.isArray(value)) {
+                // Array-valued categories pose problems to ICAL (even though a vcard with CATEGORIES:ONE,TWO
+                // will be parsed into a value ['ONE', 'TWO'], ICAL.js fails to transform it back). So we convert
+                // an array-valued category into several properties
+                return value.map((category) => ({ ...property, value: category }));
+            }
+            return property;
+        })
+        .flat();
 };
 
 /**
