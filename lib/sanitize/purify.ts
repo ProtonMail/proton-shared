@@ -41,6 +41,9 @@ const CONFIG: { [key: string]: any } = {
 
 const getConfig = (type: string): Config => ({ ...CONFIG.default, ...(CONFIG[type] || {}) });
 
+/**
+ * Remove some style properties configured in LIST_STYLE_PROPERTIES_REMOVED
+ */
 const sanitizeStyle = (node: Node) => {
     // We only work on elements
     if (node.nodeType !== 1) {
@@ -54,6 +57,11 @@ const sanitizeStyle = (node: Node) => {
     });
 };
 
+/**
+ * Rename some tags adding the proton- prefix configured in LIST_PROTON_TAG
+ * This process is done outside and after DOMPurify because renaming tags in DOMPurify don't work
+ * Currently used only for svg tags which are considered as image
+ */
 const sanitizeElements = (document: Element) => {
     LIST_PROTON_TAG.forEach((tagName) => {
         const svgs = document.querySelectorAll(tagName);
@@ -73,6 +81,10 @@ const sanitizeElements = (document: Element) => {
     });
 };
 
+/**
+ * Rename some attributes adding the proton- prefix configured in LIST_PROTON_ATTR
+ * Also escape urls in style attributes
+ */
 const beforeSanitizeElements = (node: Node) => {
     // We only work on elements
     if (node.nodeType !== 1) {
