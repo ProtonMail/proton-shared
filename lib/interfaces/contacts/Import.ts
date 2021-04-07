@@ -20,6 +20,7 @@ export enum IMPORT_STEPS {
     IMPORTING,
     SUMMARY,
     IMPORT_GROUPS,
+    FINISHED
 }
 
 export enum IMPORT_GROUPS_ACTION {
