@@ -7,7 +7,7 @@ import {
     ContactProperty,
     ContactValue,
 } from './Contact';
-
+import { VCardKey } from './VCard';
 import { ImportContactError } from '../../contacts/errors/ImportContactError';
 import { ImportFatalError } from '../../contacts/errors/ImportFatalError';
 import { ImportFileError } from '../../contacts/errors/ImportFileError';

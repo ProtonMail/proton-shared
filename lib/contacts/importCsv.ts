@@ -1,4 +1,5 @@
 import { PreVcardProperty, PreVcardsContact } from '../interfaces/contacts/Import';
+import { VCardKey } from '../interfaces/contacts/VCard';
 import { getTypeValues } from '../helpers/contacts';
 
 // See './csv.ts' for the definition of pre-vCard and pre-vCards contact
@@ -6,12 +7,13 @@ import { getTypeValues } from '../helpers/contacts';
 /**
  * Modify the field (and accordingly the type, if needed) of a pre-vCard
  */
-const modifyPreVcardField = (preVcard: PreVcardProperty, newField: string) => {
+const modifyPreVcardField = (preVcard: PreVcardProperty, newField: VCardKey) => {
     const types = getTypeValues();
-    const newType = types[newField].includes(preVcard.type || '')
+    const type = types[newField] as VCardKey[];
+    const newType = type.includes((preVcard.type || '') as VCardKey)
         ? preVcard.type
-        : types[newField].length
-        ? types[newField][0]
+        : type.length
+        ? type[0]
         : undefined;
 
     return { ...preVcard, field: newField, type: newType, custom: false };
@@ -20,7 +22,7 @@ const modifyPreVcardField = (preVcard: PreVcardProperty, newField: string) => {
 /**
  * Modify the field (and accordingly the type) of a pre-vCard inside a pre-vCards contact
  */
-export const modifyContactField = (preVcardsContact: PreVcardsContact, index: number, newField: string) => {
+export const modifyContactField = (preVcardsContact: PreVcardsContact, index: number, newField: VCardKey) => {
     return preVcardsContact.map((preVcards, i) =>
         i !== index ? preVcards : preVcards.map((preVcard) => modifyPreVcardField(preVcard, newField))
     );
