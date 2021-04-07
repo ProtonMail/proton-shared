@@ -26,6 +26,7 @@ function main({
         dsn,
         release: isProduction(host) ? APP_VERSION : COMMIT_RELEASE,
         environment: host,
+        normalizeDepth: 5,
         beforeSend(event) {
             // @ts-ignore
             if (event && 'error' in event && event.error?.stack) {
