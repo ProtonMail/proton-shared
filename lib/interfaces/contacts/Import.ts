@@ -1,3 +1,4 @@
+import { VCardKey } from './VCard';
 import {
     ContactCard,
     ContactGroup,
@@ -109,7 +110,7 @@ export interface PreVcardProperty {
     checked: boolean;
     pref?: number;
     field: string;
-    type?: string;
+    type?: VCardKey;
     value: ContactValue;
     combineInto?: string;
     combineIndex?: number;
