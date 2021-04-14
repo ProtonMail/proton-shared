@@ -4,17 +4,11 @@ import { ContactEmail } from '../interfaces/contacts';
 import { canonizeInternalEmail } from './email';
 import { unary } from './function';
 
-export const getIsAddressDisabled = (address?: Address) => {
-    if (!address) {
-        return undefined;
-    }
+export const getIsAddressDisabled = (address: Address) => {
     return address.Status === ADDRESS_STATUS.STATUS_DISABLED;
 };
 
-export const getIsAddressActive = (address?: Address) => {
-    if (!address) {
-        return undefined;
-    }
+export const getIsAddressActive = (address: Address) => {
     return (
         address.Status === ADDRESS_STATUS.STATUS_ENABLED &&
         address.Receive === RECEIVE_ADDRESS.RECEIVE_YES &&
