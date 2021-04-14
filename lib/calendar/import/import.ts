@@ -28,8 +28,6 @@ import {
     MAX_LENGTHS,
     MAX_NOTIFICATIONS,
 } from '../constants';
-// import { IMPORT_EVENT_ERROR_TYPE, ImportEventError } from './ImportEventError';
-// import { ImportFileError } from './ImportFileError';
 import formatUTC from '../../date-fns-utc/format';
 import { convertUTCDateTimeToZone, getSupportedTimezone, toUTCDate } from '../../date/timezone';
 import {
