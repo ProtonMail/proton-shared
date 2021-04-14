@@ -1,10 +1,11 @@
 import * as Sentry from '@sentry/browser';
 
 import { ProtonConfig } from '../interfaces';
+import { VPN_HOSTNAME } from '../constants';
 
 const isLocalhost = () => document.location.host.startsWith('localhost');
 
-const isProduction = (host: string) => host === 'mail.protonmail.com' || host === 'account.protonvpn.com';
+const isProduction = (host: string) => host === 'mail.protonmail.com' || host === VPN_HOSTNAME;
 
 function main({
     SENTRY_DSN,
