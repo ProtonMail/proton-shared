@@ -1,7 +1,8 @@
 import { c } from 'ttag';
 
-import { CONTACT_CARD_TYPE } from '../../constants';
+import { CONTACT_CARD_TYPE, FORBIDDEN_LABEL_NAMES } from '../../constants';
 import isTruthy from '../../helpers/isTruthy';
+import { normalize } from '../../helpers/string';
 import {
     ContactGroup,
     ContactMetadata,
@@ -18,10 +19,10 @@ import {
 } from '../../interfaces/contacts/Import';
 import { SimpleMap } from '../../interfaces/utils';
 
+import { IMPORT_CONTACT_ERROR_TYPE, ImportContactError } from '../errors/ImportContactError';
+
 import { hasCategories } from '../properties';
 import { parse as parseVcard } from '../vcard';
-
-import { IMPORT_CONTACT_ERROR_TYPE, ImportContactError } from '../errors/ImportContactError';
 
 export const getIsAcceptedExtension = (extension: string): extension is ACCEPTED_EXTENSIONS => {
     return Object.values(EXTENSION).includes(extension as EXTENSION);
@@ -185,12 +186,18 @@ export const getImportCategoriesModel = (contacts: ImportedContact[], groups: Co
     const categories = getImportCategories(contacts).map((category) => {
         const existingGroup = groups.find(({ Name }) => Name === category.name);
         const action = existingGroup && groups.length ? IMPORT_GROUPS_ACTION.MERGE : IMPORT_GROUPS_ACTION.CREATE;
-        return {
+        const targetGroup = existingGroup || groups[0];
+        const targetName = existingGroup ? '' : category.name;
+        const result: ImportCategories = {
             ...category,
             action,
-            targetGroup: existingGroup || groups[0],
-            targetName: existingGroup ? '' : category.name,
+            targetGroup,
+            targetName,
         };
+        if (action === IMPORT_GROUPS_ACTION.CREATE && FORBIDDEN_LABEL_NAMES.includes(normalize(targetName))) {
+            result.error = c('Error').t`Invalid name`;
+        }
+        return result;
     });
     return categories;
 };
