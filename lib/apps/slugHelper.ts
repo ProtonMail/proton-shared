@@ -4,7 +4,13 @@ import { stripLocalBasenameFromPathname } from '../authentication/pathnameHelper
 
 export const DEFAULT_APP = APPS.PROTONMAIL;
 
-export const ALLOWED_APPS = [APPS.PROTONMAIL, APPS.PROTONCALENDAR, APPS.PROTONCONTACTS, APPS.PROTONVPN_SETTINGS];
+export const ALLOWED_APPS = [
+    APPS.PROTONMAIL,
+    APPS.PROTONCALENDAR,
+    APPS.PROTONCONTACTS,
+    APPS.PROTONVPN_SETTINGS,
+    APPS.PROTONDRIVE,
+];
 
 export const getSlugFromApp = (app: APP_NAMES) => APPS_CONFIGURATION[app].settingsSlug;
 
