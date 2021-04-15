@@ -118,7 +118,7 @@ export const buildLink = ({
     passphraseKey: Nullable<Uint8Array>;
     cacheKey: string;
 }) => {
-    const baseURL = `https://calendar.proton.me/api/calendar/v1/url/${urlID}/calendar.ics`;
+    const baseURL = `https://calendar.protonmail.com/api/calendar/v1/url/${urlID}/calendar.ics`;
     const encodedCacheKey = encodeURIComponent(cacheKey);
 
     if (accessLevel === ACCESS_LEVEL.FULL && passphraseKey) {
