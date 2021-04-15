@@ -5,7 +5,7 @@ import { hasCategories } from './properties';
 import { parse as parseVcard } from './vcard';
 import { ContactProperties } from '../interfaces/contacts';
 import isTruthy from '../helpers/isTruthy';
-import { IMPORT_CONTACT_ERROR_TYPE, ImportContactError } from '../interfaces/contacts/ImportContactError';
+import { IMPORT_CONTACT_ERROR_TYPE, ImportContactError } from './errors/ImportContactError';
 import { ACCEPTED_EXTENSIONS, EncryptedContact, EXTENSION, ImportContactsModel } from '../interfaces/contacts/Import';
 
 export const getIsAcceptedExtension = (extension: string): extension is ACCEPTED_EXTENSIONS => {
