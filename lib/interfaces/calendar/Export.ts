@@ -3,7 +3,6 @@ import { VcalVeventComponent } from './VcalModel';
 import { CalendarEvent } from './Event';
 
 export enum EXPORT_STEPS {
-    WARNING,
     EXPORTING,
     FINISHED,
 }
