@@ -93,9 +93,9 @@ export const processInBatches = async ({
     getCalendarKeys,
     totalToProcess,
 }: ProcessData): Promise<[VcalVeventComponent[], CalendarEvent[]]> => {
-    const BATCH_SIZE = 10;
-    const DELAY = 30;
-    const batchesLength = Math.ceil(totalToProcess / BATCH_SIZE);
+    const PAGE_SIZE = 50;
+    const DELAY = 100;
+    const batchesLength = Math.ceil(totalToProcess / PAGE_SIZE);
     const processed: VcalVeventComponent[] = [];
     const errored: CalendarEvent[] = [];
 
@@ -148,30 +148,28 @@ export const processInBatches = async ({
         }
 
         const params: CalendarEventsQuery = {
-            PageSize: BATCH_SIZE,
+            PageSize: PAGE_SIZE,
             BeginID: lastId,
         };
 
-        try {
-            const [result] = await Promise.all([
-                api<{ Events: CalendarEvent[] }>(queryEvents(calendarID, params)),
-                wait(DELAY),
-            ]);
+        const [result] = await Promise.all([
+            api<{ Events: CalendarEvent[] }>(queryEvents(calendarID, params)),
+            wait(DELAY),
+        ]).catch(() => {
+            throw new Error('Failed to fatch events');
+        });
 
-            if (signal.aborted) {
-                return [[], []];
-            }
-
-            lastId = result.Events[result.Events.length - 1].ID;
-
-            const veventComponents = (await Promise.all(result.Events.map(decryptEvent))).filter(
-                (result): result is VcalVeventComponent => !!result
-            );
-
-            onProgress(veventComponents);
-        } catch (error) {
-            throw new Error(error);
+        if (signal.aborted) {
+            return [[], []];
         }
+
+        lastId = result.Events[result.Events.length - 1].ID;
+
+        const veventComponents = (await Promise.all(result.Events.map(decryptEvent))).filter(
+            (result): result is VcalVeventComponent => !!result
+        );
+
+        onProgress(veventComponents);
     }
 
     return [processed.flat(), errored];

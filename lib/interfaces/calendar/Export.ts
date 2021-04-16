@@ -6,8 +6,10 @@ export enum EXPORT_STEPS {
     WARNING,
     EXPORTING,
     FINISHED,
-    FETCHING_DEPENDENCIES,
-    ERROR_FETCHING_DEPENDENCIES,
+}
+
+export enum EXPORT_ERRORS {
+    NETWORK_ERROR,
 }
 
 export interface ExportCalendarModel {
@@ -16,5 +18,5 @@ export interface ExportCalendarModel {
     totalToProcess: number;
     calendar: Calendar;
     erroredEvents: CalendarEvent[];
-    error?: Error;
+    error?: EXPORT_ERRORS;
 }
