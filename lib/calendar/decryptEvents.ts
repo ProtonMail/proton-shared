@@ -93,11 +93,12 @@ export const processInBatches = async ({
     getCalendarKeys,
     totalToProcess,
 }: ProcessData): Promise<[VcalVeventComponent[], CalendarEvent[]]> => {
-    const PAGE_SIZE = 50;
+    const PAGE_SIZE = 10;
     const DELAY = 100;
     const batchesLength = Math.ceil(totalToProcess / PAGE_SIZE);
     const processed: VcalVeventComponent[] = [];
     const errored: CalendarEvent[] = [];
+    const promises: Promise<void>[] = [];
 
     let lastId;
 
@@ -165,12 +166,16 @@ export const processInBatches = async ({
 
         lastId = result.Events[result.Events.length - 1].ID;
 
-        const veventComponents = (await Promise.all(result.Events.map(decryptEvent))).filter(
-            (result): result is VcalVeventComponent => !!result
-        );
+        const promise = Promise.all(result.Events.map(decryptEvent)).then((veventComponents) => {
+            onProgress(
+                veventComponents.filter((veventComponent): veventComponent is VcalVeventComponent => !!veventComponent)
+            );
+        });
 
-        onProgress(veventComponents);
+        promises.push(promise);
     }
 
-    return [processed.flat(), errored];
+    await Promise.all(promises);
+
+    return [processed, errored];
 };
