@@ -1,4 +1,4 @@
-import { CalendarEventsQuery, queryEvents } from '../../api/calendars';
+import { CalendarExportEventsQuery, queryEvents } from '../../api/calendars';
 import { wait } from '../../helpers/promise';
 import { Address, Api } from '../../interfaces';
 import { CalendarEvent, VcalVeventComponent } from '../../interfaces/calendar';
@@ -84,7 +84,7 @@ export const processInBatches = async ({
             return [[], []];
         }
 
-        const params: CalendarEventsQuery = {
+        const params: CalendarExportEventsQuery = {
             PageSize: PAGE_SIZE,
             BeginID: lastId,
         };

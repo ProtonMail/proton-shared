@@ -146,10 +146,14 @@ export enum CalendarEventsQueryType {
 }
 
 export interface CalendarEventsQuery extends PaginationParams {
-    Start?: number;
-    End?: number;
-    Timezone?: string;
-    Type?: CalendarEventsQueryType;
+    Start: number;
+    End: number;
+    Timezone: string;
+    Type: CalendarEventsQueryType;
+}
+
+export interface CalendarExportEventsQuery extends PaginationParams {
+    BeginID?: string;
 }
 
 export const getEventsCount = (calendarID: string) => ({
@@ -157,7 +161,7 @@ export const getEventsCount = (calendarID: string) => ({
     method: 'get',
 });
 
-export const queryEvents = (calendarID: string, params: CalendarEventsQuery) => ({
+export const queryEvents = (calendarID: string, params: CalendarEventsQuery | CalendarExportEventsQuery) => ({
     url: `${CALENDAR_V1}/${calendarID}/events`,
     method: 'get',
     params,
