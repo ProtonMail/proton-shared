@@ -92,9 +92,7 @@ export const processInBatches = async ({
         const [result] = await Promise.all([
             api<{ Events: CalendarEvent[] }>(queryEvents(calendarID, params)),
             wait(DELAY),
-        ]).catch(() => {
-            throw new Error('Failed to fatch events');
-        });
+        ]);
 
         if (signal.aborted) {
             return [[], []];
