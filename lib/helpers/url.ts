@@ -42,14 +42,21 @@ export const getHostname = (url = '') => {
 };
 
 /**
+ * Converts search parameters from hash to a URLSearchParams compatible string
+ */
+const getSearchFromHash = (search: string) => {
+    let searchHash = search;
+    if (searchHash) {
+        searchHash = searchHash[0] === '#' ? `?${search.slice(1)}` : searchHash;
+    }
+    return searchHash;
+};
+
+/**
  * Return a param (native) map based on the search string
  */
 export const getSearchParams = (search: string): { [key: string]: string } => {
-    let searchHash = search;
-    if (searchHash) {
-        searchHash = `?${search.slice(1)}`;
-    }
-    const params = new URLSearchParams(searchHash);
+    const params = new URLSearchParams(getSearchFromHash(search));
 
     const result: { [key: string]: string } = {};
 
@@ -69,11 +76,7 @@ export const changeSearchParams = (
     search: string,
     newParams: { [key: string]: string | undefined }
 ) => {
-    let searchHash = search;
-    if (searchHash) {
-        searchHash = `?${search.slice(1)}`;
-    }
-    const params = new URLSearchParams(searchHash);
+    const params = new URLSearchParams(getSearchFromHash(search));
 
     Object.keys(newParams).forEach((key) => {
         if (newParams[key] === undefined) {
