@@ -164,8 +164,8 @@ export const getAttendeeHasRole = (attendee: VcalAttendeeProperty): attendee is 
     return !!attendee.parameters?.role;
 };
 
-export const getProdIdFromNameAndVersion = (appName: string, appVersion: string) =>
-    `-//Proton Technologies//${appName} ${appVersion}//EN`;
+export const getProdIdFromNameAndVersion = (id: string, version: string) =>
+    `-//Proton Technologies//${id} ${version}//EN`;
 
 export const getProdId = (config: ProtonConfig) => {
     const { APP_NAME, APP_VERSION: appVersion } = config;
