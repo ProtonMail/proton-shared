@@ -7,11 +7,36 @@ import {
     getMessage,
     OpenPGPKey,
 } from 'pmcrypto';
-import { ACCESS_LEVEL } from '../interfaces/calendar';
-import { encodeBase64 } from '../helpers/base64';
-import { stringToUint8Array, uint8ArrayToString, uint8ArrayToPaddedBase64URLString } from '../helpers/encoding';
-import { getSHA256Base64String, generateRandomBytes, xorEncryptDecrypt } from '../helpers/crypto';
-import { Nullable } from '../interfaces/utils';
+import { GetCalendarInfo } from '../../../../react-components/hooks/useGetCalendarInfo';
+import { EVENT_ACTIONS } from '../../constants';
+import { encodeBase64 } from '../../helpers/base64';
+import { generateRandomBytes, getSHA256Base64String, xorEncryptDecrypt } from '../../helpers/crypto';
+import { stringToUint8Array, uint8ArrayToPaddedBase64URLString, uint8ArrayToString } from '../../helpers/encoding';
+import { Nullable } from '../../interfaces';
+import { ACCESS_LEVEL, Calendar, CalendarLink, CalendarUrl } from '../../interfaces/calendar';
+import {
+    CalendarUrlEventManager,
+    CalendarUrlEventManagerCreate,
+    CalendarUrlEventManagerDelete,
+    CalendarUrlEventManagerUpdate,
+} from '../../interfaces/calendar/EventManager';
+import { splitKeys } from '../../keys';
+
+export const getIsCalendarUrlEventManagerDelete = (
+    event: CalendarUrlEventManager
+): event is CalendarUrlEventManagerDelete => {
+    return event.Action === EVENT_ACTIONS.DELETE;
+};
+export const getIsCalendarUrlEventManagerCreate = (
+    event: CalendarUrlEventManager
+): event is CalendarUrlEventManagerCreate => {
+    return event.Action === EVENT_ACTIONS.CREATE;
+};
+export const getIsCalendarUrlEventManagerUpdate = (
+    event: CalendarUrlEventManager
+): event is CalendarUrlEventManagerUpdate => {
+    return event.Action === EVENT_ACTIONS.UPDATE;
+};
 
 export const decryptPurpose = async ({
     encryptedPurpose,
@@ -26,7 +51,6 @@ export const decryptPurpose = async ({
             privateKeys,
         })
     ).data;
-
 export const generateEncryptedPurpose = async ({
     purpose,
     publicKeys,
@@ -38,14 +62,8 @@ export const generateEncryptedPurpose = async ({
         return null;
     }
 
-    return (
-        await encryptMessage({
-            data: purpose,
-            publicKeys,
-        })
-    ).data;
+    return (await encryptMessage({ data: purpose, publicKeys })).data;
 };
-
 export const generateEncryptedPassphrase = ({
     passphraseKey,
     decryptedPassphrase,
@@ -58,6 +76,7 @@ export const generateEncryptedPassphrase = ({
     );
 
 export const generateCacheKey = () => uint8ArrayToPaddedBase64URLString(generateRandomBytes(16));
+
 export const generateCacheKeySalt = () => encodeBase64(arrayToBinaryString(generateRandomBytes(8)));
 
 export const getCacheKeyHash = ({ cacheKey, cacheKeySalt }: { cacheKey: string; cacheKeySalt: string }) =>
@@ -128,4 +147,64 @@ export const buildLink = ({
     }
 
     return `${baseURL}?CacheKey=${encodedCacheKey}`;
+};
+
+export const transformLinkFromAPI = async ({
+    calendarUrl,
+    calendar,
+    getCalendarInfo,
+    onError,
+}: {
+    calendarUrl: CalendarUrl;
+    calendar: Calendar;
+    getCalendarInfo: GetCalendarInfo;
+    onError: (e: Error) => void;
+}): Promise<CalendarLink> => {
+    const { EncryptedPurpose: encryptedPurpose } = calendarUrl;
+    let purpose = null;
+
+    if (encryptedPurpose) {
+        try {
+            const { decryptedCalendarKeys } = await getCalendarInfo(calendar.ID);
+            const { privateKeys } = splitKeys(decryptedCalendarKeys);
+
+            purpose = await decryptPurpose({
+                encryptedPurpose,
+                privateKeys,
+            });
+        } catch (e) {
+            onError(e);
+            purpose = encryptedPurpose;
+        }
+    }
+
+    return {
+        ...calendarUrl,
+        calendarName: calendar.Name,
+        color: calendar.Color,
+        purpose,
+    };
+};
+
+export const transformLinksFromAPI = async ({
+    calendarUrls,
+    calendar,
+    getCalendarInfo,
+    onError,
+}: {
+    calendarUrls: CalendarUrl[];
+    calendar: Calendar;
+    getCalendarInfo: GetCalendarInfo;
+    onError: (e: Error) => void;
+}) => {
+    return Promise.all(
+        calendarUrls.map((calendarUrl) =>
+            transformLinkFromAPI({
+                calendarUrl,
+                calendar,
+                getCalendarInfo,
+                onError,
+            })
+        )
+    );
 };

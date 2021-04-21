@@ -6,7 +6,7 @@ export enum ACCESS_LEVEL {
     FULL = 1,
 }
 
-export interface CalendarURL {
+export interface CalendarUrl {
     CalendarUrlID: string;
     CalendarID: string;
     PassphraseID?: string;
@@ -18,12 +18,12 @@ export interface CalendarURL {
 }
 
 export interface CalendarUrlResponse {
-    CalendarUrl: CalendarURL;
+    CalendarUrl: CalendarUrl;
     Code: number;
 }
 
 export interface CalendarUrlsResponse {
-    CalendarUrls: CalendarURL[];
+    CalendarUrls: CalendarUrl[];
     Code: number;
 }
 
@@ -31,7 +31,7 @@ export interface CalendarMap {
     [key: string]: Calendar;
 }
 
-export interface CalendarLink extends Omit<CalendarURL, 'PassphraseID'> {
+export interface CalendarLink extends Omit<CalendarUrl, 'PassphraseID'> {
     calendarName: string;
     color: string;
     purpose: Nullable<string>;
