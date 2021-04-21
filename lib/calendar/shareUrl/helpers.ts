@@ -8,7 +8,8 @@ import {
     getMessage,
     OpenPGPKey,
 } from 'pmcrypto';
-import { AES256, EVENT_ACTIONS } from '../../constants';
+import { getAppHref } from '../../apps/helper';
+import { AES256, APPS, EVENT_ACTIONS } from '../../constants';
 import { encodeBase64 } from '../../helpers/base64';
 import { generateRandomBytes, getSHA256Base64String, xorEncryptDecrypt } from '../../helpers/crypto';
 import { stringToUint8Array, uint8ArrayToPaddedBase64URLString, uint8ArrayToString } from '../../helpers/encoding';
@@ -136,7 +137,7 @@ export const buildLink = ({
     passphraseKey: Nullable<Uint8Array>;
     cacheKey: string;
 }) => {
-    const baseURL = `https://calendar.protonmail.com/api/calendar/v1/url/${urlID}/calendar.ics`;
+    const baseURL = getAppHref(`/api/calendar/v1/url/${urlID}/calendar.ics`, APPS.PROTONCALENDAR);
     const encodedCacheKey = encodeURIComponent(cacheKey);
 
     if (accessLevel === ACCESS_LEVEL.FULL && passphraseKey) {
