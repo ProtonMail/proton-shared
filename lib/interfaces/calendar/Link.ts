@@ -35,6 +35,7 @@ export interface CalendarLink extends Omit<CalendarUrl, 'PassphraseID'> {
     calendarName: string;
     color: string;
     purpose: Nullable<string>;
+    link: string;
 }
 
 export interface CopyLinkParams {

@@ -4,11 +4,11 @@ import {
     decodeBase64,
     decryptMessage,
     encryptMessage,
+    generateSessionKey,
     getMessage,
     OpenPGPKey,
 } from 'pmcrypto';
-import { GetCalendarInfo } from '../../../../react-components/hooks/useGetCalendarInfo';
-import { EVENT_ACTIONS } from '../../constants';
+import { AES256, EVENT_ACTIONS } from '../../constants';
 import { encodeBase64 } from '../../helpers/base64';
 import { generateRandomBytes, getSHA256Base64String, xorEncryptDecrypt } from '../../helpers/crypto';
 import { stringToUint8Array, uint8ArrayToPaddedBase64URLString, uint8ArrayToString } from '../../helpers/encoding';
@@ -20,7 +20,6 @@ import {
     CalendarUrlEventManagerDelete,
     CalendarUrlEventManagerUpdate,
 } from '../../interfaces/calendar/EventManager';
-import { splitKeys } from '../../keys';
 
 export const getIsCalendarUrlEventManagerDelete = (
     event: CalendarUrlEventManager
@@ -149,25 +148,67 @@ export const buildLink = ({
     return `${baseURL}?CacheKey=${encodedCacheKey}`;
 };
 
+export const getCreatePublicLinkPayload = async ({
+    accessLevel,
+    publicKeys,
+    decryptedPassphrase,
+    passphraseID,
+}: {
+    accessLevel: ACCESS_LEVEL;
+    publicKeys: OpenPGPKey[];
+    decryptedPassphrase: string;
+    passphraseID: string;
+}) => {
+    const encryptedPurpose = null;
+    const passphraseKey = await generateSessionKey(AES256);
+    const encryptedPassphrase =
+        accessLevel === ACCESS_LEVEL.FULL ? generateEncryptedPassphrase({ passphraseKey, decryptedPassphrase }) : null;
+
+    const cacheKeySalt = generateCacheKeySalt();
+    const cacheKey = generateCacheKey();
+    const cacheKeyHash = await getCacheKeyHash({ cacheKey, cacheKeySalt });
+    const encryptedCacheKey = await generateEncryptedCacheKey({ cacheKey, publicKeys });
+
+    return {
+        payload: {
+            AccessLevel: accessLevel,
+            CacheKeySalt: cacheKeySalt,
+            CacheKeyHash: cacheKeyHash,
+            EncryptedPassphrase: encryptedPassphrase,
+            EncryptedPurpose: encryptedPurpose,
+            EncryptedCacheKey: encryptedCacheKey,
+            PassphraseID: accessLevel === ACCESS_LEVEL.FULL ? passphraseID : null,
+        },
+        passphraseKey,
+        cacheKey,
+    };
+};
+
 export const transformLinkFromAPI = async ({
     calendarUrl,
     calendar,
-    getCalendarInfo,
+    privateKeys,
+    calendarPassphrase,
     onError,
 }: {
     calendarUrl: CalendarUrl;
     calendar: Calendar;
-    getCalendarInfo: GetCalendarInfo;
+    privateKeys: OpenPGPKey[];
+    calendarPassphrase: string;
     onError: (e: Error) => void;
 }): Promise<CalendarLink> => {
-    const { EncryptedPurpose: encryptedPurpose } = calendarUrl;
+    const {
+        EncryptedPurpose: encryptedPurpose,
+        CalendarUrlID,
+        AccessLevel,
+        EncryptedCacheKey,
+        EncryptedPassphrase,
+    } = calendarUrl;
     let purpose = null;
+    let link = '';
 
     if (encryptedPurpose) {
         try {
-            const { decryptedCalendarKeys } = await getCalendarInfo(calendar.ID);
-            const { privateKeys } = splitKeys(decryptedCalendarKeys);
-
             purpose = await decryptPurpose({
                 encryptedPurpose,
                 privateKeys,
@@ -178,23 +219,41 @@ export const transformLinkFromAPI = async ({
         }
     }
 
+    try {
+        const cacheKey = await decryptCacheKey({ encryptedCacheKey: EncryptedCacheKey, privateKeys });
+        const passphraseKey = getPassphraseKey({ encryptedPassphrase: EncryptedPassphrase, calendarPassphrase });
+
+        link = buildLink({
+            urlID: CalendarUrlID,
+            accessLevel: AccessLevel,
+            passphraseKey,
+            cacheKey,
+        });
+    } catch (e) {
+        onError(e);
+        link = `Error building link: ${e.message}`;
+    }
+
     return {
         ...calendarUrl,
         calendarName: calendar.Name,
         color: calendar.Color,
         purpose,
+        link,
     };
 };
 
 export const transformLinksFromAPI = async ({
     calendarUrls,
     calendar,
-    getCalendarInfo,
+    privateKeys,
+    calendarPassphrase,
     onError,
 }: {
     calendarUrls: CalendarUrl[];
     calendar: Calendar;
-    getCalendarInfo: GetCalendarInfo;
+    privateKeys: OpenPGPKey[];
+    calendarPassphrase: string;
     onError: (e: Error) => void;
 }) => {
     return Promise.all(
@@ -202,7 +261,8 @@ export const transformLinksFromAPI = async ({
             transformLinkFromAPI({
                 calendarUrl,
                 calendar,
-                getCalendarInfo,
+                privateKeys,
+                calendarPassphrase,
                 onError,
             })
         )
