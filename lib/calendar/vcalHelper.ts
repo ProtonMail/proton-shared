@@ -164,11 +164,14 @@ export const getAttendeeHasRole = (attendee: VcalAttendeeProperty): attendee is 
     return !!attendee.parameters?.role;
 };
 
+export const getProdIdFromNameAndVersion = (appName: string, appVersion: string) =>
+    `-//Proton Technologies//${appName} ${appVersion}//EN`;
+
 export const getProdId = (config: ProtonConfig) => {
     const { APP_NAME, APP_VERSION: appVersion } = config;
     const appName = APPS_CONFIGURATION[APP_NAME].name;
 
-    return `-//Proton Technologies//${appName} ${appVersion}//EN`;
+    return getProdIdFromNameAndVersion(appName, appVersion);
 };
 
 export const getIcalMethod = ({ value }: VcalStringProperty) => {
