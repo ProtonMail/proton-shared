@@ -1,3 +1,5 @@
+import { format } from 'date-fns';
+
 import { toICAL } from '../vcard';
 import downloadFile from '../../helpers/downloadFile';
 import { Contact, ContactCard, ContactProperties } from '../../interfaces/contacts/Contact';
@@ -13,7 +15,7 @@ export const getFileName = (properties: ContactProperties) => {
         .filter(({ field }) => ['fn', 'email'].includes(field))
         .map(({ value }) => (Array.isArray(value) ? value[0] : value))[0];
 
-    return `${name}.vcf`;
+    return `${name}-${format(Date.now(), 'yyyy-MM-dd')}.vcf`;
 };
 
 /**
