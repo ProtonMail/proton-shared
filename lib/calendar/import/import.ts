@@ -72,10 +72,14 @@ export const parseIcs = async (ics: File) => {
             throw new ImportFileError(IMPORT_ERROR_TYPE.INVALID_CALENDAR, filename);
         }
         const { method, version, components, calscale, 'x-wr-timezone': xWrTimezone } = parsedVcalendar;
+        const trimmedMethod = method && {
+            ...method,
+            value: method?.value.trim(),
+        };
         if (version?.value !== '2.0') {
             throw new ImportFileError(IMPORT_ERROR_TYPE.INVALID_VERSION, filename);
         }
-        if (method && method.value.toLowerCase() !== 'publish') {
+        if (trimmedMethod && trimmedMethod.value.toLowerCase() !== 'publish') {
             throw new ImportFileError(IMPORT_ERROR_TYPE.INVALID_METHOD, filename);
         }
         if (!components?.length) {
