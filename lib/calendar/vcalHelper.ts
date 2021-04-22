@@ -1,4 +1,5 @@
 import { APPS_CONFIGURATION } from '../constants';
+import { normalize } from '../helpers/string';
 import { ProtonConfig } from '../interfaces';
 import {
     VcalAttendeeProperty,
@@ -172,8 +173,8 @@ export const getProdId = (config: ProtonConfig) => {
 };
 
 export const getIcalMethod = ({ value }: VcalStringProperty) => {
-    if (Object.values(ICAL_METHOD).some((icalMethod) => icalMethod === value)) {
-        return value as ICAL_METHOD;
+    if (Object.values(ICAL_METHOD).some((icalMethod) => normalize(icalMethod) === normalize(value))) {
+        return value.toUpperCase() as ICAL_METHOD;
     }
 };
 
