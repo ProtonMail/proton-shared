@@ -1,5 +1,6 @@
 import { PreVcardProperty, PreVcardsContact } from '../../interfaces/contacts/Import';
 import { getTypeValues } from './types';
+import { VCardKey } from '../../interfaces/contacts/VCard';
 
 // See './csv.ts' for the definition of pre-vCard and pre-vCards contact
 
@@ -8,11 +9,11 @@ import { getTypeValues } from './types';
  */
 const modifyPreVcardField = (preVcard: PreVcardProperty, newField: string) => {
     const types = getTypeValues();
-    const newType = types[newField].includes(preVcard.type || '')
+    const newType = (types[newField].includes(preVcard.type || '')
         ? preVcard.type
         : types[newField].length
         ? types[newField][0]
-        : undefined;
+        : undefined) as VCardKey;
 
     return { ...preVcard, field: newField, type: newType, custom: false };
 };
@@ -29,7 +30,10 @@ export const modifyContactField = (preVcardsContact: PreVcardsContact, index: nu
 /**
  * Modify the type of a pre-vCard
  */
-const modifyPreVcardType = (preVcard: PreVcardProperty, newType: string) => ({ ...preVcard, type: newType });
+const modifyPreVcardType = (preVcard: PreVcardProperty, newType: string) => ({
+    ...preVcard,
+    type: newType as VCardKey,
+});
 
 /**
  * Modify the type of a pre-vCard inside a pre-vCards contact
