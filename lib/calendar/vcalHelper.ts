@@ -29,6 +29,7 @@ import {
     ICAL_METHODS_ATTENDEE,
     ICAL_METHODS_ORGANIZER,
 } from './constants';
+import { unary } from '../helpers/function';
 
 export const getIsPropertyAllDay = (property: VcalDateOrDateTimeProperty): property is VcalDateProperty => {
     return property.parameters?.type === 'date' ?? false;
@@ -173,11 +174,11 @@ export const getProdId = (config: ProtonConfig) => {
 };
 
 export const getIcalMethod = ({ value }: VcalStringProperty) => {
-    for (const icalMethod of Object.values(ICAL_METHOD)) {
-        if (normalize(icalMethod) === normalize(value)) {
-            return icalMethod;
-        }
-    }
+    const normalizedValue = normalize(value);
+
+    return Object.values(ICAL_METHOD)
+        .map(unary(normalize))
+        .find((icalMethod) => icalMethod === normalizedValue);
 };
 
 export const getIsValidMethod = (method: ICAL_METHOD, isOrganizerMode: boolean) => {
