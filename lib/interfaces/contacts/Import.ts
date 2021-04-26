@@ -1,4 +1,3 @@
-import { VCardKey } from './VCard';
 import {
     ContactCard,
     ContactGroup,
