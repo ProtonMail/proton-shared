@@ -36,6 +36,7 @@ export interface PinnedKeysConfig {
     error?: Error;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
+    contactSignatureTimestamp?: Date | null; // undefined for unsigned contacts, null with invalid signature
 }
 
 export interface PublicKeyConfigs {

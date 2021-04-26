@@ -52,7 +52,7 @@
         "lodash": "^4.17.11",
         "papaparse": "^5.0.0",
         "pm-srp": "github:ProtonMail/pm-srp.git#semver:^1.0.0",
-        "pmcrypto": "github:ProtonMail/pmcrypto.git#semver:~6.3.0",
+        "pmcrypto": "github:ProtonMail/pmcrypto.git#f07f343f75ba089aa28b831defacd39cc9e81f81",
         "mutex-browser": "github:ProtonMail/mutex-browser#semver:^1.0.0",
         "mimemessage": "github:ProtonMail/mimemessage.js#semver:~v1.1.4",
         "push.js": "^1.0.12",
