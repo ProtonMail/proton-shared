@@ -64,6 +64,7 @@ export interface ContactPublicKeyModel {
     pgpAddressDisabled: boolean;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
+    contactSignatureTimestamp?: Date | null;
     emailAddressWarnings?: string[];
     emailAddressErrors?: string[];
 }
@@ -86,6 +87,7 @@ export interface PublicKeyModel {
     pgpAddressDisabled: boolean;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
+    contactSignatureTimestamp?: Date | null;
     emailAddressWarnings?: string[];
     emailAddressErrors?: string[];
 }
