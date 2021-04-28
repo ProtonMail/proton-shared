@@ -252,4 +252,36 @@ describe('switchPlan', () => {
             [PLANS.VPNPLUS]: 1,
         });
     });
+
+    it('should keep the ProtonVPN Basic plan when selecting ProtonMail Professional', () => {
+        const planIDs = { [PLANS.PLUS]: 1, [PLANS.VPNBASIC]: 1 };
+        const planID = PLANS.PROFESSIONAL;
+        const service = PLAN_SERVICES.MAIL;
+        const result = switchPlan({ planIDs, plans: MOCK_PLANS, planID, service });
+        expect(result).toEqual({
+            [PLANS.PROFESSIONAL]: 1,
+            [PLANS.VPNBASIC]: 1,
+        });
+    });
+
+    it('should keep the ProtonVPN Plus plan when selecting ProtonMail Professional', () => {
+        const planIDs = { [PLANS.PLUS]: 1, [PLANS.VPNPLUS]: 1 };
+        const planID = PLANS.PROFESSIONAL;
+        const service = PLAN_SERVICES.MAIL;
+        const result = switchPlan({ planIDs, plans: MOCK_PLANS, planID, service });
+        expect(result).toEqual({
+            [PLANS.PROFESSIONAL]: 1,
+            [PLANS.VPNPLUS]: 1,
+        });
+    });
+
+    it('should not add the ProtonVPN Plus plan when selecting ProtonMail Professional', () => {
+        const planIDs = { [PLANS.PLUS]: 1 };
+        const planID = PLANS.PROFESSIONAL;
+        const service = PLAN_SERVICES.MAIL;
+        const result = switchPlan({ planIDs, plans: MOCK_PLANS, planID, service });
+        expect(result).toEqual({
+            [PLANS.PROFESSIONAL]: 1,
+        });
+    });
 });
