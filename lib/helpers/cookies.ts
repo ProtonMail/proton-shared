@@ -51,3 +51,11 @@ export const setCookie = ({
         .filter(isTruthy)
         .join(';');
 };
+
+export const deleteCookie = (cookieName: string) => {
+    setCookie({
+        cookieName,
+        cookieValue: undefined,
+        path: '/',
+    });
+};
