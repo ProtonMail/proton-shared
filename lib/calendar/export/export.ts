@@ -14,7 +14,6 @@ interface ProcessData {
     getAddressKeys: (id: string) => Promise<DecryptedKey[]>;
     getEncryptionPreferences: GetEncryptionPreferences;
     getDecryptedPassphraseAndCalendarKeys: GetDecryptedPassphraseAndCalendarKeys;
-    getCalendarKeys: Function;
     getCalendarEventPersonal: Function;
     api: Api;
     signal: AbortSignal;
