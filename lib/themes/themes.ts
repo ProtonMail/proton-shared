@@ -59,7 +59,7 @@ export const PROTON_THEMES = {
         src: themeContrastSvg,
         theme: contrastTheme.toString(),
     },
-    LEGACY: {
+    [ThemeTypes.Legacy]: {
         getI18NLabel: () => c('Theme').t`Proton (legacy)`,
         identifier: ThemeTypes.Legacy,
         src: themeLegacySvg,
