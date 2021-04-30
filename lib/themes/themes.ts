@@ -30,7 +30,7 @@ export enum ThemeTypes {
 
 export const PROTON_THEMES = {
     [ThemeTypes.Default]: {
-        getI18NLabel: () => c('Theme').t`Proton (default)`,
+        getI18NLabel: () => c('Theme').t`Proton`,
         identifier: ThemeTypes.Default,
         src: themeDefaultSvg,
         theme: defaultTheme.toString(),
@@ -60,7 +60,7 @@ export const PROTON_THEMES = {
         theme: contrastTheme.toString(),
     },
     [ThemeTypes.Legacy]: {
-        getI18NLabel: () => c('Theme').t`Proton (legacy)`,
+        getI18NLabel: () => c('Theme').t`Legacy`,
         identifier: ThemeTypes.Legacy,
         src: themeLegacySvg,
         theme: legacyTheme.toString(),
