@@ -1,6 +1,6 @@
 import { Calendar } from './Calendar';
 import { VcalVeventComponent } from './VcalModel';
-import { CalendarEvent } from './Event';
+import { WeekStartsOn } from '../../date-fns-utc/interface';
 
 export enum EXPORT_STEPS {
     EXPORTING,
@@ -11,11 +11,19 @@ export enum EXPORT_ERRORS {
     NETWORK_ERROR,
 }
 
+export enum EXPORT_EVENT_ERRORS {
+    DECRYPTION_ERROR,
+    PASSWORD_RESET,
+}
+
+export type ExportError = [string, EXPORT_EVENT_ERRORS];
+
 export interface ExportCalendarModel {
     step: EXPORT_STEPS;
     totalProcessed: VcalVeventComponent[];
     totalToProcess: number;
     calendar: Calendar;
-    erroredEvents: CalendarEvent[];
+    exportErrors: ExportError[];
     error?: EXPORT_ERRORS;
+    weekStartsOn: WeekStartsOn;
 }

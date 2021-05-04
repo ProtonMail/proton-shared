@@ -1,12 +1,57 @@
+import { c } from 'ttag';
+import { getMatchingKey, getSignature } from 'pmcrypto';
+import { fromUnixTime } from 'date-fns';
 import { CalendarExportEventsQuery, queryEvents } from '../../api/calendars';
 import { wait } from '../../helpers/promise';
 import { Address, Api, DecryptedKey } from '../../interfaces';
-import { CalendarEvent, VcalVeventComponent } from '../../interfaces/calendar';
+import {
+    CalendarEventWithMetadata,
+    EXPORT_EVENT_ERRORS,
+    ExportError,
+    VcalVeventComponent,
+} from '../../interfaces/calendar';
 import { GetCalendarKeys } from '../../interfaces/hooks/GetCalendarKeys';
 import { GetEncryptionPreferences } from '../../interfaces/hooks/GetEncryptionPreferences';
 import { splitKeys } from '../../keys';
 import { getAuthorPublicKeysMap, withNormalizedAuthors } from '../author';
 import { readCalendarEvent, readSessionKeys } from '../deserialize';
+import isTruthy from '../../helpers/isTruthy';
+import { fromRruleString } from '../vcal';
+import { getTimezonedFrequencyString } from '../integration/getFrequencyString';
+import { getDateProperty } from '../vcalConverter';
+import { convertUTCDateTimeToZone, fromUTCDate, toLocalDate } from '../../date/timezone';
+import { dateLocale } from '../../i18n';
+import { WeekStartsOn } from '../../date-fns-utc/interface';
+
+const getError = ({
+    event,
+    error,
+    weekStartsOn,
+}: {
+    event: CalendarEventWithMetadata;
+    error: EXPORT_EVENT_ERRORS;
+    weekStartsOn: WeekStartsOn;
+}): ExportError => {
+    const { StartTime, StartTimezone, RRule } = event;
+    const timeString = toLocalDate(
+        convertUTCDateTimeToZone(fromUTCDate(new Date(parseInt(`${StartTime}000`, 10))), StartTimezone)
+    ).toLocaleTimeString();
+    const rruleValueFromString = RRule ? fromRruleString(RRule) : undefined;
+    const utcStartDate = fromUnixTime(StartTime);
+    const dtstart = getDateProperty(fromUTCDate(utcStartDate));
+
+    if (rruleValueFromString) {
+        const rruleString = getTimezonedFrequencyString({ value: rruleValueFromString }, dtstart, {
+            currentTzid: StartTimezone,
+            locale: dateLocale,
+            weekStartsOn,
+        });
+
+        return [c('Calendar export').t`Event from ${timeString}, ${rruleString}`, error];
+    }
+
+    return [c('Calendar export').t`Event @ ${timeString}`, error];
+};
 
 interface ProcessData {
     calendarID: string;
@@ -20,6 +65,7 @@ interface ProcessData {
     onProgress: (veventComponents: VcalVeventComponent[]) => void;
     totalToProcess: number;
     memberID: string;
+    weekStartsOn: WeekStartsOn;
 }
 
 export const processInBatches = async ({
@@ -34,18 +80,19 @@ export const processInBatches = async ({
     totalToProcess,
     memberID,
     getCalendarKeys,
-}: ProcessData): Promise<[VcalVeventComponent[], CalendarEvent[], number]> => {
+    weekStartsOn,
+}: ProcessData): Promise<[VcalVeventComponent[], ExportError[], number]> => {
     const PAGE_SIZE = 10;
     const DELAY = 100;
     const batchesLength = Math.ceil(totalToProcess / PAGE_SIZE);
     const processed: VcalVeventComponent[] = [];
-    const errored: CalendarEvent[] = [];
+    const errors: ExportError[] = [];
     const promises: Promise<void>[] = [];
     let totalEventsFetched = 0;
 
     let lastId;
 
-    const decryptEvent = async (event: CalendarEvent) => {
+    const decryptEvent = async (event: CalendarEventWithMetadata) => {
         try {
             const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
                 getCalendarKeys(event.CalendarID),
@@ -57,6 +104,29 @@ export const processInBatches = async ({
                 }),
                 getCalendarEventPersonal(event),
             ]);
+
+            const allEventSignatures = [
+                ...event.SharedEvents,
+                ...event.CalendarEvents,
+                ...event.AttendeesEvents,
+            ].flatMap((event) => (event.Signature ? [event.Signature] : []));
+
+            const publicKeys = Object.values(publicKeysMap)
+                .flatMap((key) => (key ? [key] : []))
+                .flat();
+            const matchingSignatures = (
+                await Promise.all(
+                    allEventSignatures.map(async (signature) =>
+                        getMatchingKey(await getSignature(signature), publicKeys)
+                    )
+                )
+            ).filter(isTruthy);
+
+            if (!matchingSignatures.length) {
+                errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.PASSWORD_RESET, weekStartsOn }));
+
+                return null;
+            }
 
             const personalVevent = memberID ? eventPersonalMap[memberID] : undefined;
             const valarms = personalVevent ? personalVevent.veventComponent : {};
@@ -88,7 +158,7 @@ export const processInBatches = async ({
 
             return veventWithAlarms;
         } catch (error) {
-            errored.push(event);
+            errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.DECRYPTION_ERROR, weekStartsOn }));
 
             return null;
         }
@@ -105,7 +175,7 @@ export const processInBatches = async ({
         };
 
         const [{ Events }] = await Promise.all([
-            api<{ Events: CalendarEvent[] }>(queryEvents(calendarID, params)),
+            api<{ Events: CalendarEventWithMetadata[] }>(queryEvents(calendarID, params)),
             wait(DELAY),
         ]);
 
@@ -130,5 +200,5 @@ export const processInBatches = async ({
 
     await Promise.all(promises);
 
-    return [processed, errored, totalEventsFetched];
+    return [processed, errors, totalEventsFetched];
 };
