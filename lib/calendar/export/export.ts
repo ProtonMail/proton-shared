@@ -23,15 +23,13 @@ import { convertUTCDateTimeToZone, fromUTCDate, toLocalDate } from '../../date/t
 import { dateLocale } from '../../i18n';
 import { WeekStartsOn } from '../../date-fns-utc/interface';
 
-const getError = ({
-    event,
-    error,
-    weekStartsOn,
-}: {
-    event: CalendarEventWithMetadata;
+export interface GetErrorProps {
+    event: Pick<CalendarEventWithMetadata, 'StartTime' | 'StartTimezone' | 'RRule'>;
     error: EXPORT_EVENT_ERRORS;
     weekStartsOn: WeekStartsOn;
-}): ExportError => {
+}
+
+export const getError = ({ event, error, weekStartsOn }: GetErrorProps): ExportError => {
     const { StartTime, StartTimezone, RRule } = event;
     const timeString = toLocalDate(
         convertUTCDateTimeToZone(fromUTCDate(new Date(parseInt(`${StartTime}000`, 10))), StartTimezone)
