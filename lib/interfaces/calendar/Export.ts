@@ -1,5 +1,4 @@
 import { Calendar } from './Calendar';
-import { VcalVeventComponent } from './VcalModel';
 import { WeekStartsOn } from '../../date-fns-utc/interface';
 
 export enum EXPORT_STEPS {
@@ -20,7 +19,7 @@ export type ExportError = [string, EXPORT_EVENT_ERROR_TYPES];
 
 export interface ExportCalendarModel {
     step: EXPORT_STEPS;
-    totalProcessed: VcalVeventComponent[];
+    totalProcessed: number;
     totalToProcess: number;
     calendar: Calendar;
     exportErrors: ExportError[];
