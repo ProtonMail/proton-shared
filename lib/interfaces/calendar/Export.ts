@@ -11,12 +11,12 @@ export enum EXPORT_ERRORS {
     NETWORK_ERROR,
 }
 
-export enum EXPORT_EVENT_ERRORS {
+export enum EXPORT_EVENT_ERROR_TYPES {
     DECRYPTION_ERROR,
     PASSWORD_RESET,
 }
 
-export type ExportError = [string, EXPORT_EVENT_ERRORS];
+export type ExportError = [string, EXPORT_EVENT_ERROR_TYPES];
 
 export interface ExportCalendarModel {
     step: EXPORT_STEPS;
