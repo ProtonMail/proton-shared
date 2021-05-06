@@ -11,6 +11,7 @@ import {
     ExportError,
     VcalVeventComponent,
 } from '../../interfaces/calendar';
+import { GetCalendarEventPersonal } from '../../interfaces/hooks/GetCalendarEventPersonal';
 import { GetCalendarKeys } from '../../interfaces/hooks/GetCalendarKeys';
 import { GetEncryptionPreferences } from '../../interfaces/hooks/GetEncryptionPreferences';
 import { splitKeys } from '../../keys';
@@ -22,14 +23,13 @@ import { getTimezonedFrequencyString } from '../integration/getFrequencyString';
 import { getDateProperty } from '../vcalConverter';
 import {
     convertUTCDateTimeToZone,
-    formatTimezoneOffset,
+    formatGMTOffsetAbbreviation,
     fromUTCDate,
     getTimezoneOffset,
     toUTCDate,
 } from '../../date/timezone';
 import { dateLocale } from '../../i18n';
 import { WeekStartsOn } from '../../date-fns-utc/interface';
-import useGetCalendarEventPersonal from '../../../../react-components/hooks/useGetCalendarEventPersonal';
 import { SECOND } from '../../constants';
 import formatUTC from '../../date-fns-utc/format';
 
@@ -60,7 +60,7 @@ export const getError = ({ event, errorType, weekStartsOn, defaultTzid }: GetErr
     const fakeUTCStartDate = toUTCDate(convertUTCDateTimeToZone(fromUTCDate(startDate), defaultTzid));
     const startDateString = formatUTC(fakeUTCStartDate, 'Pp', { locale: dateLocale });
     const { offset } = getTimezoneOffset(startDate, defaultTzid);
-    const offsetString = `GMT${formatTimezoneOffset(offset)}`;
+    const offsetString = formatGMTOffsetAbbreviation(offset);
     const timeString = `${startDateString} ${offsetString}`;
 
     const rruleValueFromString = RRule ? fromRruleString(RRule) : undefined;
@@ -98,7 +98,7 @@ interface ProcessData {
     getAddressKeys: (id: string) => Promise<DecryptedKey[]>;
     getEncryptionPreferences: GetEncryptionPreferences;
     getCalendarKeys: GetCalendarKeys;
-    getCalendarEventPersonal: ReturnType<typeof useGetCalendarEventPersonal>;
+    getCalendarEventPersonal: GetCalendarEventPersonal;
     api: Api;
     signal: AbortSignal;
     onProgress: (veventComponents: VcalVeventComponent[]) => void;
