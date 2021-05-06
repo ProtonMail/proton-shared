@@ -43,8 +43,8 @@ export const getMatchingSignatures = async (
     ].flatMap((event) => (event.Signature ? [event.Signature] : []));
 
     const publicKeys = Object.values(publicKeysMap)
-        .flatMap((key) => (key ? [key] : []))
-        .flat();
+        .filter(isTruthy)
+        .flatMap((keys) => (Array.isArray(keys) ? keys : [keys]));
     return (
         await Promise.all(
             allEventSignatures.map(async (signature) => getMatchingKey(await getSignature(signature), publicKeys))
