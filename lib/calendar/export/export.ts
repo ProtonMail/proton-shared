@@ -92,6 +92,75 @@ const getDecryptionErrorType = async (event: CalendarEventWithMetadata, publicKe
     }
 };
 
+const decryptEvent = async ({
+    event,
+    defaultTzid,
+    weekStartsOn,
+    addresses,
+    getAddressKeys,
+    getCalendarKeys,
+    getCalendarEventPersonal,
+    getEncryptionPreferences,
+    memberID,
+}: {
+    event: CalendarEventWithMetadata;
+    addresses: Address[];
+    getAddressKeys: (id: string) => Promise<DecryptedKey[]>;
+    getEncryptionPreferences: GetEncryptionPreferences;
+    getCalendarKeys: GetCalendarKeys;
+    getCalendarEventPersonal: GetCalendarEventPersonal;
+    memberID: string;
+    weekStartsOn: WeekStartsOn;
+    defaultTzid: string;
+}) => {
+    const defaultParams = { event, defaultTzid, weekStartsOn };
+    const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
+        getCalendarKeys(event.CalendarID),
+        getAuthorPublicKeysMap({
+            event,
+            addresses,
+            getAddressKeys,
+            getEncryptionPreferences,
+        }),
+        getCalendarEventPersonal(event),
+    ]);
+
+    try {
+        const personalVevent = memberID ? eventPersonalMap[memberID] : undefined;
+        const valarms = personalVevent ? personalVevent.veventComponent : {};
+
+        const [sharedSessionKey, calendarSessionKey] = await readSessionKeys({
+            calendarEvent: event,
+            ...splitKeys(calendarKeys),
+        });
+
+        const { veventComponent } = await readCalendarEvent({
+            isOrganizer: !!event.IsOrganizer,
+            event: {
+                SharedEvents: withNormalizedAuthors(event.SharedEvents),
+                CalendarEvents: withNormalizedAuthors(event.CalendarEvents),
+                AttendeesEvents: withNormalizedAuthors(event.AttendeesEvents),
+                Attendees: event.Attendees,
+            },
+            sharedSessionKey,
+            calendarSessionKey,
+            publicKeysMap,
+            addresses,
+        });
+        const veventWithAlarms: VcalVeventComponent = {
+            ...valarms,
+            ...veventComponent,
+        };
+
+        return veventWithAlarms;
+    } catch (error) {
+        const publicKeys = Object.values(publicKeysMap)
+            .filter(isTruthy)
+            .flatMap((keys) => (Array.isArray(keys) ? keys : [keys]));
+        return getError({ ...defaultParams, errorType: await getDecryptionErrorType(event, publicKeys) });
+    }
+};
+
 interface ProcessData {
     calendarID: string;
     addresses: Address[];
@@ -101,7 +170,11 @@ interface ProcessData {
     getCalendarEventPersonal: GetCalendarEventPersonal;
     api: Api;
     signal: AbortSignal;
-    onProgress: (veventComponents: VcalVeventComponent[]) => void;
+    onProgress: (
+        calendarEvents: CalendarEventWithMetadata[],
+        veventComponents: VcalVeventComponent[],
+        exportErrors: ExportError[]
+    ) => void;
     totalToProcess: number;
     memberID: string;
     weekStartsOn: WeekStartsOn;
@@ -133,59 +206,6 @@ export const processInBatches = async ({
 
     let lastId;
 
-    const decryptEvent = async (event: CalendarEventWithMetadata) => {
-        const defaultParams = { event, defaultTzid, weekStartsOn };
-        const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
-            getCalendarKeys(event.CalendarID),
-            getAuthorPublicKeysMap({
-                event,
-                addresses,
-                getAddressKeys,
-                getEncryptionPreferences,
-            }),
-            getCalendarEventPersonal(event),
-        ]);
-
-        try {
-            const personalVevent = memberID ? eventPersonalMap[memberID] : undefined;
-            const valarms = personalVevent ? personalVevent.veventComponent : {};
-
-            const [sharedSessionKey, calendarSessionKey] = await readSessionKeys({
-                calendarEvent: event,
-                ...splitKeys(calendarKeys),
-            });
-
-            const { veventComponent } = await readCalendarEvent({
-                isOrganizer: !!event.IsOrganizer,
-                event: {
-                    SharedEvents: withNormalizedAuthors(event.SharedEvents),
-                    CalendarEvents: withNormalizedAuthors(event.CalendarEvents),
-                    AttendeesEvents: withNormalizedAuthors(event.AttendeesEvents),
-                    Attendees: event.Attendees,
-                },
-                sharedSessionKey,
-                calendarSessionKey,
-                publicKeysMap,
-                addresses,
-            });
-            const veventWithAlarms = {
-                ...valarms,
-                ...veventComponent,
-            };
-
-            processed.push(veventWithAlarms);
-
-            return veventWithAlarms;
-        } catch (error) {
-            const publicKeys = Object.values(publicKeysMap)
-                .filter(isTruthy)
-                .flatMap((keys) => (Array.isArray(keys) ? keys : [keys]));
-            errors.push(getError({ ...defaultParams, errorType: await getDecryptionErrorType(event, publicKeys) }));
-
-            return null;
-        }
-    };
-
     for (let i = 0; i < batchesLength; i++) {
         if (signal.aborted) {
             return [[], [], totalToProcess];
@@ -204,6 +224,7 @@ export const processInBatches = async ({
         if (signal.aborted) {
             return [[], [], totalToProcess];
         }
+        onProgress(Events, [], []);
 
         const { length: eventsLength } = Events;
 
@@ -211,10 +232,30 @@ export const processInBatches = async ({
 
         totalEventsFetched += eventsLength;
 
-        const promise = Promise.all(Events.map(decryptEvent)).then((veventComponents) => {
-            onProgress(
-                veventComponents.filter((veventComponent): veventComponent is VcalVeventComponent => !!veventComponent)
+        const promise = Promise.all(
+            Events.map((event) =>
+                decryptEvent({
+                    event,
+                    defaultTzid,
+                    weekStartsOn,
+                    addresses,
+                    getAddressKeys,
+                    getCalendarKeys,
+                    getCalendarEventPersonal,
+                    getEncryptionPreferences,
+                    memberID,
+                })
+            )
+        ).then((veventsOrErrors) => {
+            const veventComponents = veventsOrErrors.filter(
+                (veventOrError): veventOrError is VcalVeventComponent => !Array.isArray(veventOrError)
             );
+            const exportErrors = veventsOrErrors.filter((veventOrError): veventOrError is ExportError =>
+                Array.isArray(veventOrError)
+            );
+            processed.push(...veventComponents);
+            errors.push(...exportErrors);
+            onProgress([], veventComponents, exportErrors);
         });
 
         promises.push(promise);

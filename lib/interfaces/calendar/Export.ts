@@ -19,6 +19,7 @@ export type ExportError = [string, EXPORT_EVENT_ERROR_TYPES];
 
 export interface ExportCalendarModel {
     step: EXPORT_STEPS;
+    totalFetched: number;
     totalProcessed: number;
     totalToProcess: number;
     calendar: Calendar;
