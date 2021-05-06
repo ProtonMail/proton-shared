@@ -22,6 +22,7 @@ import { getDateProperty } from '../vcalConverter';
 import { convertUTCDateTimeToZone, fromUTCDate, toLocalDate } from '../../date/timezone';
 import { dateLocale } from '../../i18n';
 import { WeekStartsOn } from '../../date-fns-utc/interface';
+import useGetCalendarEventPersonal from '../../../../react-components/hooks/useGetCalendarEventPersonal';
 
 export interface GetErrorProps {
     event: Pick<CalendarEventWithMetadata, 'StartTime' | 'StartTimezone' | 'RRule'>;
@@ -57,7 +58,7 @@ interface ProcessData {
     getAddressKeys: (id: string) => Promise<DecryptedKey[]>;
     getEncryptionPreferences: GetEncryptionPreferences;
     getCalendarKeys: GetCalendarKeys;
-    getCalendarEventPersonal: Function;
+    getCalendarEventPersonal: ReturnType<typeof useGetCalendarEventPersonal>;
     api: Api;
     signal: AbortSignal;
     onProgress: (veventComponents: VcalVeventComponent[]) => void;
@@ -91,41 +92,18 @@ export const processInBatches = async ({
     let lastId;
 
     const decryptEvent = async (event: CalendarEventWithMetadata) => {
+        const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
+            getCalendarKeys(event.CalendarID),
+            getAuthorPublicKeysMap({
+                event,
+                addresses,
+                getAddressKeys,
+                getEncryptionPreferences,
+            }),
+            getCalendarEventPersonal(event),
+        ]);
+
         try {
-            const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
-                getCalendarKeys(event.CalendarID),
-                getAuthorPublicKeysMap({
-                    event,
-                    addresses,
-                    getAddressKeys,
-                    getEncryptionPreferences,
-                }),
-                getCalendarEventPersonal(event),
-            ]);
-
-            const allEventSignatures = [
-                ...event.SharedEvents,
-                ...event.CalendarEvents,
-                ...event.AttendeesEvents,
-            ].flatMap((event) => (event.Signature ? [event.Signature] : []));
-
-            const publicKeys = Object.values(publicKeysMap)
-                .flatMap((key) => (key ? [key] : []))
-                .flat();
-            const matchingSignatures = (
-                await Promise.all(
-                    allEventSignatures.map(async (signature) =>
-                        getMatchingKey(await getSignature(signature), publicKeys)
-                    )
-                )
-            ).filter(isTruthy);
-
-            if (!matchingSignatures.length) {
-                errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.PASSWORD_RESET, weekStartsOn }));
-
-                return null;
-            }
-
             const personalVevent = memberID ? eventPersonalMap[memberID] : undefined;
             const valarms = personalVevent ? personalVevent.veventComponent : {};
 
@@ -156,7 +134,28 @@ export const processInBatches = async ({
 
             return veventWithAlarms;
         } catch (error) {
-            errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.DECRYPTION_ERROR, weekStartsOn }));
+            const allEventSignatures = [
+                ...event.SharedEvents,
+                ...event.CalendarEvents,
+                ...event.AttendeesEvents,
+            ].flatMap((event) => (event.Signature ? [event.Signature] : []));
+
+            const publicKeys = Object.values(publicKeysMap)
+                .flatMap((key) => (key ? [key] : []))
+                .flat();
+            const matchingSignatures = (
+                await Promise.all(
+                    allEventSignatures.map(async (signature) =>
+                        getMatchingKey(await getSignature(signature), publicKeys)
+                    )
+                )
+            ).filter(isTruthy);
+
+            if (!matchingSignatures.length) {
+                errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.PASSWORD_RESET, weekStartsOn }));
+            } else {
+                errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.DECRYPTION_ERROR, weekStartsOn }));
+            }
 
             return null;
         }
