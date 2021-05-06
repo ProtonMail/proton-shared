@@ -26,4 +26,5 @@ export interface ExportCalendarModel {
     exportErrors: ExportError[];
     error?: EXPORT_ERRORS;
     weekStartsOn: WeekStartsOn;
+    defaultTzid: string;
 }

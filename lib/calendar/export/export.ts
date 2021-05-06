@@ -1,9 +1,9 @@
 import { c } from 'ttag';
-import { getMatchingKey, getSignature } from 'pmcrypto';
+import { getMatchingKey, getSignature, OpenPGPKey } from 'pmcrypto';
 import { fromUnixTime } from 'date-fns';
 import { CalendarExportEventsQuery, queryEvents } from '../../api/calendars';
 import { wait } from '../../helpers/promise';
-import { Address, Api, DecryptedKey } from '../../interfaces';
+import { Address, Api, DecryptedKey, SimpleMap } from '../../interfaces';
 import {
     CalendarEventWithMetadata,
     EXPORT_EVENT_ERRORS,
@@ -19,22 +19,55 @@ import isTruthy from '../../helpers/isTruthy';
 import { fromRruleString } from '../vcal';
 import { getTimezonedFrequencyString } from '../integration/getFrequencyString';
 import { getDateProperty } from '../vcalConverter';
-import { convertUTCDateTimeToZone, fromUTCDate, toLocalDate } from '../../date/timezone';
+import {
+    convertUTCDateTimeToZone,
+    formatTimezoneOffset,
+    fromUTCDate,
+    getTimezoneOffset,
+    toUTCDate,
+} from '../../date/timezone';
 import { dateLocale } from '../../i18n';
 import { WeekStartsOn } from '../../date-fns-utc/interface';
 import useGetCalendarEventPersonal from '../../../../react-components/hooks/useGetCalendarEventPersonal';
+import { SECOND } from '../../constants';
+import formatUTC from '../../date-fns-utc/format';
+
+export const getMatchingSignatures = async (
+    event: CalendarEventWithMetadata,
+    publicKeysMap: SimpleMap<OpenPGPKey | OpenPGPKey[]>
+) => {
+    const allEventSignatures = [
+        ...event.SharedEvents,
+        ...event.CalendarEvents,
+        ...event.AttendeesEvents,
+    ].flatMap((event) => (event.Signature ? [event.Signature] : []));
+
+    const publicKeys = Object.values(publicKeysMap)
+        .flatMap((key) => (key ? [key] : []))
+        .flat();
+    return (
+        await Promise.all(
+            allEventSignatures.map(async (signature) => getMatchingKey(await getSignature(signature), publicKeys))
+        )
+    ).filter(isTruthy);
+};
 
 export interface GetErrorProps {
     event: Pick<CalendarEventWithMetadata, 'StartTime' | 'StartTimezone' | 'RRule'>;
     error: EXPORT_EVENT_ERRORS;
     weekStartsOn: WeekStartsOn;
+    defaultTzid: string;
 }
 
-export const getError = ({ event, error, weekStartsOn }: GetErrorProps): ExportError => {
+export const getError = ({ event, error, weekStartsOn, defaultTzid }: GetErrorProps): ExportError => {
     const { StartTime, StartTimezone, RRule } = event;
-    const timeString = toLocalDate(
-        convertUTCDateTimeToZone(fromUTCDate(new Date(parseInt(`${StartTime}000`, 10))), StartTimezone)
-    ).toLocaleTimeString();
+    const startDate = new Date(StartTime * SECOND);
+    const fakeUTCStartDate = toUTCDate(convertUTCDateTimeToZone(fromUTCDate(startDate), defaultTzid));
+    const startDateString = formatUTC(fakeUTCStartDate, 'Pp', { locale: dateLocale });
+    const { offset } = getTimezoneOffset(startDate, defaultTzid);
+    const offsetString = `GMT${formatTimezoneOffset(offset)}`;
+    const timeString = `${startDateString} ${offsetString}`;
+
     const rruleValueFromString = RRule ? fromRruleString(RRule) : undefined;
     const utcStartDate = fromUnixTime(StartTime);
     const dtstart = getDateProperty(fromUTCDate(utcStartDate));
@@ -46,10 +79,10 @@ export const getError = ({ event, error, weekStartsOn }: GetErrorProps): ExportE
             weekStartsOn,
         });
 
-        return [c('Calendar export').t`Event from ${timeString}, ${rruleString}`, error];
+        return [c('Error when exporting event from calendar').t`Event from ${timeString}, ${rruleString}`, error];
     }
 
-    return [c('Calendar export').t`Event @ ${timeString}`, error];
+    return [c('Error when exporting event from calendar').t`Event @ ${timeString}`, error];
 };
 
 interface ProcessData {
@@ -65,6 +98,7 @@ interface ProcessData {
     totalToProcess: number;
     memberID: string;
     weekStartsOn: WeekStartsOn;
+    defaultTzid: string;
 }
 
 export const processInBatches = async ({
@@ -80,6 +114,7 @@ export const processInBatches = async ({
     memberID,
     getCalendarKeys,
     weekStartsOn,
+    defaultTzid,
 }: ProcessData): Promise<[VcalVeventComponent[], ExportError[], number]> => {
     const PAGE_SIZE = 10;
     const DELAY = 100;
@@ -92,6 +127,7 @@ export const processInBatches = async ({
     let lastId;
 
     const decryptEvent = async (event: CalendarEventWithMetadata) => {
+        const defaultParams = { event, defaultTzid, weekStartsOn };
         const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
             getCalendarKeys(event.CalendarID),
             getAuthorPublicKeysMap({
@@ -134,27 +170,16 @@ export const processInBatches = async ({
 
             return veventWithAlarms;
         } catch (error) {
-            const allEventSignatures = [
-                ...event.SharedEvents,
-                ...event.CalendarEvents,
-                ...event.AttendeesEvents,
-            ].flatMap((event) => (event.Signature ? [event.Signature] : []));
+            try {
+                const matchingSignatures = await getMatchingSignatures(event, publicKeysMap);
 
-            const publicKeys = Object.values(publicKeysMap)
-                .flatMap((key) => (key ? [key] : []))
-                .flat();
-            const matchingSignatures = (
-                await Promise.all(
-                    allEventSignatures.map(async (signature) =>
-                        getMatchingKey(await getSignature(signature), publicKeys)
-                    )
-                )
-            ).filter(isTruthy);
-
-            if (!matchingSignatures.length) {
-                errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.PASSWORD_RESET, weekStartsOn }));
-            } else {
-                errors.push(getError({ event, error: EXPORT_EVENT_ERRORS.DECRYPTION_ERROR, weekStartsOn }));
+                if (!matchingSignatures.length) {
+                    errors.push(getError({ ...defaultParams, error: EXPORT_EVENT_ERRORS.PASSWORD_RESET }));
+                } else {
+                    errors.push(getError({ ...defaultParams, error: EXPORT_EVENT_ERRORS.DECRYPTION_ERROR }));
+                }
+            } catch {
+                errors.push(getError({ ...defaultParams, error: EXPORT_EVENT_ERRORS.DECRYPTION_ERROR }));
             }
 
             return null;
