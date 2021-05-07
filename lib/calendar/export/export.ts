@@ -4,7 +4,7 @@ import { fromUnixTime } from 'date-fns';
 import { CalendarExportEventsQuery, queryEvents } from '../../api/calendars';
 import { wait } from '../../helpers/promise';
 import { unique } from '../../helpers/array';
-import { Address, Api, DecryptedKey, Key } from '../../interfaces';
+import { Address, Api, Key } from '../../interfaces';
 import {
     CalendarEvent,
     CalendarEventWithMetadata,
@@ -14,7 +14,6 @@ import {
 } from '../../interfaces/calendar';
 import { GetCalendarEventPersonal } from '../../interfaces/hooks/GetCalendarEventPersonal';
 import { GetCalendarKeys } from '../../interfaces/hooks/GetCalendarKeys';
-import { GetEncryptionPreferences } from '../../interfaces/hooks/GetEncryptionPreferences';
 import { splitKeys } from '../../keys';
 import { withNormalizedAuthors } from '../author';
 import { readCalendarEvent, readSessionKeys } from '../deserialize';
@@ -113,8 +112,6 @@ const decryptEvent = async ({
 }: {
     event: CalendarEventWithMetadata;
     addresses: Address[];
-    getAddressKeys: (id: string) => Promise<DecryptedKey[]>;
-    getEncryptionPreferences: GetEncryptionPreferences;
     getCalendarKeys: GetCalendarKeys;
     getCalendarEventPersonal: GetCalendarEventPersonal;
     memberID: string;
@@ -166,8 +163,6 @@ const decryptEvent = async ({
 interface ProcessData {
     calendarID: string;
     addresses: Address[];
-    getAddressKeys: (id: string) => Promise<DecryptedKey[]>;
-    getEncryptionPreferences: GetEncryptionPreferences;
     getCalendarKeys: GetCalendarKeys;
     getCalendarEventPersonal: GetCalendarEventPersonal;
     api: Api;
@@ -189,8 +184,6 @@ export const processInBatches = async ({
     signal,
     onProgress,
     addresses,
-    getAddressKeys,
-    getEncryptionPreferences,
     getCalendarEventPersonal,
     totalToProcess,
     memberID,
@@ -241,10 +234,8 @@ export const processInBatches = async ({
                     defaultTzid,
                     weekStartsOn,
                     addresses,
-                    getAddressKeys,
                     getCalendarKeys,
                     getCalendarEventPersonal,
-                    getEncryptionPreferences,
                     memberID,
                 })
             )
