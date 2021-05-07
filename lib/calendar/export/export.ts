@@ -1,9 +1,10 @@
 import { c } from 'ttag';
-import { getMatchingKey, getSignature, OpenPGPKey } from 'pmcrypto';
+import { arrayToHexString, binaryStringToArray, getKeys, getSignature } from 'pmcrypto';
 import { fromUnixTime } from 'date-fns';
 import { CalendarExportEventsQuery, queryEvents } from '../../api/calendars';
 import { wait } from '../../helpers/promise';
-import { Address, Api, DecryptedKey } from '../../interfaces';
+import { unique } from '../../helpers/array';
+import { Address, Api, DecryptedKey, Key } from '../../interfaces';
 import {
     CalendarEvent,
     CalendarEventWithMetadata,
@@ -15,9 +16,8 @@ import { GetCalendarEventPersonal } from '../../interfaces/hooks/GetCalendarEven
 import { GetCalendarKeys } from '../../interfaces/hooks/GetCalendarKeys';
 import { GetEncryptionPreferences } from '../../interfaces/hooks/GetEncryptionPreferences';
 import { splitKeys } from '../../keys';
-import { getAuthorPublicKeysMap, withNormalizedAuthors } from '../author';
+import { withNormalizedAuthors } from '../author';
 import { readCalendarEvent, readSessionKeys } from '../deserialize';
-import isTruthy from '../../helpers/isTruthy';
 import { fromRruleString } from '../vcal';
 import { getTimezonedFrequencyString } from '../integration/getFrequencyString';
 import { getDateProperty } from '../vcalConverter';
@@ -33,18 +33,28 @@ import { WeekStartsOn } from '../../date-fns-utc/interface';
 import { SECOND } from '../../constants';
 import formatUTC from '../../date-fns-utc/format';
 
-export const getCalendarEventMatchingSigningKeys = async (event: CalendarEvent, publicKeys: OpenPGPKey[]) => {
+export const getHasCalendarEventMatchingSigningKeys = async (event: CalendarEvent, keys: Key[]) => {
+    // OpenPGP types are broken
     const allEventSignatures = [
         ...event.SharedEvents,
         ...event.CalendarEvents,
         ...event.AttendeesEvents,
     ].flatMap((event) => (event.Signature ? [event.Signature] : []));
 
-    return (
-        await Promise.all(
-            allEventSignatures.map(async (signature) => getMatchingKey(await getSignature(signature), publicKeys))
-        )
-    ).filter(isTruthy);
+    const allSignaturesPromises = Promise.all(allEventSignatures.map((signature) => getSignature(signature)));
+    const allKeyIdsPromises = Promise.all(
+        keys.map(async (key) => {
+            const [signingKey] = await getKeys(key.PrivateKey);
+            // @ts-ignore
+            return arrayToHexString(binaryStringToArray(signingKey.getKeyId().bytes as string));
+        })
+    );
+    const [allSignatures, allKeyIds] = await Promise.all([allSignaturesPromises, allKeyIdsPromises]);
+    const allSignatureKeyIds: string[] = unique(
+        // @ts-ignore
+        allSignatures.flatMap((signature) => signature.packets.map(({ issuerKeyId }) => issuerKeyId.toHex()))
+    );
+    return allSignatureKeyIds.some((id) => allKeyIds.includes(id));
 };
 
 export interface GetErrorProps {
@@ -80,10 +90,10 @@ export const getError = ({ event, errorType, weekStartsOn, defaultTzid }: GetErr
     return [c('Error when exporting event from calendar').t`Event @ ${timeString}`, errorType];
 };
 
-const getDecryptionErrorType = async (event: CalendarEventWithMetadata, publicKeys: OpenPGPKey[]) => {
+const getDecryptionErrorType = async (event: CalendarEventWithMetadata, keys: Key[]) => {
     try {
-        const matchingKeys = await getCalendarEventMatchingSigningKeys(event, publicKeys);
-        if (matchingKeys.length) {
+        const HasMatchingKeys = await getHasCalendarEventMatchingSigningKeys(event, keys);
+        if (HasMatchingKeys) {
             return EXPORT_EVENT_ERROR_TYPES.PASSWORD_RESET;
         }
         return EXPORT_EVENT_ERROR_TYPES.DECRYPTION_ERROR;
@@ -97,10 +107,8 @@ const decryptEvent = async ({
     defaultTzid,
     weekStartsOn,
     addresses,
-    getAddressKeys,
     getCalendarKeys,
     getCalendarEventPersonal,
-    getEncryptionPreferences,
     memberID,
 }: {
     event: CalendarEventWithMetadata;
@@ -114,14 +122,8 @@ const decryptEvent = async ({
     defaultTzid: string;
 }) => {
     const defaultParams = { event, defaultTzid, weekStartsOn };
-    const [calendarKeys, publicKeysMap, eventPersonalMap] = await Promise.all([
+    const [calendarKeys, eventPersonalMap] = await Promise.all([
         getCalendarKeys(event.CalendarID),
-        getAuthorPublicKeysMap({
-            event,
-            addresses,
-            getAddressKeys,
-            getEncryptionPreferences,
-        }),
         getCalendarEventPersonal(event),
     ]);
 
@@ -144,7 +146,6 @@ const decryptEvent = async ({
             },
             sharedSessionKey,
             calendarSessionKey,
-            publicKeysMap,
             addresses,
         });
         const veventWithAlarms: VcalVeventComponent = {
@@ -154,10 +155,11 @@ const decryptEvent = async ({
 
         return veventWithAlarms;
     } catch (error) {
-        const publicKeys = Object.values(publicKeysMap)
-            .filter(isTruthy)
-            .flatMap((keys) => (Array.isArray(keys) ? keys : [keys]));
-        return getError({ ...defaultParams, errorType: await getDecryptionErrorType(event, publicKeys) });
+        const inactiveKeys = addresses.flatMap(({ Keys }) => Keys.filter(({ Active }) => !Active));
+        return getError({
+            ...defaultParams,
+            errorType: await getDecryptionErrorType(event, inactiveKeys),
+        });
     }
 };
 
@@ -246,17 +248,26 @@ export const processInBatches = async ({
                     memberID,
                 })
             )
-        ).then((veventsOrErrors) => {
-            const veventComponents = veventsOrErrors.filter(
-                (veventOrError): veventOrError is VcalVeventComponent => !Array.isArray(veventOrError)
-            );
-            const exportErrors = veventsOrErrors.filter((veventOrError): veventOrError is ExportError =>
-                Array.isArray(veventOrError)
-            );
-            processed.push(...veventComponents);
-            errors.push(...exportErrors);
-            onProgress([], veventComponents, exportErrors);
-        });
+        )
+            .then((veventsOrErrors) => {
+                const veventComponents = veventsOrErrors.filter(
+                    (veventOrError): veventOrError is VcalVeventComponent => !Array.isArray(veventOrError)
+                );
+                const exportErrors = veventsOrErrors.filter((veventOrError): veventOrError is ExportError =>
+                    Array.isArray(veventOrError)
+                );
+                processed.push(...veventComponents);
+                errors.push(...exportErrors);
+                onProgress([], veventComponents, exportErrors);
+            })
+            .catch((e) => {
+                const exportErrors: ExportError[] = Events.map(() => [
+                    e.message,
+                    EXPORT_EVENT_ERROR_TYPES.DECRYPTION_ERROR,
+                ]);
+                errors.push(...exportErrors);
+                onProgress([], [], exportErrors);
+            });
 
         promises.push(promise);
     }
