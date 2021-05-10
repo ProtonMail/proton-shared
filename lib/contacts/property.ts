@@ -1,4 +1,4 @@
-import isTruthy from '../helpers/isTruthy';
+import { range } from '../helpers/array';
 
 const UNESCAPE_REGEX = /\\\\|\\,|\\;/gi;
 const UNESCAPE_EXTENDED_REGEX = /\\\\|\\:|\\,|\\;/gi;
@@ -75,7 +75,9 @@ export const getValue = (property: any, field: string): string | string[] => {
     // Which we don't support later in the code
     // Until we do, we flatten the value by joining these entries
     if (field === 'adr') {
-        values[0] = (values[0] as (string | string[])[]).map((entry) => (Array.isArray(entry) ? entry.join(', ') : entry));
+        values[0] = (values[0] as (string | string[])[]).map((entry) =>
+            Array.isArray(entry) ? entry.join(', ') : entry
+        );
     }
 
     if (field === 'categories') {
@@ -106,11 +108,37 @@ export const getType = (types: string | string[] = []): string => {
 };
 
 /**
- * Transform an array value for the field 'adr' into a string to be displayed
+ * Transform an array value for the field 'adr' into a strings to be displayed on different lines
  */
-export const formatAdr = (adr: string[] = []): string => {
-    return adr
-        .filter(isTruthy)
-        .map((value) => value.trim())
-        .join(', ');
+export const formatAdr = (adr: string | string[]): string[] => {
+    let value: string[] = [];
+    try {
+        // Input sanitization
+        value = Array.isArray(adr) ? adr : ['', '', adr];
+        if (value.length < 7) {
+            value.push(...range(0, 7 - value.length).map(() => ''));
+        }
+
+        // According to vCard RFC https://datatracker.ietf.org/doc/html/rfc6350#section-6.3.1
+        // Address is split into 7 strings with different meaning at each position
+        const postOfficeBox = adr[0];
+        const extendedAddress = adr[1];
+        const streetAddress = adr[2];
+        const locality = adr[3];
+        const region = adr[4];
+        const postalCode = adr[5];
+        const country = adr[6];
+        const lines = [
+            streetAddress,
+            extendedAddress,
+            [postalCode, locality].join(' '),
+            postOfficeBox,
+            [region, country].join(' '),
+        ].filter((line) => line !== undefined && line !== '');
+        return lines;
+    } catch {
+        // Some addresses, especially imported can be strangely formated
+        // We don't want to break the whole page if the format is corrupted
+        return value;
+    }
 };
