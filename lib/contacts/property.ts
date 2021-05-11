@@ -121,13 +121,7 @@ export const formatAdr = (adr: string | string[]): string[] => {
 
         // According to vCard RFC https://datatracker.ietf.org/doc/html/rfc6350#section-6.3.1
         // Address is split into 7 strings with different meaning at each position
-        const postOfficeBox = adr[0];
-        const extendedAddress = adr[1];
-        const streetAddress = adr[2];
-        const locality = adr[3];
-        const region = adr[4];
-        const postalCode = adr[5];
-        const country = adr[6];
+        const [postOfficeBox, extendedAddress, streetAddress, locality, region, postalCode, country] = adr;
         const lines = [
             streetAddress,
             extendedAddress,
