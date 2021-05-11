@@ -3,7 +3,7 @@ import { arrayToHexString, binaryStringToArray, getKeys, getSignature } from 'pm
 import { fromUnixTime } from 'date-fns';
 import { CalendarExportEventsQuery, queryEvents } from '../../api/calendars';
 import { wait } from '../../helpers/promise';
-import { unique } from '../../helpers/array';
+import { partition, unique } from '../../helpers/array';
 import { Address, Api, Key } from '../../interfaces';
 import {
     CalendarEvent,
@@ -241,12 +241,11 @@ export const processInBatches = async ({
             )
         )
             .then((veventsOrErrors) => {
-                const veventComponents = veventsOrErrors.filter(
-                    (veventOrError): veventOrError is VcalVeventComponent => !Array.isArray(veventOrError)
+                const [veventComponents, exportErrors] = partition<VcalVeventComponent, ExportError>(
+                    veventsOrErrors,
+                    (item): item is VcalVeventComponent => !Array.isArray(item)
                 );
-                const exportErrors = veventsOrErrors.filter((veventOrError): veventOrError is ExportError =>
-                    Array.isArray(veventOrError)
-                );
+
                 processed.push(...veventComponents);
                 errors.push(...exportErrors);
                 onProgress([], veventComponents, exportErrors);
