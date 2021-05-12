@@ -114,7 +114,7 @@ export const formatAdr = (adr: string | string[]): string[] => {
     let value: string[] = [];
     try {
         // Input sanitization
-        value = Array.isArray(adr) ? adr : ['', '', adr];
+        value = Array.isArray(adr) ? adr : [adr];
         if (value.length < 7) {
             value.push(...range(0, 7 - value.length).map(() => ''));
         }
@@ -125,9 +125,9 @@ export const formatAdr = (adr: string | string[]): string[] => {
         const lines = [
             streetAddress,
             extendedAddress,
-            [postalCode, locality].join(' '),
+            [postalCode, locality].join(', '),
             postOfficeBox,
-            [region, country].join(' '),
+            [region, country].join(', '),
         ].filter((line) => line !== undefined && line !== '');
         return lines;
     } catch {
