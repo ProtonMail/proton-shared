@@ -73,3 +73,9 @@ export const getScrollParent = (element: HTMLElement | null | undefined, include
 
     return document.body;
 };
+
+/**
+ * get root font size, to manage properly some elements in pixels
+ * Base font size on the body is 14, so we take the body computed font size and find root one
+ */
+export const rootFontSize = (parseInt(window.getComputedStyle(document.body).fontSize, 10) * 16) / 14;
