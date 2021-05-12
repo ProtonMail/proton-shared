@@ -108,7 +108,7 @@ export const getType = (types: string | string[] = []): string => {
 };
 
 /**
- * Transform an array value for the field 'adr' into a strings to be displayed on different lines
+ * Sanitize a string or string-array value for the field 'adr' into an array of strings to be displayed on different lines
  */
 export const formatAdr = (adr: string | string[]): string[] => {
     let value: string[] = [];
