@@ -87,7 +87,7 @@ export const getSupportedContacts = (vcards: string[]) => {
 };
 
 export const haveCategories = (contacts: ImportedContact[]) => {
-    return contacts.some(({ categories }) => categories.length);
+    return contacts.some(({ categories }) => categories.some((category) => category.contactEmailIDs?.length));
 };
 
 /**
