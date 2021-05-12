@@ -142,7 +142,7 @@ export const getImportCategories = (contacts: ImportedContact[]) => {
         if (
             // No categories to consider
             !categories.length ||
-            // We ignore groups on contact with no email
+            // We ignore groups on contact with no emails
             !contactEmailIDsOfContact.length
         ) {
             return acc;
@@ -150,7 +150,7 @@ export const getImportCategories = (contacts: ImportedContact[]) => {
         categories.forEach(({ name, contactEmailIDs = [] }) => {
             const category = acc[name];
             if (contactEmailIDs.length === 0) {
-                // We ignore groups on contact if no email are assigned
+                // We ignore groups on contact if no emails are assigned
                 return;
             }
             if (!category) {
