@@ -36,7 +36,7 @@ export interface PinnedKeysConfig {
     error?: Error;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
-    contactSignatureTimestamp?: Date | null; // undefined for unsigned contacts, null with invalid signature
+    contactSignatureTimestamp?: Date;
 }
 
 export interface PublicKeyConfigs {
@@ -64,7 +64,7 @@ export interface ContactPublicKeyModel {
     pgpAddressDisabled: boolean;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
-    contactSignatureTimestamp?: Date | null;
+    contactSignatureTimestamp?: Date;
     emailAddressWarnings?: string[];
     emailAddressErrors?: string[];
 }
@@ -87,7 +87,7 @@ export interface PublicKeyModel {
     pgpAddressDisabled: boolean;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
-    contactSignatureTimestamp?: Date | null;
+    contactSignatureTimestamp?: Date;
     emailAddressWarnings?: string[];
     emailAddressErrors?: string[];
 }

@@ -40,7 +40,7 @@ export interface EncryptionPreferences {
     hasPinnedKeys: boolean;
     isContact: boolean;
     isContactSignatureVerified?: boolean;
-    contactSignatureTimestamp?: Date | null;
+    contactSignatureTimestamp?: Date;
     warnings?: string[];
     error?: EncryptionPreferencesError;
     emailAddressWarnings?: string[];
