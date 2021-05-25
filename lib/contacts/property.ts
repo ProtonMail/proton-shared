@@ -119,16 +119,18 @@ export const formatAdr = (adr: string | string[]): string[] => {
             value.push(...range(0, 7 - value.length).map(() => ''));
         }
 
+        const filterEmpty = (source: string[]) => source.filter((line) => line !== undefined && line !== '');
+
         // According to vCard RFC https://datatracker.ietf.org/doc/html/rfc6350#section-6.3.1
         // Address is split into 7 strings with different meaning at each position
         const [postOfficeBox, extendedAddress, streetAddress, locality, region, postalCode, country] = adr;
-        const lines = [
+        const lines = filterEmpty([
             streetAddress,
             extendedAddress,
-            [postalCode, locality].join(', '),
+            filterEmpty([postalCode, locality]).join(', '),
             postOfficeBox,
-            [region, country].join(', '),
-        ].filter((line) => line !== undefined && line !== '');
+            filterEmpty([region, country]).join(', '),
+        ]);
         return lines;
     } catch {
         // Some addresses, especially imported can be strangely formated
