@@ -4,6 +4,11 @@ import { CalendarKey } from './CalendarKey';
 import { NotificationModel } from './Notification';
 import { SETTINGS_NOTIFICATION_TYPE } from '../../calendar/constants';
 
+export enum CALENDAR_TYPE {
+    PERSONAL,
+    SUBSCRIPTION,
+}
+
 export interface Calendar {
     ID: string;
     Name: string;
@@ -11,6 +16,8 @@ export interface Calendar {
     Display: 0 | 1;
     Color: string;
     Flags: number;
+    Type: CALENDAR_TYPE;
+    URL?: string;
 }
 
 export enum SETTINGS_VIEW {
@@ -70,6 +77,8 @@ export interface CalendarViewModelFull {
     defaultFullDayNotification: NotificationModel;
     partDayNotifications: NotificationModel[];
     fullDayNotifications: NotificationModel[];
+    url?: string;
+    type: CALENDAR_TYPE;
 }
 
 export interface CalendarErrors {
