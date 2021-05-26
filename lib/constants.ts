@@ -542,6 +542,13 @@ export enum MESSAGE_BUTTONS {
     UNREAD_READ = 1,
 }
 
+export enum MESSAGE_ACTIONS {
+    NEW = -1,
+    REPLY = 0,
+    REPLY_ALL = 1,
+    FORWARD = 2,
+}
+
 export const KEY_FILE_EXTENSION = '.asc';
 
 export enum ENCRYPTION_TYPES {
@@ -754,6 +761,17 @@ export const MAJOR_DOMAINS = [
     'outlook.com',
     'hotmail.com',
     'yahoo.com',
+];
+
+export const PROTON_DOMAINS = [
+    'protonmail.com',
+    'protonmail.ch',
+    'protonvpn.com',
+    'protonstatus.com',
+    'gdpr.eu',
+    'protonvpn.net',
+    'pm.me',
+    'protonirockerxow.onion',
 ];
 
 export enum LINK_TYPES {
