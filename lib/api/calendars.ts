@@ -269,3 +269,8 @@ export const editPublicLink = ({
     method: 'put',
     data: { EncryptedPurpose: encryptedPurpose },
 });
+
+export const getSubscriptionParameters = (calendarID: string) => ({
+    url: `${CALENDAR_V1}/${calendarID}/subscription`,
+    method: 'get',
+});

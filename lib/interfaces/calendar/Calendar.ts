@@ -17,7 +17,18 @@ export interface Calendar {
     Color: string;
     Flags: number;
     Type: CALENDAR_TYPE;
-    URL?: string;
+}
+
+export interface CalendarSubscription {
+    CalendarID: string;
+    CreateTime: number;
+    LastUpdateTime: number;
+    Status: 0 | 1; // OK | Error
+    URL: string;
+}
+
+export interface CalendarWithPossibleSubscriptionParameters extends Calendar {
+    SubscriptionParameters?: CalendarSubscription;
 }
 
 export enum SETTINGS_VIEW {
