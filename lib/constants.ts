@@ -542,13 +542,6 @@ export enum MESSAGE_BUTTONS {
     UNREAD_READ = 1,
 }
 
-export enum MESSAGE_ACTIONS {
-    NEW = -1,
-    REPLY = 0,
-    REPLY_ALL = 1,
-    FORWARD = 2,
-}
-
 export const KEY_FILE_EXTENSION = '.asc';
 
 export enum ENCRYPTION_TYPES {
