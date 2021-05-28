@@ -43,7 +43,7 @@ describe('string', () => {
 
     describe('getInitials', () => {
         it('should handle empty parameter', () => {
-            expect(getInitials()).toEqual('');
+            expect(getInitials()).toEqual('?');
         });
 
         it('should handle single character', () => {
@@ -68,10 +68,6 @@ describe('string', () => {
 
         it('should remove undesired characters', () => {
             expect(getInitials('Thomas Anderson (@neo)')).toEqual('TA');
-        });
-
-        it('should return "?" if initials calculated is empty', () => {
-            expect(getInitials('(Edward Nigma)')).toEqual('?');
         });
     });
 
