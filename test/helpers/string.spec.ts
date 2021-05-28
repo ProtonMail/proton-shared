@@ -69,6 +69,10 @@ describe('string', () => {
         it('should remove undesired characters', () => {
             expect(getInitials('Thomas Anderson (@neo)')).toEqual('TA');
         });
+
+        it('should return "?" if initials calculated is empty', () => {
+            expect(getInitials('(Edward Nigma)')).toEqual('?');
+        });
     });
 
     describe('truncate', () => {
