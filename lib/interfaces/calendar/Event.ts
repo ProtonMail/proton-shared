@@ -158,6 +158,7 @@ export interface AttendeeModel {
 export interface CalendarViewModel {
     id: string;
     color: string;
+    isSubscribedCalendar?: boolean;
 }
 
 export interface CalendarsModel {
