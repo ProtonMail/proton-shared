@@ -1,5 +1,5 @@
 export const load = (page: string) => ({
-    method: 'post',
+    method: 'get',
     url: 'core/v4/load',
     params: { page },
 });
