@@ -5,8 +5,8 @@ import { NotificationModel } from './Notification';
 import { SETTINGS_NOTIFICATION_TYPE } from '../../calendar/constants';
 
 export enum CALENDAR_TYPE {
-    PERSONAL,
-    SUBSCRIPTION,
+    PERSONAL = 0,
+    SUBSCRIPTION = 1,
 }
 
 export interface Calendar {
