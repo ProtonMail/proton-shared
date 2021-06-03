@@ -19,11 +19,16 @@ export interface Calendar {
     Type: CALENDAR_TYPE;
 }
 
+export enum CALENDAR_SUBSCRIPTION_STATUS {
+    OK = 0,
+    ERROR = 1,
+}
+
 export interface CalendarSubscription {
     CalendarID: string;
     CreateTime: number;
     LastUpdateTime: number;
-    Status: 0 | 1; // OK | Error
+    Status: CALENDAR_SUBSCRIPTION_STATUS;
     URL: string;
 }
 
