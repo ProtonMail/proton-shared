@@ -62,7 +62,7 @@ export const deleteLabel = (labelID: string) => ({
 export const deleteLabels = (labelIDs: string[]) => ({
     method: 'delete',
     url: `v4/labels`,
-    data: { labelIDs },
+    data: { LabelIDs: labelIDs },
 });
 
 export const checkLabelAvailability = (params: { Name: string; Type: LABEL_TYPE; ParentID?: string | number }) => ({
