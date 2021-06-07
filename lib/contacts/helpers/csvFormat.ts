@@ -311,9 +311,8 @@ export const toPreVcard = ({ original, standard }: { original: string; standard:
     const extAddressMatch = property.match(/^(\w*)\s?extended address\s?(\d*)$/);
     const streetMatch = property.match(/^(\w*)\s?street\s?(\d*)$/);
     const cityMatch = property.match(/^(\w*)\s?city\s?(\d*)$/);
-    const stateMatch = property.match(/^(\w*)\s?state\s?(\d*)$/);
+    const stateMatch = property.match(/^(\w*)\s?(state|region)\s?(\d*)$/);
     const postalCodeMatch = property.match(/^(\w*)\s?postal code\s?(\d*)$/);
-    const regionMatch = property.match(/^(\w*)\s?region\s?(\d*)$/);
     const countryMatch = property.match(/^(\w*)\s?country\s?(\d*)$/);
 
     if (['title', 'name prefix'].includes(property)) {
@@ -400,15 +399,10 @@ export const toPreVcard = ({ original, standard }: { original: string; standard:
         const pref = postalCodeMatch?.[2] ? +postalCodeMatch[2] : undefined;
         return (value: ContactValue) => templates.adr({ pref, header, type: toVcardType(type), value, index: 5 });
     }
-    if (regionMatch) {
-        const type = regionMatch[1] ? regionMatch[1] : undefined;
-        const pref = regionMatch?.[2] ? +regionMatch[2] : undefined;
-        return (value: ContactValue) => templates.adr({ pref, header, type: toVcardType(type), value, index: 6 });
-    }
     if (countryMatch) {
         const type = countryMatch[1] ? countryMatch[1] : undefined;
         const pref = countryMatch?.[2] ? +countryMatch[2] : undefined;
-        return (value: ContactValue) => templates.adr({ pref, header, type: toVcardType(type), value, index: 7 });
+        return (value: ContactValue) => templates.adr({ pref, header, type: toVcardType(type), value, index: 6 });
     }
     if (property === 'job title') {
         return (value: ContactValue) => ({
