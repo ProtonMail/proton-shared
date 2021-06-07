@@ -102,7 +102,16 @@ export const toICAL = (properties: ContactProperties = []) => {
     return versionLessProperties.reduce((component, { field, type, pref, value, group }) => {
         const fieldWithGroup = [group, field].filter(isTruthy).join('.');
         const property = new ICAL.Property(fieldWithGroup);
+
+        // in vCard, the date must be formatted as YYYYMMDD or ISO 8601
+        if ((field === 'bday' || field === 'anniversary') && typeof value === 'string') {
+            const date = new Date(value);
+            const dateWithoutOffset = new Date(date.getTime() + Math.abs(date.getTimezoneOffset() * 60000));
+            value = dateWithoutOffset.toISOString();
+        }
+
         property.setValue(value);
+
         if (type) {
             property.setParameter('type', type);
         }

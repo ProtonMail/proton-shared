@@ -311,7 +311,7 @@ export const toPreVcard = ({ original, standard }: { original: string; standard:
     const extAddressMatch = property.match(/^(\w*)\s?extended address\s?(\d*)$/);
     const streetMatch = property.match(/^(\w*)\s?street\s?(\d*)$/);
     const cityMatch = property.match(/^(\w*)\s?city\s?(\d*)$/);
-    const stateMatch = property.match(/^(\w*)\s?(state|region)\s?(\d*)$/);
+    const stateMatch = property.match(/^(\w*)\s?state\s?(\d*)$/);
     const postalCodeMatch = property.match(/^(\w*)\s?postal code\s?(\d*)$/);
     const countryMatch = property.match(/^(\w*)\s?country\s?(\d*)$/);
 
