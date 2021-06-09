@@ -5,7 +5,6 @@ import {
     truncate,
     truncateMore,
     getInitials,
-    truncateMoreMid,
 } from '../../lib/helpers/string';
 
 describe('string', () => {
@@ -105,20 +104,18 @@ describe('string', () => {
                 '12…789'
             );
         });
-    });
 
-    describe('truncateMoreMid', () => {
-        it('should truncateMoreMid', () => {
-            expect(truncateMoreMid({ string: '', charsToDisplay: 1 })).toEqual('');
-            expect(truncateMoreMid({ string: 'a', charsToDisplay: 1 })).toEqual('a');
-            expect(truncateMoreMid({ string: 'ab', charsToDisplay: 1 })).toEqual('…');
-            expect(truncateMoreMid({ string: 'ab', charsToDisplay: 2 })).toEqual('ab');
-            expect(truncateMoreMid({ string: 'abc', charsToDisplay: 4 })).toEqual('abc');
-            expect(truncateMoreMid({ string: 'abc', charsToDisplay: 2 })).toEqual('a…');
-            expect(truncateMoreMid({ string: 'abc', charsToDisplay: 2, skewEnd: true })).toEqual('…c');
-            expect(truncateMoreMid({ string: 'abcde', charsToDisplay: 5 })).toEqual('abcde');
-            expect(truncateMoreMid({ string: '12345', charsToDisplay: 4, skewEnd: true })).toEqual('1…45');
-            expect(truncateMoreMid({ string: '123456789', charsToDisplay: 5 })).toEqual('12…89');
+        it('should truncate in the middle', () => {
+            expect(truncateMore({ string: '', charsToDisplay: 1 })).toEqual('');
+            expect(truncateMore({ string: 'a', charsToDisplay: 1 })).toEqual('a');
+            expect(truncateMore({ string: 'ab', charsToDisplay: 1 })).toEqual('…');
+            expect(truncateMore({ string: 'ab', charsToDisplay: 2 })).toEqual('ab');
+            expect(truncateMore({ string: 'abc', charsToDisplay: 4, charsToDisplayStart: 1 })).toEqual('abc');
+            expect(truncateMore({ string: 'abc', charsToDisplay: 2 })).toEqual('a…');
+            expect(truncateMore({ string: 'abc', charsToDisplay: 2, skewEnd: true })).toEqual('…c');
+            expect(truncateMore({ string: 'abcde', charsToDisplay: 5, charsToDisplayEnd: 4 })).toEqual('abcde');
+            expect(truncateMore({ string: '12345', charsToDisplay: 4, skewEnd: true })).toEqual('1…45');
+            expect(truncateMore({ string: '123456789', charsToDisplay: 5 })).toEqual('12…89');
         });
     });
 });
