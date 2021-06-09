@@ -85,7 +85,7 @@ export const truncate = (str = '', charsToDisplay = 50, omission = '…') => {
 
 /**
  * Given a maximum number of characters to capture from a string at the start and end of it,
- * truncate the string by adding omission if too long
+ * truncate the string by adding omission if too long.
  */
 export const truncateMore = ({ string = '', charsToDisplayStart = 0, charsToDisplayEnd = 0, omission = '…' }) => {
     if (string.length === 0) {
@@ -97,6 +97,17 @@ export const truncateMore = ({ string = '', charsToDisplayStart = 0, charsToDisp
     const strBegin = string.substring(0, charsToDisplayStart);
     const strEnd = string.substring(string.length - charsToDisplayEnd, string.length);
     return strBegin + omission + strEnd;
+};
+
+/**
+ * Given a maximum number of characters to display,
+ * truncate a string by adding omission in the middle of it if too long
+ */
+export const truncateMoreMid = ({ string = '', charsToDisplay = 50, omission = '…', skewEnd = false }) => {
+    const visibleChars = charsToDisplay - omission.length;
+    const charsToDisplayStart = skewEnd ? Math.floor(visibleChars / 2) : Math.ceil(visibleChars / 2);
+    const charsToDisplayEnd = visibleChars - charsToDisplayStart;
+    return truncateMore({ string, charsToDisplayStart, charsToDisplayEnd, omission });
 };
 
 export const getInitials = (fullName = '') => {

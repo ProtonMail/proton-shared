@@ -1,8 +1,8 @@
-import { Member } from './Member';
-import { Passphrase } from './Passphrase';
-import { CalendarKey } from './CalendarKey';
-import { NotificationModel } from './Notification';
 import { SETTINGS_NOTIFICATION_TYPE } from '../../calendar/constants';
+import { CalendarKey } from './CalendarKey';
+import { Member } from './Member';
+import { NotificationModel } from './Notification';
+import { Passphrase } from './Passphrase';
 
 export enum CALENDAR_TYPE {
     PERSONAL = 0,
@@ -17,23 +17,6 @@ export interface Calendar {
     Color: string;
     Flags: number;
     Type: CALENDAR_TYPE;
-}
-
-export enum CALENDAR_SUBSCRIPTION_STATUS {
-    OK = 0,
-    ERROR = 1,
-}
-
-export interface CalendarSubscription {
-    CalendarID: string;
-    CreateTime: number;
-    LastUpdateTime: number;
-    Status: CALENDAR_SUBSCRIPTION_STATUS;
-    URL: string;
-}
-
-export interface CalendarWithPossibleSubscriptionParameters extends Calendar {
-    SubscriptionParameters?: CalendarSubscription;
 }
 
 export enum SETTINGS_VIEW {
