@@ -23,6 +23,10 @@ export const getIsCalendarSubscriptionEventManagerUpdate = (
     return event.Action === EVENT_ACTIONS.UPDATE;
 };
 
+export const getIsPersonalCalendar = (calendar: Calendar | SubscribedCalendar): calendar is SubscribedCalendar => {
+    return calendar.Type === CALENDAR_TYPE.PERSONAL;
+};
+
 export const getIsSubscribedCalendar = (calendar: Calendar | SubscribedCalendar): calendar is SubscribedCalendar => {
     return calendar.Type === CALENDAR_TYPE.SUBSCRIPTION;
 };
