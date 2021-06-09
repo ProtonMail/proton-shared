@@ -83,7 +83,9 @@ export const getValue = (property: any, field: string): string | string[] => {
     if (field === 'categories') {
         // the ICAL library will parse item1.CATEGORIES:cat1,cat2 with value ['cat1,cat2'], but we expect ['cat1', 'cat2']
         const flatValues = values.flat();
-        const splitValues = flatValues.map((value) => value.split(','));
+        // Some groups may contain a ',' so we need to split the values by checking if we don't have a '\' before the delimiter ','
+        const regex = /([^\\]),/g;
+        const splitValues = flatValues.map((value) => value.replace(regex, '$1DELIMITER_HERE').split(/DELIMITER_HERE/));
         return splitValues.flat();
     }
     return values[0];
