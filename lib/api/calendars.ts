@@ -137,7 +137,10 @@ export const getEventsCount = (calendarID: string) => ({
     method: 'get',
 });
 
-export const queryEvents = (calendarID: string, params: CalendarEventsQuery | CalendarExportEventsQuery) => ({
+export const queryEvents = (
+    calendarID: string,
+    params: CalendarEventsQuery | CalendarExportEventsQuery | GetEventByUIDArguments
+) => ({
     url: `${CALENDAR_V1}/${calendarID}/events`,
     method: 'get',
     params,
