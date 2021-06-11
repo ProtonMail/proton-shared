@@ -104,12 +104,12 @@ export const generateLookupHash = async (name: string, hashKey: string) => {
     return arrayToHexString(new Uint8Array(signature));
 };
 
-export const generateNodeHashKey = async (publicKey: OpenPGPKey) => {
-    const message = generatePassphrase();
-
-    const NodeHashKey = await encryptUnsigned({
-        message,
-        publicKey,
+export const generateNodeHashKey = async (publicKey: OpenPGPKey, addressPrivateKey: OpenPGPKey) => {
+    const { data: NodeHashKey } = await encryptMessage({
+        data: generatePassphrase(),
+        publicKeys: publicKey,
+        privateKeys: addressPrivateKey,
+        detached: false,
     });
 
     return { NodeHashKey };
