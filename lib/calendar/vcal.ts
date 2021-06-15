@@ -316,7 +316,7 @@ export const parse = (vcal = ''): VcalCalendarComponent => {
 };
 
 /**
- * If a vcalendar ics does not have the proper enclosing, add it
+ * If a vcalendar icsSurgery does not have the proper enclosing, add it
  */
 export const reformatVcalEnclosing = (vcal = '') => {
     let sanitized = vcal;

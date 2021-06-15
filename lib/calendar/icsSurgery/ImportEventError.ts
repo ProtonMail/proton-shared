@@ -8,6 +8,8 @@ export enum IMPORT_EVENT_ERROR_TYPE {
     FREEBUSY_FORMAT,
     TIMEZONE_FORMAT,
     TIMEZONE_IGNORE,
+    VEVENT_INVALID,
+    VEVENT_UNSUPPORTED,
     UID_MISSING,
     FLOATING_TIME,
     ALLDAY_INCONSISTENCY,
@@ -47,6 +49,12 @@ const getErrorMessage = (errorType: IMPORT_EVENT_ERROR_TYPE, externalError?: Err
     }
     if (errorType === IMPORT_EVENT_ERROR_TYPE.TIMEZONE_FORMAT) {
         return c('Error importing event').t`Custom timezone`;
+    }
+    if (errorType === IMPORT_EVENT_ERROR_TYPE.VEVENT_INVALID) {
+        return c('Error importing event').t`Invalid event`;
+    }
+    if (errorType === IMPORT_EVENT_ERROR_TYPE.VEVENT_UNSUPPORTED) {
+        return c('Error importing event').t`Unsupported event`;
     }
     if (errorType === IMPORT_EVENT_ERROR_TYPE.UID_MISSING) {
         return c('Error importing event').t`Missing UID`;
