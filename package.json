@@ -28,7 +28,7 @@
         "url": "git+https://github.com/ProtonMail/proton-shared.git"
     },
     "author": "ProtonMail",
-    "license": "MIT",
+    "license": "GPL-3.0",
     "bugs": {
         "url": "https://github.com/ProtonMail/proton-shared/issues"
     },
