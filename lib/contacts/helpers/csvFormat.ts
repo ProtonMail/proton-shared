@@ -25,6 +25,10 @@ const beIgnoredCsvProperties = [
     'subject',
 ];
 
+const beIgnoredCsvPropertiesRegex = [
+    /e-mail\s?([0-9]*) display name/, // We have to ignore 'E-mail Display Name' and 'E-mail [NUMBER] Display Name' headers
+];
+
 /**
  * For a list of headers and csv contacts extracted from a csv,
  * check if a given header index has the empty value for all contacts
@@ -100,11 +104,16 @@ export const standarize = ({ headers, contacts }: ParsedCsvContacts) => {
             if (isEmptyHeaderIndex(i, contacts)) {
                 beRemoved[i] = true;
             }
-            if (beIgnoredCsvProperties.includes(header) || header.startsWith('im') || header.includes('event')) {
+            if (
+                beIgnoredCsvProperties.includes(header) ||
+                header.startsWith('im') ||
+                header.includes('event') ||
+                beIgnoredCsvPropertiesRegex.some((regex) => regex.test(header))
+            ) {
                 beRemoved[i] = true;
                 return acc;
             }
-            // Remove header if don't allow multiple instances and has already been encountered
+            // Remove header if we don't allow multiple instances and it has already been encountered
             if (uniqueHeaders.includes(header)) {
                 if (!uniqueHeadersEncounteredStatusMap.get(header)) {
                     uniqueHeadersEncounteredStatusMap.set(header, true);
