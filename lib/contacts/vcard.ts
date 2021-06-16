@@ -58,8 +58,8 @@ export const parse = (vcard = ''): ContactProperties => {
     // Apple AddressBook can add custom headers 'X-ABLabel' to properties that we need to take care of
     const customHeaders = properties.reduce<{ name: string; value: string }[]>((acc, property) => {
         if (property.name.includes('x-ablabel')) {
-            const [propertyName, propertyField]: [string, string] = property.name.split('.');
-            const field = propertyField.length > 0 ? propertyField : propertyName;
+            const [propertyName, propertyField]: [string, string | undefined] = property.name.split('.');
+            const field = propertyField && propertyField.length > 0 ? propertyField : propertyName;
             const value = getValue(property, field);
             if (typeof value === 'string') {
                 return [...acc, { name: propertyName, value }];
