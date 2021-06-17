@@ -296,24 +296,6 @@ const templates = {
     },
 };
 
-const convertDate = (value: ContactValue) => {
-    let formattedValue = value;
-
-    // in vCard, the birthday and anniversary fields must be formatted as YYYYMMDD or ISO 8601
-    if (value && typeof value === 'string') {
-        // Match date format DD.MM.YYYY, DD/MM/YYYY, DD-MM-YYYY
-        const matchDDMMYYYYFormat = /^[0-9]{2}[/.-][0-9]{2}[/.-][0-9]{4}$/.test(value);
-
-        if (matchDDMMYYYYFormat) {
-            const date = new Date(value.replaceAll(/[.-]/g, '/'));
-            const dateWithoutOffset = new Date(date.getTime() + Math.abs(date.getTimezoneOffset() * 60000));
-            formattedValue = dateWithoutOffset.toISOString();
-        }
-    }
-
-    return formattedValue;
-};
-
 /**
  * Given an object with a csv property name (header) in both original and standard form,
  * return a function that transforms a value for that property into one or several pre-vCard properties
@@ -451,7 +433,7 @@ export const toPreVcard = ({ original, standard }: { original: string; standard:
         return (value: ContactValue) => {
             return {
                 header,
-                value: convertDate(value),
+                value,
                 checked: true,
                 field: 'bday',
             };
@@ -461,7 +443,7 @@ export const toPreVcard = ({ original, standard }: { original: string; standard:
         return (value: ContactValue) => {
             return {
                 header,
-                value: convertDate(value),
+                value,
                 checked: true,
                 field: 'anniversary',
             };
