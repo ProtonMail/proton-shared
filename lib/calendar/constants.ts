@@ -157,7 +157,7 @@ export enum END_TYPE {
     UNTIL = 'UNTIL',
 }
 
-export const ICAL_EXTENSIONS = ['icsSurgery', 'ical', 'ifb', 'icalendar'];
+export const ICAL_EXTENSIONS = ['ics', 'ical', 'ifb', 'icalendar'];
 export const ICAL_MIME_TYPE = 'text/calendar';
 
 export const DEFAULT_CALENDAR = {

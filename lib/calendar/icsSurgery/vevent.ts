@@ -124,7 +124,7 @@ export const getSupportedEvent = ({
     guessTzid?: string;
     componentId?: string;
     verboseError?: boolean;
-}) => {
+}): VcalVeventComponent => {
     const isImport = method === ICAL_METHOD.PUBLISH;
     const isInvite = !isImport;
     try {
@@ -154,7 +154,7 @@ export const getSupportedEvent = ({
         const trimmedLocationValue = location?.value.trim();
         const isRecurring = !!rrule || !!recurrenceId;
 
-        const validated: VcalVeventComponent & Required<Pick<VcalVeventComponent, 'uid' | 'dtstamp' | 'dtstart'>> = {
+        const validated: VcalVeventComponent = {
             component,
             uid: getSupportedUID(uid),
             dtstamp: { ...dtstamp },

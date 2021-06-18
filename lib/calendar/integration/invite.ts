@@ -161,7 +161,7 @@ export const createInviteVevent = ({ method, attendeesTo, vevent, keepDtstamp }:
         if (!keepDtstamp) {
             propertiesToOmit.push('dtstamp');
         }
-        // SUMMARY is mandatory in a REQUEST icsSurgery
+        // SUMMARY is mandatory in a REQUEST ics
         const veventWithSummary = withSummary(vevent);
         return withDtstamp(omit(veventWithSummary, propertiesToOmit) as VcalVeventComponent);
     }

@@ -43,7 +43,7 @@ const exampleVevent = {
 };
 
 describe('createInviteIcs for REPLY method', () => {
-    it('should create the correct icsSurgery when there is no summary', () => {
+    it('should create the correct ics when there is no summary', () => {
         const params = {
             method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
@@ -71,7 +71,7 @@ END:VCALENDAR`;
         expect(ics).toEqual(toCRLF(expected));
     });
 
-    it('should create the correct icsSurgery when there is an empty summary', () => {
+    it('should create the correct ics when there is an empty summary', () => {
         const params = {
             method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
@@ -103,7 +103,7 @@ END:VCALENDAR`;
         expect(ics).toEqual(toCRLF(expected));
     });
 
-    it('should create the correct icsSurgery when there is a summary and a recurrence-id', () => {
+    it('should create the correct ics when there is a summary and a recurrence-id', () => {
         const params = {
             method: ICAL_METHOD.REPLY,
             prodId: 'Proton Calendar',
@@ -141,7 +141,7 @@ END:VCALENDAR`;
 });
 
 describe('createInviteIcs for CANCEL method', () => {
-    it('should create the correct icsSurgery', () => {
+    it('should create the correct ics', () => {
         const params = {
             method: ICAL_METHOD.CANCEL,
             prodId: 'Proton Calendar',

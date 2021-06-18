@@ -91,8 +91,8 @@ interface ProcessData {
     addressKeys: DecryptedKey[];
     calendarKeys: DecryptedCalendarKey[];
     api: Api;
-    signal: AbortSignal;
-    onProgress: (encrypted: EncryptedEvent[], imported: EncryptedEvent[], errors: ImportEventError[]) => void;
+    signal?: AbortSignal;
+    onProgress?: (encrypted: EncryptedEvent[], imported: EncryptedEvent[], errors: ImportEventError[]) => void;
 }
 
 export const processInBatches = async ({
@@ -112,7 +112,7 @@ export const processInBatches = async ({
     for (let i = 0; i < batches.length; i++) {
         // The API requests limit for the submit route are 100 calls per 10 seconds
         // We play it safe by enforcing a 100ms minimum wait between API calls. During this wait we encrypt the events
-        if (signal.aborted) {
+        if (signal?.aborted) {
             return [];
         }
         const batchedEvents = batches[i];
@@ -121,16 +121,16 @@ export const processInBatches = async ({
             wait(300),
         ]);
         const { errors, rest: encrypted } = splitErrors(result);
-        if (signal.aborted) {
+        if (signal?.aborted) {
             return [];
         }
-        onProgress(encrypted, [], errors);
+        onProgress?.(encrypted, [], errors);
         if (encrypted.length) {
             const promise = submitEvents(encrypted, calendarID, memberID, api).then(
                 (result: (StoredEncryptedEvent | ImportEventError)[]) => {
                     const { errors, rest: importedSuccess } = splitErrors(result);
                     imported.push(importedSuccess);
-                    onProgress([], importedSuccess, errors);
+                    onProgress?.([], importedSuccess, errors);
                 }
             );
             promises.push(promise);

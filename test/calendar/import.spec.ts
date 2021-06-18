@@ -583,7 +583,9 @@ SEQUENCE:0
 END:VEVENT`;
         const tzid = 'Europe/Brussels';
         const event = parse(vevent) as VcalVeventComponent;
-        expect(extractSupportedEvent({ vcalComponent: event, calendarTzid: tzid, hasXWrTimezone: true })).toEqual(event);
+        expect(extractSupportedEvent({ vcalComponent: event, calendarTzid: tzid, hasXWrTimezone: true })).toEqual(
+            event
+        );
     });
 
     it('should ignore global timezone for all-day events', () => {
@@ -598,7 +600,9 @@ SEQUENCE:1
 END:VEVENT`;
         const tzid = 'Europe/Brussels';
         const event = parse(vevent) as VcalVeventComponent;
-        expect(extractSupportedEvent({ vcalComponent: event, calendarTzid: tzid, hasXWrTimezone: true })).toEqual(event);
+        expect(extractSupportedEvent({ vcalComponent: event, calendarTzid: tzid, hasXWrTimezone: true })).toEqual(
+            event
+        );
     });
 
     it('should not support other timezones not in our list', () => {
@@ -644,7 +648,7 @@ END:VEVENT`;
 });
 
 describe('parseIcs', () => {
-    it('should parse an icsSurgery with no method', async () => {
+    it('should parse an ics with no method', async () => {
         const icsString = `BEGIN:VCALENDAR
 PRODID:-//github.com/rianjs/ical.net//NONSGML ical.net 4.0//EN
 VERSION:2.0
@@ -679,7 +683,7 @@ TRIGGER:-PT1H
 END:VALARM
 END:VEVENT
 END:VCALENDAR`;
-        const ics = new File([new Blob([icsString])], 'invite.icsSurgery');
+        const ics = new File([new Blob([icsString])], 'invite.ics');
         const expectedVtimezone = {
             component: 'vtimezone',
             components: [
@@ -714,8 +718,7 @@ END:VCALENDAR`;
                 value: 'Another one bites the dust',
             },
             description: {
-                value:
-                    '\nHi there,\nThis is a very weird description with tabs and \n\t\t\tlinejumps\n\t\t\ta few\n\t\t\tjumps\n\t\t\tyaaay',
+                value: '\nHi there,\nThis is a very weird description with tabs and \n\t\t\tlinejumps\n\t\t\ta few\n\t\t\tjumps\n\t\t\tyaaay',
             },
             sequence: { value: 0 },
             organizer: {
