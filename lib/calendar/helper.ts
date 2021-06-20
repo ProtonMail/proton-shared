@@ -16,10 +16,12 @@ export const generateProtonCalendarUID = () => {
     return `${base64String}@proton.me`;
 };
 
+export const HASH_UID_PREFIX = 'sha1-uid-';
+
 export const generateVeventHashUID = async (binaryString: string) => {
     const hash = arrayToHexString(await unsafeSHA1(binaryStringToArray(binaryString)));
 
-    return `sha1-uid-${hash}`;
+    return `${HASH_UID_PREFIX}${hash}`;
 };
 
 /**

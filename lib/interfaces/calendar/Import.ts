@@ -1,4 +1,4 @@
-import { ImportEventError } from '../../calendar/import/ImportEventError';
+import { ImportEventError } from '../../calendar/icsSurgery/ImportEventError';
 import { ImportFatalError } from '../../calendar/import/ImportFatalError';
 import { ImportFileError } from '../../calendar/import/ImportFileError';
 import { RequireSome } from '../utils';

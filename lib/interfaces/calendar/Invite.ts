@@ -43,8 +43,16 @@ export interface Participant {
     attendeeID?: string;
 }
 
-export interface SavedInviteData {
+export interface SavedImportData {
     savedEvent: CalendarEvent;
     savedVevent: VcalVeventComponent;
+}
+
+export interface ImportErrorData {
+    vevent: VcalVeventComponent;
+    error: string;
+}
+
+export interface SavedInviteData extends SavedImportData {
     savedVcalAttendee: VcalAttendeeProperty;
 }

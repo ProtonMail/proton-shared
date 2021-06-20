@@ -116,6 +116,7 @@ export const getSupportedEvent = ({
     guessTzid,
     componentId,
     verboseError,
+    dropAlarms,
 }: {
     method: ICAL_METHOD;
     vcalVeventComponent: VcalVeventComponent;
@@ -124,6 +125,7 @@ export const getSupportedEvent = ({
     guessTzid?: string;
     componentId?: string;
     verboseError?: boolean;
+    dropAlarms?: boolean;
 }): VcalVeventComponent => {
     const isImport = method === ICAL_METHOD.PUBLISH;
     const isInvite = !isImport;
@@ -295,12 +297,14 @@ export const getSupportedEvent = ({
 
         // import-specific surgery
         if (isImport) {
-            const alarms = components?.filter(({ component }) => component === 'valarm') || [];
-            const supportedAlarms = getSupportedAlarms(alarms, dtstart);
-            const dedupedAlarms = dedupeAlarmsWithNormalizedTriggers(supportedAlarms);
+            if (!dropAlarms) {
+                const alarms = components?.filter(({ component }) => component === 'valarm') || [];
+                const supportedAlarms = getSupportedAlarms(alarms, dtstart);
+                const dedupedAlarms = dedupeAlarmsWithNormalizedTriggers(supportedAlarms);
 
-            if (dedupedAlarms.length) {
-                validated.components = dedupedAlarms;
+                if (dedupedAlarms.length) {
+                    validated.components = dedupedAlarms;
+                }
             }
         }
 
