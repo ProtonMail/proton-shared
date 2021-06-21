@@ -1,8 +1,5 @@
 import { addDays } from 'date-fns';
-import {
-    EVENT_INVITATION_ERROR_TYPE,
-    EventInvitationError,
-} from '../../../../proton-mail/src/app/helpers/calendar/EventInvitationError';
+import { EVENT_INVITATION_ERROR_TYPE, EventInvitationError } from '../integration/EventInvitationError';
 import { convertUTCDateTimeToZone, getSupportedTimezone } from '../../date/timezone';
 import { unique } from '../../helpers/array';
 import { truncate } from '../../helpers/string';
