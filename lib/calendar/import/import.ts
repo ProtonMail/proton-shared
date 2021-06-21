@@ -162,6 +162,8 @@ export const extractSupportedEvent = ({
         calendarTzid,
         guessTzid,
         method: ICAL_METHOD.PUBLISH,
+        componentId,
+        verboseError: true,
     });
 };
 
