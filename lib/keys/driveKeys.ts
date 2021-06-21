@@ -153,10 +153,10 @@ export const generateContentHash = async (content: Uint8Array) => {
 export const generateContentKeys = async (nodeKey: OpenPGPKey, addressPrivateKey: OpenPGPKey) => {
     const publicKey = nodeKey.toPublic();
     const sessionKey = await createSessionKey(publicKey);
+    const sessionKeySignature = await sign(sessionKey.data, addressPrivateKey);
     const contentKeys = await getEncryptedSessionKey(sessionKey, publicKey);
     const ContentKeyPacket = uint8ArrayToBase64String(contentKeys);
-    const ContentKeyPacketSignature = await sign(ContentKeyPacket, addressPrivateKey);
-    return { sessionKey, ContentKeyPacket, ContentKeyPacketSignature };
+    return { sessionKey, ContentKeyPacket, ContentKeyPacketSignature: sessionKeySignature };
 };
 
 export const generateDriveBootstrap = async (addressPrivateKey: OpenPGPKey) => {
