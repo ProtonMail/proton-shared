@@ -1,4 +1,5 @@
 import { addDays } from 'date-fns';
+import { getIsDateOutOfBounds, getIsWellFormedDateOrDateTime, getSupportedUID } from '../helper';
 import { EVENT_INVITATION_ERROR_TYPE, EventInvitationError } from '../integration/EventInvitationError';
 import { convertUTCDateTimeToZone, getSupportedTimezone } from '../../date/timezone';
 import { unique } from '../../helpers/array';
@@ -12,7 +13,6 @@ import { dedupeAlarmsWithNormalizedTriggers } from '../alarms';
 import { getAttendeeEmail, getSupportedAttendee } from '../attendees';
 import { ICAL_METHOD, MAX_LENGTHS } from '../constants';
 import { getHasConsistentRrule, getSupportedRrule } from '../rrule';
-import { getIsDateOutOfBounds, getIsWellFormedDateOrDateTime, getSupportedUID } from '../support';
 import {
     getDateProperty,
     getDateTimeProperty,
