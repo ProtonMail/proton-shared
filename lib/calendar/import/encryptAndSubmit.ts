@@ -43,11 +43,17 @@ const encryptEvent = async (
     }
 };
 
-const submitEvents = async (events: EncryptedEvent[], calendarID: string, memberID: string, api: Api) => {
+const submitEvents = async (
+    events: EncryptedEvent[],
+    calendarID: string,
+    memberID: string,
+    api: Api,
+    overwrite?: 0 | 1
+) => {
     // prepare the events data in the way the API wants it
     const Events = events.map(
         (event): CreateCalendarEventSyncData => ({
-            Overwrite: 1,
+            Overwrite: overwrite,
             Event: { Permissions: 1, ...event.data },
         })
     );
@@ -91,6 +97,7 @@ interface ProcessData {
     addressKeys: DecryptedKey[];
     calendarKeys: DecryptedCalendarKey[];
     api: Api;
+    overwrite?: 0 | 1;
     signal?: AbortSignal;
     onProgress?: (encrypted: EncryptedEvent[], imported: EncryptedEvent[], errors: ImportEventError[]) => void;
 }
@@ -99,6 +106,7 @@ export const processInBatches = async ({
     events,
     calendarID,
     memberID,
+    overwrite = 1,
     addressKeys,
     calendarKeys,
     api,
@@ -126,7 +134,7 @@ export const processInBatches = async ({
         }
         onProgress?.(encrypted, [], errors);
         if (encrypted.length) {
-            const promise = submitEvents(encrypted, calendarID, memberID, api).then(
+            const promise = submitEvents(encrypted, calendarID, memberID, api, overwrite).then(
                 (result: (StoredEncryptedEvent | ImportEventError)[]) => {
                     const { errors, rest: importedSuccess } = splitErrors(result);
                     imported.push(importedSuccess);
