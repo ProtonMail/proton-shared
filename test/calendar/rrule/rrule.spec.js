@@ -413,7 +413,27 @@ describe('getSupportedRrule', () => {
                 dtend: dtendPartDayUTC,
                 rrule: {
                     value: {
+                        freq: 'DAILY',
+                        until: { year: 2020, month: 5, day: 15, hours: 12, minutes: 0, seconds: 30, isUTC: true },
+                    },
+                },
+            },
+            {
+                dtstart: dtstartPartDayUTC,
+                dtend: dtendPartDayUTC,
+                rrule: {
+                    value: {
                         freq: 'WEEKLY',
+                        until: { year: 2020, month: 5, day: 15, hours: 12, minutes: 0, seconds: 30, isUTC: true },
+                    },
+                },
+            },
+            {
+                dtstart: dtstartPartDayZoned,
+                dtend: dtendPartDayZoned,
+                rrule: {
+                    value: {
+                        freq: 'DAILY',
                         until: { year: 2020, month: 5, day: 15, hours: 12, minutes: 0, seconds: 30, isUTC: true },
                     },
                 },
@@ -428,18 +448,62 @@ describe('getSupportedRrule', () => {
                     },
                 },
             },
+            {
+                dtstart: dtstartAllDay,
+                dtend: dtendAllDay,
+                rrule: {
+                    value: {
+                        freq: 'DAILY',
+                        until: { year: 2020, month: 5, day: 15, hours: 12, minutes: 0, seconds: 30, isUTC: true },
+                    },
+                },
+            },
+            {
+                dtstart: dtstartAllDay,
+                dtend: dtendAllDay,
+                rrule: {
+                    value: {
+                        freq: 'WEEKLY',
+                        until: { year: 2020, month: 5, day: 15, hours: 12, minutes: 0, seconds: 30, isUTC: true },
+                    },
+                },
+            },
         ];
         const expected = [
             {
                 value: {
-                    freq: 'WEEKLY',
+                    freq: 'DAILY',
                     until: { year: 2020, month: 5, day: 15, hours: 23, minutes: 59, seconds: 59, isUTC: true },
                 },
             },
             {
                 value: {
                     freq: 'WEEKLY',
+                    until: { year: 2020, month: 5, day: 14, hours: 23, minutes: 59, seconds: 59, isUTC: true },
+                },
+            },
+            {
+                value: {
+                    freq: 'DAILY',
                     until: { year: 2020, month: 5, day: 15, hours: 21, minutes: 59, seconds: 59, isUTC: true },
+                },
+            },
+            {
+                value: {
+                    freq: 'WEEKLY',
+                    until: { year: 2020, month: 5, day: 14, hours: 21, minutes: 59, seconds: 59, isUTC: true },
+                },
+            },
+            {
+                value: {
+                    freq: 'DAILY',
+                    until: { year: 2020, month: 5, day: 15 },
+                },
+            },
+            {
+                value: {
+                    freq: 'WEEKLY',
+                    until: { year: 2020, month: 5, day: 15 },
                 },
             },
         ];

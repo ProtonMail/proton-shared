@@ -1,4 +1,5 @@
 import { getOccurrences } from './recurring';
+import { withRruleUntil } from './rruleUntil';
 import { propertyToUTCDate } from './vcalConverter';
 import { getIsDateTimeValue, getIsPropertyAllDay, getPropertyTzid } from './vcalHelper';
 import { convertUTCDateTimeToZone, convertZonedDateTimeToUTC, toLocalDate, toUTCDate } from '../date/timezone';
@@ -367,10 +368,10 @@ export const getSupportedRrule = (
     isInvitation = false,
     guessTzid?: string
 ): VcalRruleProperty | undefined => {
-    if (!vevent.rrule?.value) {
+    const { dtstart, rrule } = vevent;
+    if (!rrule?.value) {
         return;
     }
-    const { dtstart, rrule } = vevent;
     const { until } = rrule.value;
     const supportedRrule = { ...rrule };
 
@@ -386,7 +387,7 @@ export const getSupportedRrule = (
     if (!getIsRruleSupported(rrule.value, isInvitation)) {
         return;
     }
-    return supportedRrule;
+    return withRruleUntil(rrule, dtstart);
 };
 
 export const getHasConsistentRrule = (vevent: VcalVeventComponent) => {

@@ -14,6 +14,8 @@ import {
     VcalVeventComponent,
     Participant,
     DateTime,
+    VcalDateTimeValue,
+    VcalDateValue,
 } from '../interfaces/calendar';
 
 import { getAttendeeEmail } from './attendees';
@@ -131,16 +133,23 @@ export const getAllDayInfo = (dtstart: VcalDateOrDateTimeProperty, dtend?: VcalD
     return { isAllDay: true, isSingleAllDay: isNextDay(fakeUTCStart, fakeUTCEnd) || +fakeUTCStart === +fakeUTCEnd };
 };
 
-export interface UntilDateArgument {
-    year: number;
-    month: number;
-    day: number;
-}
-export const getUntilProperty = (
-    untilDateTime: UntilDateArgument,
+export function getUntilProperty(untilDateTime: VcalDateOrDateTimeValue, isAllDay: true, tzid?: string): VcalDateValue;
+export function getUntilProperty(
+    untilDateTime: VcalDateOrDateTimeValue,
+    isAllDay: false,
+    tzid?: string
+): VcalDateTimeValue;
+export function getUntilProperty(
+    untilDateTime: VcalDateOrDateTimeValue,
+    isAllDay: boolean,
+    tzid?: string
+): VcalDateOrDateTimeValue;
+
+export function getUntilProperty(
+    untilDateTime: VcalDateOrDateTimeValue,
     isAllDay: boolean,
     tzid = 'UTC'
-): VcalDateOrDateTimeValue => {
+): VcalDateOrDateTimeValue {
     // According to the RFC, we should use UTC dates if and only if the event is not all-day.
     if (isAllDay) {
         // we should use a floating date in this case
@@ -154,7 +163,7 @@ export const getUntilProperty = (
     const zonedEndOfDay = { ...untilDateTime, hours: 23, minutes: 59, seconds: 59 };
     const utcEndOfDay = convertZonedDateTimeToUTC(zonedEndOfDay, tzid);
     return { ...utcEndOfDay, isUTC: true };
-};
+}
 
 export const extractEmailAddress = ({ value, parameters }: VcalAttendeeProperty | VcalOrganizerProperty) => {
     const email = value || parameters?.cn;
