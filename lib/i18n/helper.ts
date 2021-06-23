@@ -1,12 +1,5 @@
 import { DEFAULT_LOCALE } from '../constants';
 
-/**
- * Gets the first specified locale from the browser, if any.
- */
-export const getBrowserLocale = () => {
-    return window.navigator?.languages?.[0];
-};
-
 export const getNormalizedLocale = (locale = '') => {
     return locale.toLowerCase().replace('-', '_');
 };
@@ -16,6 +9,22 @@ export const getNormalizedLocale = (locale = '') => {
  */
 export const getLanguageCode = (locale = '') => {
     return getNormalizedLocale(locale).split('_')[0];
+};
+
+/**
+ * Gets the first specified locale from the browser, if any.
+ *
+ * If the first locale does not have a region and the second is a regional variant of the first, take it instead.
+ */
+export const getBrowserLocale = () => {
+    const first = window.navigator?.languages?.[0];
+    const second = window.navigator?.languages?.[1];
+
+    if (!/[_-]/.test(first) && /[_-]/.test(second) && getLanguageCode(first) === getLanguageCode(second)) {
+        return second;
+    }
+
+    return first;
 };
 
 /**
