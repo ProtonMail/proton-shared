@@ -1,6 +1,6 @@
 import { addDays } from 'date-fns';
 import { getIsDateOutOfBounds, getIsWellFormedDateOrDateTime, getSupportedUID } from '../helper';
-import { EVENT_INVITATION_ERROR_TYPE, EventInvitationError } from '../integration/EventInvitationError';
+import { EVENT_INVITATION_ERROR_TYPE, EventInvitationError } from './EventInvitationError';
 import { convertUTCDateTimeToZone, getSupportedTimezone } from '../../date/timezone';
 import { unique } from '../../helpers/array';
 import { truncate } from '../../helpers/string';
@@ -30,6 +30,8 @@ export const getSupportedDateOrDateTimeProperty = ({
     hasXWrTimezone,
     calendarTzid,
     isRecurring = false,
+    method,
+    isInvite,
 }: {
     property: VcalDateOrDateTimeProperty | VcalFloatingDateTimeProperty;
     component: string;
@@ -38,6 +40,7 @@ export const getSupportedDateOrDateTimeProperty = ({
     calendarTzid?: string;
     isRecurring?: boolean;
     method?: ICAL_METHOD;
+    isInvite?: boolean;
 }) => {
     if (getIsPropertyAllDay(property)) {
         return getDateProperty(property.value);
@@ -56,9 +59,15 @@ export const getSupportedDateOrDateTimeProperty = ({
     // A floating date-time property
     if (!partDayPropertyTzid) {
         if (!hasXWrTimezone) {
+            if (isInvite) {
+                throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+            }
             throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.FLOATING_TIME, 'vevent', componentId);
         }
         if (hasXWrTimezone && !calendarTzid) {
+            if (isInvite) {
+                throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+            }
             throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.X_WR_TIMEZONE_UNSUPPORTED, 'vevent', componentId);
         }
         return getDateTimeProperty(partDayProperty.value, calendarTzid);
@@ -66,6 +75,9 @@ export const getSupportedDateOrDateTimeProperty = ({
 
     const supportedTzid = getSupportedTimezone(partDayPropertyTzid);
     if (!supportedTzid) {
+        if (isInvite) {
+            throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+        }
         throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.TZID_UNSUPPORTED, component, componentId);
     }
     return getDateTimeProperty(partDayProperty.value, supportedTzid);
@@ -77,6 +89,8 @@ export const getLinkedDateTimeProperty = ({
     isAllDay,
     tzid,
     componentId = '',
+    method,
+    isInvite,
 }: {
     property: VcalDateOrDateTimeProperty;
     component: string;
@@ -84,15 +98,22 @@ export const getLinkedDateTimeProperty = ({
     isAllDay: boolean;
     tzid?: string;
     method?: ICAL_METHOD;
+    isInvite?: boolean;
 }): VcalDateOrDateTimeProperty => {
     if (isAllDay) {
         return getDateProperty(property.value);
     }
     if (getIsPropertyAllDay(property)) {
+        if (isInvite) {
+            throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+        }
         throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.ALLDAY_INCONSISTENCY, component, componentId);
     }
     const supportedTzid = getPropertyTzid(property);
     if (!supportedTzid || !tzid) {
+        if (isInvite) {
+            throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+        }
         throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.FLOATING_TIME, component, componentId);
     }
     if (tzid !== supportedTzid) {
@@ -111,8 +132,8 @@ export const getSupportedEvent = ({
     hasXWrTimezone,
     calendarTzid,
     guessTzid,
-    componentId,
-    verboseError,
+    componentId = '',
+    isEventInvitation,
     dropAlarms,
 }: {
     method: ICAL_METHOD;
@@ -121,11 +142,10 @@ export const getSupportedEvent = ({
     calendarTzid?: string;
     guessTzid?: string;
     componentId?: string;
-    verboseError?: boolean;
+    isEventInvitation?: boolean;
     dropAlarms?: boolean;
 }): VcalVeventComponent => {
     const isImport = method === ICAL_METHOD.PUBLISH;
-    const isInvite = !isImport;
     try {
         // common surgery
         const {
@@ -194,15 +214,15 @@ export const getSupportedEvent = ({
         const isAllDayStart = getIsPropertyAllDay(validated.dtstart);
         const startTzid = getPropertyTzid(validated.dtstart);
         if (!getIsWellFormedDateOrDateTime(validated.dtstart)) {
-            if (isInvite) {
+            if (isEventInvitation) {
                 throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
             }
-            if (verboseError && componentId) {
-                throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.DTSTART_MALFORMED, 'vevent', componentId);
-            }
-            throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.VEVENT_INVALID, 'vevent', '');
+            throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.DTSTART_MALFORMED, 'vevent', componentId);
         }
-        if (getIsDateOutOfBounds(validated.dtstart) && componentId) {
+        if (getIsDateOutOfBounds(validated.dtstart)) {
+            if (isEventInvitation) {
+                throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+            }
             throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.DTSTART_OUT_OF_BOUNDS, 'vevent', componentId);
         }
         if (dtend) {
@@ -214,10 +234,16 @@ export const getSupportedEvent = ({
                 calendarTzid,
                 isRecurring,
             });
-            if (!getIsWellFormedDateOrDateTime(supportedDtend) && componentId) {
+            if (!getIsWellFormedDateOrDateTime(supportedDtend)) {
+                if (isEventInvitation) {
+                    throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+                }
                 throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.DTEND_MALFORMED, 'vevent', componentId);
             }
-            if (getIsDateOutOfBounds(supportedDtend) && componentId) {
+            if (getIsDateOutOfBounds(supportedDtend)) {
+                if (isEventInvitation) {
+                    throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+                }
                 throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.DTEND_OUT_OF_BOUNDS, 'vevent', componentId);
             }
             const startDateUTC = propertyToUTCDate(validated.dtstart);
@@ -230,15 +256,24 @@ export const getSupportedEvent = ({
             if (eventDuration > 0) {
                 validated.dtend = supportedDtend;
             }
-        } else if (duration && componentId) {
+        } else if (duration) {
+            if (isEventInvitation) {
+                throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+            }
             throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.VEVENT_DURATION, 'vevent', componentId);
         }
         const isAllDayEnd = validated.dtend ? getIsPropertyAllDay(validated.dtend) : undefined;
-        if (isAllDayEnd !== undefined && +isAllDayStart ^ +isAllDayEnd && componentId) {
+        if (isAllDayEnd !== undefined && +isAllDayStart ^ +isAllDayEnd) {
+            if (isEventInvitation) {
+                throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+            }
             throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.ALLDAY_INCONSISTENCY, 'vevent', componentId);
         }
         if (exdate) {
-            if (!rrule && componentId) {
+            if (!rrule) {
+                if (isEventInvitation) {
+                    throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+                }
                 throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.RRULE_MALFORMED, 'vevent', componentId);
             }
             const supportedExdate = exdate.map((property) =>
@@ -262,11 +297,14 @@ export const getSupportedEvent = ({
             );
         }
         if (recurrenceId) {
-            if (rrule && componentId) {
+            if (rrule) {
                 if (method === ICAL_METHOD.REPLY) {
                     // the external provider forgot to remove the RRULE
                     ignoreRrule = true;
                 } else {
+                    if (isEventInvitation) {
+                        throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+                    }
                     throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.SINGLE_EDIT_UNSUPPORTED, 'vevent', componentId);
                 }
             }
@@ -281,13 +319,19 @@ export const getSupportedEvent = ({
             });
         }
 
-        if (rrule && !ignoreRrule && componentId) {
-            const supportedRrule = getSupportedRrule({ ...validated, rrule }, isInvite, guessTzid);
+        if (rrule && !ignoreRrule) {
+            const supportedRrule = getSupportedRrule({ ...validated, rrule }, isEventInvitation, guessTzid);
             if (!supportedRrule) {
+                if (isEventInvitation) {
+                    throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { method });
+                }
                 throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.RRULE_UNSUPPORTED, 'vevent', componentId);
             }
             validated.rrule = supportedRrule;
             if (!getHasConsistentRrule(validated)) {
+                if (isEventInvitation) {
+                    throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_INVALID, { method });
+                }
                 throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.RRULE_MALFORMED, 'vevent', componentId);
             }
         }
@@ -306,7 +350,7 @@ export const getSupportedEvent = ({
         }
 
         // invite-specific surgery
-        if (isInvite) {
+        if (!isImport) {
             if (sharedSessionKey) {
                 validated['x-pm-session-key'] = { ...sharedSessionKey };
             }
@@ -344,8 +388,11 @@ export const getSupportedEvent = ({
 
         return validated;
     } catch (e) {
-        if (e instanceof ImportEventError) {
+        if (e instanceof ImportEventError || e instanceof EventInvitationError) {
             throw e;
+        }
+        if (isEventInvitation) {
+            throw new EventInvitationError(EVENT_INVITATION_ERROR_TYPE.INVITATION_UNSUPPORTED, { externalError: e });
         }
         throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.VALIDATION_ERROR, 'vevent', componentId || '');
     }

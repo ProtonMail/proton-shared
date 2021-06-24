@@ -163,7 +163,6 @@ export const extractSupportedEvent = ({
         guessTzid,
         method: ICAL_METHOD.PUBLISH,
         componentId,
-        verboseError: true,
     });
 };
 
