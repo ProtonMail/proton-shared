@@ -10,7 +10,6 @@ export enum IMPORT_EVENT_ERROR_TYPE {
     TIMEZONE_IGNORE,
     VEVENT_INVALID,
     VEVENT_UNSUPPORTED,
-    UID_MISSING,
     FLOATING_TIME,
     ALLDAY_INCONSISTENCY,
     DTSTART_MISSING,
@@ -55,9 +54,6 @@ const getErrorMessage = (errorType: IMPORT_EVENT_ERROR_TYPE, externalError?: Err
     }
     if (errorType === IMPORT_EVENT_ERROR_TYPE.VEVENT_UNSUPPORTED) {
         return c('Error importing event').t`Unsupported event`;
-    }
-    if (errorType === IMPORT_EVENT_ERROR_TYPE.UID_MISSING) {
-        return c('Error importing event').t`Missing UID`;
     }
     if (errorType === IMPORT_EVENT_ERROR_TYPE.ALLDAY_INCONSISTENCY) {
         return c('Error importing event').t`Malformed all-day event`;

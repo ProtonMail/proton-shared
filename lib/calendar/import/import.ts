@@ -19,12 +19,12 @@ import {
 
 import { ICAL_METHOD, IMPORT_ERROR_TYPE, MAX_CALENDARS_PER_USER, MAX_IMPORT_EVENTS } from '../constants';
 import getComponentFromCalendarEvent from '../getComponentFromCalendarEvent';
+import { generateVeventHashUID } from '../helper';
 import { getLinkedDateTimeProperty, getSupportedEvent } from '../icsSurgery/vevent';
-import { parseWithErrors } from '../vcal';
+import { parseWithErrors, serialize } from '../vcal';
 import {
     getHasDtStart,
     getHasRecurrenceId,
-    getHasUid,
     getIcalMethod,
     getIsCalendar,
     getIsEventComponent,
@@ -122,7 +122,7 @@ interface GetSupportedEventArgs {
     calendarTzid?: string;
     guessTzid?: string;
 }
-export const extractSupportedEvent = ({
+export const extractSupportedEvent = async ({
     vcalComponent,
     hasXWrTimezone,
     calendarTzid,
@@ -150,14 +150,15 @@ export const extractSupportedEvent = ({
     if (!getIsEventComponent(vcalComponent)) {
         throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.WRONG_FORMAT, 'vunknown', componentId);
     }
-    if (!getHasUid(vcalComponent)) {
-        throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.UID_MISSING, 'vevent', componentId);
-    }
     if (!getHasDtStart(vcalComponent)) {
         throw new ImportEventError(IMPORT_EVENT_ERROR_TYPE.DTSTART_MISSING, 'vevent', componentId);
     }
+    const validVevent = withDtstamp(vcalComponent);
+    if (!validVevent.uid?.value) {
+        validVevent.uid = { value: await generateVeventHashUID(serialize(validVevent)) };
+    }
     return getSupportedEvent({
-        vcalVeventComponent: withDtstamp(vcalComponent),
+        vcalVeventComponent: validVevent,
         hasXWrTimezone,
         calendarTzid,
         guessTzid,

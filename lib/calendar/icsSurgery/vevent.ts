@@ -127,7 +127,7 @@ export const getLinkedDateTimeProperty = ({
  * Perform ICS surgery on a VEVENT component
  */
 export const getSupportedEvent = ({
-    method,
+    method = ICAL_METHOD.PUBLISH,
     vcalVeventComponent,
     hasXWrTimezone,
     calendarTzid,
@@ -136,7 +136,7 @@ export const getSupportedEvent = ({
     isEventInvitation,
     dropAlarms,
 }: {
-    method: ICAL_METHOD;
+    method?: ICAL_METHOD;
     vcalVeventComponent: VcalVeventComponent;
     hasXWrTimezone: boolean;
     calendarTzid?: string;
