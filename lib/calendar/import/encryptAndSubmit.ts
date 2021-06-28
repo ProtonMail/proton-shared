@@ -58,8 +58,9 @@ const submitEvents = async (
         })
     );
     // submit the data
-    let responses: SyncMultipleApiResponses[] = [];
+    let responses: SyncMultipleApiResponses[];
     try {
+        // throw new Error('malena')
         const { Responses } = await api<SyncMultipleApiResponse>({
             ...syncMultipleEvents(calendarID, { MemberID: memberID, IsImport: 1, Events }),
             timeout: HOUR,
@@ -72,7 +73,10 @@ const submitEvents = async (
             Response: { Code: 0, Error: `${error}` },
         }));
     }
+    return responses;
+};
 
+const processResponses = (responses: SyncMultipleApiResponses[], events: EncryptedEvent[]) => {
     return responses.map((response): StoredEncryptedEvent | ImportEventError => {
         const {
             Index,
@@ -116,12 +120,16 @@ export const processInBatches = async ({
     const batches = chunk(events, BATCH_SIZE);
     const promises = [];
     const imported: StoredEncryptedEvent[][] = [];
+    const errored: ImportEventError[][] = [];
 
     for (let i = 0; i < batches.length; i++) {
         // The API requests limit for the submit route are 100 calls per 10 seconds
         // We play it safe by enforcing a 100ms minimum wait between API calls. During this wait we encrypt the events
         if (signal?.aborted) {
-            return [];
+            return {
+                importedEvents: [],
+                importErrors: [],
+            };
         }
         const batchedEvents = batches[i];
         const [result] = await Promise.all([
@@ -130,23 +138,32 @@ export const processInBatches = async ({
         ]);
         const { errors, rest: encrypted } = splitErrors(result);
         if (signal?.aborted) {
-            return [];
+            return {
+                importedEvents: [],
+                importErrors: [],
+            };
         }
         onProgress?.(encrypted, [], errors);
+        if (errors.length) {
+            errored.push(errors);
+        }
         if (encrypted.length) {
-            const promise = submitEvents(encrypted, calendarID, memberID, api, overwrite).then(
-                (result: (StoredEncryptedEvent | ImportEventError)[]) => {
-                    const { errors, rest: importedSuccess } = splitErrors(result);
-                    imported.push(importedSuccess);
-                    onProgress?.([], importedSuccess, errors);
-                }
-            );
+            const promise = submitEvents(encrypted, calendarID, memberID, api, overwrite).then((responses) => {
+                const processedResponses = processResponses(responses, encrypted);
+                const { errors, rest: importedSuccess } = splitErrors(processedResponses);
+                imported.push(importedSuccess);
+                errored.push(errors);
+                onProgress?.([], importedSuccess, errors);
+            });
             promises.push(promise);
         }
     }
     await Promise.all(promises);
 
-    return imported.flat();
+    return {
+        importedEvents: imported.flat(),
+        importErrors: errored.flat(),
+    };
 };
 
 export const extractTotals = (model: ImportCalendarModel) => {
