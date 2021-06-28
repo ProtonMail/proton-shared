@@ -3,12 +3,13 @@ import {
     SyncMultipleApiResponse,
     DecryptedCalendarKey,
     ImportCalendarModel,
-    StoredEncryptedEvent,
+    ImportedEvent,
     VcalVeventComponent,
     EncryptedEvent,
 } from '../../interfaces/calendar';
-import { API_CODES, HOUR } from '../../constants';
+import { HOUR } from '../../constants';
 import { CreateCalendarEventSyncData } from '../../interfaces/calendar/Api';
+import { getIsSuccessSyncApiResponse } from '../helper';
 import { splitErrors } from './import';
 import { IMPORT_EVENT_ERROR_TYPE, ImportEventError } from '../icsSurgery/ImportEventError';
 import { syncMultipleEvents } from '../../api/calendars';
@@ -18,7 +19,6 @@ import { chunk } from '../../helpers/array';
 import { wait } from '../../helpers/promise';
 import { Api, DecryptedKey } from '../../interfaces';
 
-const { SINGLE_SUCCESS } = API_CODES;
 const BATCH_SIZE = 10;
 
 const encryptEvent = async (
@@ -77,12 +77,12 @@ const submitEvents = async (
 };
 
 const processResponses = (responses: SyncMultipleApiResponses[], events: EncryptedEvent[]) => {
-    return responses.map((response): StoredEncryptedEvent | ImportEventError => {
+    return responses.map((response): ImportedEvent | ImportEventError => {
         const {
             Index,
-            Response: { Error: errorMessage, Code },
+            Response: { Error: errorMessage },
         } = response;
-        if (Code === SINGLE_SUCCESS) {
+        if (getIsSuccessSyncApiResponse(response)) {
             return {
                 ...events[Index],
                 response,
@@ -119,7 +119,7 @@ export const processInBatches = async ({
 }: ProcessData) => {
     const batches = chunk(events, BATCH_SIZE);
     const promises = [];
-    const imported: StoredEncryptedEvent[][] = [];
+    const imported: ImportedEvent[][] = [];
     const errored: ImportEventError[][] = [];
 
     for (let i = 0; i < batches.length; i++) {

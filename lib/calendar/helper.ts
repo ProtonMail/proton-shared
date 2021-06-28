@@ -1,15 +1,31 @@
 import getRandomValues from 'get-random-values';
 import { arrayToHexString, binaryStringToArray, unsafeSHA1 } from 'pmcrypto';
 import { c } from 'ttag';
+import { API_CODES } from '../constants';
 import { getDaysInMonth } from '../date-fns-utc';
 import { encodeBase64URL, uint8ArrayToString } from '../helpers/encoding';
-import { VcalDateOrDateTimeProperty, VcalDateTimeProperty, VcalUidProperty } from '../interfaces/calendar';
+import {
+    SyncMultipleApiResponses,
+    SyncMultipleApiSuccessResponses,
+    VcalDateOrDateTimeProperty,
+    VcalDateTimeProperty,
+    VcalUidProperty,
+} from '../interfaces/calendar';
 import { MAX_LENGTHS, MAXIMUM_DATE_UTC, MINIMUM_DATE_UTC } from './constants';
 import { propertyToUTCDate } from './vcalConverter';
 import { getIsPropertyAllDay } from './vcalHelper';
 
 export const HASH_UID_PREFIX = 'sha1-uid-';
 export const ORIGINAL_UID_PREFIX = '-original-uid-';
+
+export const getIsSuccessSyncApiResponse = (
+    response: SyncMultipleApiResponses
+): response is SyncMultipleApiSuccessResponses => {
+    const {
+        Response: { Code, Event },
+    } = response;
+    return Code === API_CODES.SINGLE_SUCCESS && !!Event;
+};
 
 /**
  * Generates a calendar UID of the form 'RandomBase64String@proton.me'
