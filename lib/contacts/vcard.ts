@@ -123,11 +123,10 @@ export const merge = (contacts: ContactProperties[] = []): ContactProperties => 
             const { field } = property;
             const { cardinality = ONE_OR_MORE_MAY_BE_PRESENT } = PROPERTIES[field] || {};
 
-            if ([ONE_OR_MORE_MUST_BE_PRESENT, ONE_OR_MORE_MAY_BE_PRESENT].includes(cardinality)) {
-                acc.push(property);
-            } else if (!acc.find(({ field: f }) => f === field)) {
-                acc.push(property);
-            }
+			if ([ONE_OR_MORE_MUST_BE_PRESENT, ONE_OR_MORE_MAY_BE_PRESENT].includes(cardinality)
+				|| !acc.find(({ field: f }) => f === field)) {
+				acc.push(property);
+			}
         });
         return acc;
     }, []);
